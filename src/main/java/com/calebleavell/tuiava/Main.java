@@ -41,12 +41,6 @@ public class Main {
         TUITextModule text1 = new TUITextModule.Builder("scn-1", "scene 1").build();
         TUITextModule text2 = new TUITextModule.Builder("scn-2", "scene 2").build();
         TUITextModule text3 = new TUITextModule.Builder("scn-3", "scene 3").build();
-        TUIContainerModule scnList = TUIModuleFactory.NumberedModuleSelector(
-                "scn-selector", List.of("Scene 1", "Scene 2", "Scene 3"), app, List.of("scn-1", "scn-2", "scn-3"))
-                .children(
-                        TUIModuleFactory.Terminate("scn-selector", app, "scn-selector-terminate").build(),
-                        text1, text2, text3
-                ).build();
 
         TUIContainerModule scnList2 = new TUIModuleFactory.NumberedModuleSelector("scn-selector2", app,
                 text1)
