@@ -24,6 +24,8 @@ public interface TUIModule {
 
     TUIModule.Builder<?> getChild(String name);
 
+    <T extends Builder<?>> T getChild(String name, Class<T> builderType);
+
     void terminate();
     boolean isTerminated();
 
@@ -34,7 +36,7 @@ public interface TUIModule {
     String toString(int indent, boolean displayChildren);
 
     public final static class NameOrModule {
-        private TUIModule.Builder<?> module; // TODO: finish updating everything to deal only with Builders until running
+        private TUIModule.Builder<?> module;
         private String moduleName;
 
         public NameOrModule(TUIModule.Builder<?> module) {
@@ -87,6 +89,8 @@ public interface TUIModule {
         public Builder<?> getChild(String name);
 
         public Builder<?> getChildHelper(String name, List<Builder<?>> visited);
+
+        public TUIApplicationModule getApplication();
 
         public B self();
 

@@ -87,7 +87,7 @@ public class Main {
                 scnList2, TUIModuleFactory.Terminate(app, "app-terminate"), text1, text2, text3
         );
 
-        TUIModuleFactory.NumberedList helloThere = new TUIModuleFactory.NumberedList("myList",
+        TUIModuleFactory.NumberedList helloThere = new TUIModuleFactory.NumberedList("my-list",
                 "item1", "item2", "item3", "item4")
                 .start(5)
                 .step(2)
@@ -101,11 +101,25 @@ public class Main {
                         })
                 );
 
-        Rect myRect = new Rect("myRect", 5, 2).cell("[]");
+        TUIContainerModule.Builder rectBuilder = new TUIContainerModule.Builder("rect-builder")
+                .children(
+                        new TUITextInputModule.Builder("rect-builder-input", "Size of Rect (integer): ")
+                                .inputConverter(Integer::parseInt)
+                                .inputVerifier("Error: input must be an integer"),
+                        new TUIFunctionModule.Builder("rect-builder-function", () -> {
+                            Integer size = app.getInput("rect-builder-input", Integer.class);
+                            if(size == null) {
+                                System.out.println("Error: input was not converted to integer");
+                                return;
+                            }
+                            Rect rect = app.getChild("rect", Rect.class);
+                            rect.x = size;
+                            rect.y = size;
+                        }),
+                        new Rect("rect", 0, 0).cell("#")
+                );
 
-        app.setHome(myRect);
+        app.setHome(rectBuilder);
         app.run();
-        System.out.println(app.getInput("scn-selector2-goto-module"));
-
     }
 }

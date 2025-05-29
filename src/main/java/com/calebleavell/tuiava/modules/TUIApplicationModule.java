@@ -44,6 +44,10 @@ public class TUIApplicationModule extends TUIGenericModule {
         return this.getChildren().getFirst();
     }
 
+    public void terminateChild(String moduleName) {
+        getCurrentRunningBranch().forEach(m -> {if(m.getName().equals(moduleName)) m.terminate();});
+    }
+
     public TUIApplicationModule(Builder builder) {
         super(builder);
         this.inputMap = builder.inputMap;

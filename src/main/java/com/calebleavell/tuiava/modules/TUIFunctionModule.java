@@ -36,6 +36,15 @@ public class TUIFunctionModule extends TUIGenericModule {
 
         public Builder(String name, Runnable function) {
             super(Builder.class, name);
+            this.function(function);
+        }
+
+        public Builder function(Supplier<Object> function) {
+            this.function = function;
+            return self();
+        }
+
+        public Builder function(Runnable function) {
             if(function == null) this.function = null;
             else {
                 this.function = () -> {
@@ -43,6 +52,8 @@ public class TUIFunctionModule extends TUIGenericModule {
                     return null;
                 };
             }
+
+            return self();
         }
 
         @Override

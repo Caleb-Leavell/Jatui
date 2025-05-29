@@ -59,6 +59,16 @@ public abstract class TUIGenericModule implements TUIModule {
     }
 
     @Override
+    public <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
+        TUIModule.Builder<?> child = getChild(name);
+        if(child.getClass() == type) {
+            return type.cast(child);
+        }
+        else return null;
+    }
+
+
+    @Override
     public TUIApplicationModule getApplication() {
         return application;
     }
@@ -236,6 +246,11 @@ public abstract class TUIGenericModule implements TUIModule {
             }
 
             return null;
+        }
+
+        @Override
+        public TUIApplicationModule getApplication() {
+            return this.application;
         }
 
         @Override
