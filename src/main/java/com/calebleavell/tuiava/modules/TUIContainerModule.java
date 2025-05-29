@@ -4,7 +4,7 @@ package com.calebleavell.tuiava.modules;
  * Not only does this class improve modularity by housing other modules,
  * but it also provides a template for extending TUIGenericModule.
  */
-public class TUIContainerModule extends TUIGenericModule{
+public class TUIContainerModule extends TUIGenericModule {
     public TUIContainerModule(TUIGenericModule.Builder<?> builder) {
         super(builder);
     }

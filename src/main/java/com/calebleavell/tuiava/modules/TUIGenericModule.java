@@ -2,13 +2,14 @@ package com.calebleavell.tuiava.modules;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
 
 public abstract class TUIGenericModule implements TUIModule {
 
     private String name;
     private TUIApplicationModule application;
-    private List<TUIModule> children;
+    private List<TUIModule.Builder<?>> children;
+
+    private TUIModule currentRunningChild;
 
     private boolean terminated = false;
 
@@ -18,9 +19,12 @@ public abstract class TUIGenericModule implements TUIModule {
     @Override
     public void run() {
         terminated = false;
-        for(TUIModule child : children) {
+        for(TUIModule.Builder<?> child : children) {
             if(terminated) return;
-            child.run();
+            TUIModule toRun = child.build();
+            currentRunningChild = toRun;
+            toRun.run();
+            currentRunningChild = null;
         }
     }
 
@@ -35,45 +39,20 @@ public abstract class TUIGenericModule implements TUIModule {
     }
 
     @Override
-    public List<TUIModule> getChildren() {
+    public List<TUIModule.Builder<?>> getChildren() {
         return children;
     }
 
     @Override
-    public void setChildren(List<TUIModule> children) {
+    public void setChildren(List<TUIModule.Builder<?>> children) {
         this.children = children;
     }
 
-    /**
-     * Finds a child matching the name.
-     * It is recommended to name all modules uniquely so this returns a unique module every time.
-     *
-     * @param name The name of the child
-     * @return The first found child (DFS), or <i>null</i> if none is found
-     */
     @Override
-    public TUIModule getChild(String name) {
-        List<TUIModule> visited = new ArrayList<>();
-        return getChildHelper(name, visited);
-    }
-
-    /**
-     * Executes a DFS.
-     * Helper used so we can keep track of the modules we've visited and thus support cycles
-     *
-     * @param name The name of the child
-     * @param visited The list of visited modules
-     * @return The first found child (DFS), or <i>null</i> if none is found
-     */
-    public TUIModule getChildHelper(String name, List<TUIModule> visited) {
-        if(this.name.equals(name)) return this;
-        visited.add(this);
-
-        for(TUIModule child : children) {
-            if(visited.contains(child)) continue;
-
-            TUIModule found = child.getChildHelper(name, visited);
-            if(found != null) return found;
+    public TUIModule.Builder<?> getChild(String name) {
+        for(TUIModule.Builder<?> child : children) {
+            TUIModule.Builder<?> returned = child.getChild(name);
+            if(returned != null) return returned;
         }
 
         return null;
@@ -85,34 +64,37 @@ public abstract class TUIGenericModule implements TUIModule {
     }
 
     @Override
-    public void setApplication(TUIApplicationModule application) {
-        this.application = application;
-    }
-
-    @Override
     public void setChildrenApplication(TUIApplicationModule app) {
-        for(TUIModule child : children) child.setApplicationRecursive(app);
+        for(TUIModule.Builder<?> child : children) child.application(app);
     }
-
-    @Override
-    public void setApplicationRecursive(TUIApplicationModule app) {
-        if(this.application == null) this.application = app;
-
-        for(TUIModule child : children) child.setApplicationRecursive(app);
-    }
-
-
 
     @Override
     public void terminate() {
         if(this.terminated) return;
         this.terminated = true;
-        children.forEach(TUIModule::terminate);
+        if(this.currentRunningChild != null) currentRunningChild.terminate();
     }
 
     @Override
     public boolean isTerminated() {
         return terminated;
+    }
+
+    @Override
+    public TUIModule getCurrentRunningChild() {
+        return currentRunningChild;
+    }
+
+    @Override
+    public List<TUIModule> getCurrentRunningBranch() {
+        List<TUIModule> currentRunningBranch = new ArrayList<>();
+        currentRunningBranch.add(this);
+
+        if(currentRunningChild != null) {
+            currentRunningBranch.addAll(currentRunningChild.getCurrentRunningBranch());
+        }
+
+        return currentRunningBranch;
     }
 
     /**
@@ -141,8 +123,8 @@ public abstract class TUIGenericModule implements TUIModule {
         output.append(this.name).append(" -- ").append(this.getClass().getSimpleName());
 
         if (displayChildren) {
-            for (TUIModule child : children) {
-                output.append("\n").append(child.toString(indent + 1, true));
+            for (TUIModule.Builder<?> child : children) {
+                output.append("\n").append(child.build().toString(indent + 1, true));
             }
         }
 
@@ -155,59 +137,113 @@ public abstract class TUIGenericModule implements TUIModule {
         this.children = builder.children;
     }
 
-    public abstract static class Builder<B extends Builder<B>> {
+    public abstract static class Builder<B extends Builder<B>> implements TUIModule.Builder<Builder<B>> {
         protected String name;
         protected TUIApplicationModule application;
-        protected List<TUIModule> children = new ArrayList<>();
-        protected Class<B> type;
+        protected List<TUIModule.Builder<?>> children = new ArrayList<>();
+
+        protected final Class<B> type;
+
 
         public Builder(Class<B> type, String name) {
             this.type = type;
             this.name = name;
         }
 
-        public B application(TUIApplicationModule application) {
-            this.application = application;
+        @Override
+        public B application(TUIApplicationModule app) {
+            applicationHelper(app, new ArrayList<>());
+
             return self();
         }
 
-        public B children(List<TUIModule> children) {
-            for(TUIModule child : children) addChild(child);
+        @Override
+        public List<TUIModule.Builder<?>> applicationHelper(TUIApplicationModule app, List<TUIModule.Builder<?>> visited) {
+
+            if(visited.contains(this)) return new ArrayList<>();
+
+            this.application = app;
+
+            visited.add(this);
+
+            for(TUIModule.Builder<?> child : children) {
+                visited.addAll(child.applicationHelper(app, visited));
+            }
+
+            return visited;
+        }
+
+        @Override
+        public B children(List<TUIModule.Builder<?>> children) {
+            for(TUIModule.Builder<?> child : children) addChild(child);
             return self();
         }
 
-        public B children(TUIModule... children) {
-            for(TUIModule child : children) addChild(child);
+        @Override
+        public B children(TUIModule.Builder<?>... children) {
+            for(TUIModule.Builder<?> child : children) addChild(child);
             return self();
         }
 
-        public B children(Builder<?>... children) {
-            for(Builder<?> child : children) addChild(child.build());
-            return self();
-        }
-
-        public B addChild(TUIModule child) {
+        @Override
+        public B addChild(TUIModule.Builder<?> child) {
             this.children.add(child);
             return self();
         }
 
-        public B addChild(int index, TUIModule child) {
+        @Override
+        public B addChild(int index, TUIModule.Builder<?> child) {
             this.children.add(index, child);
             return self();
         }
 
-        public B addChild(Builder<?> child) {
-            return addChild(child.build());
+        @Override
+        public String getName() {
+            return name;
         }
 
-        public B addChild(int index, Builder<?> child) {
-            return addChild(index, child.build());
+        /**
+         * Finds a child matching the name.
+         * It is recommended to name all modules uniquely so this returns a unique module every time.
+         *
+         * @param name The name of the child
+         * @return The first found child (DFS), or <i>null</i> if none is found
+         */
+        @Override
+        public TUIModule.Builder<?> getChild(String name) {
+            List<TUIModule.Builder<?>> visited = new ArrayList<>();
+            return getChildHelper(name, visited);
         }
 
+        /**
+         * Executes a DFS.
+         * Helper used so we can keep track of the modules we've visited and thus support cycles
+         *
+         * @param name    The name of the child
+         * @param visited The list of visited modules
+         * @return The first found child (DFS), or <i>null</i> if none is found
+         */
+        @Override
+        public TUIModule.Builder<?> getChildHelper(String name, List<TUIModule.Builder<?>> visited) {
+            if(this.name.equals(name)) return this;
+            visited.add(this);
+
+            for(TUIModule.Builder<?> child : children) {
+                if(visited.contains(child)) continue;
+
+                TUIModule.Builder<?> found = child.getChildHelper(name, visited);
+                if(found != null) return found;
+            }
+
+            return null;
+        }
+
+        @Override
         public B self() {
             return type.cast(this);
         }
 
+        @Override
         public abstract TUIModule build();
     }
 

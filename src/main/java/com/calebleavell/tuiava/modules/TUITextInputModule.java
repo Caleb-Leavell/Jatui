@@ -40,7 +40,7 @@ public class TUITextInputModule extends TUIGenericModule {
     public static class Builder extends TUIGenericModule.Builder<Builder> {
         protected TUITextModule displayText;
 
-        public Builder(String displayText, String name) {
+        public Builder(String name, String displayText) {
             super(Builder.class, name);
             this.displayText = new TUITextModule.Builder(name + "-display-text", displayText)
                     .printNewLine(false)

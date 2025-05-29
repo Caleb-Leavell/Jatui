@@ -29,17 +29,17 @@ public class TUIApplicationModule extends TUIGenericModule {
     }
 
     public void updateInput(String moduleName, Object input) {
-        TUIModule child = getChild(moduleName);
+        TUIModule.Builder<?> child = getChild(moduleName);
         if(child == null) return;
-        else updateInput(child, input);
+        else updateInput(child.build(), input);
     }
 
-    public void setHome(TUIModule home) {
+    public void setHome(TUIModule.Builder<?> home) {
         this.getChildren().set(0, home);
         setChildrenApplication(this);
     }
 
-    public TUIModule getHome() {
+    public TUIModule.Builder<?> getHome() {
         if(this.getChildren().isEmpty()) return null;
         return this.getChildren().getFirst();
     }
@@ -54,10 +54,10 @@ public class TUIApplicationModule extends TUIGenericModule {
 
         public Builder(String name) {
             super(Builder.class, name);
-            this.children.add(TUIModuleFactory.Empty("home").build());
+            this.children.add(TUIModuleFactory.Empty("home"));
         }
 
-        public Builder home(final TUIModule home) {
+        public Builder home(TUIModule.Builder<?> home) {
             this.children.set(0, home);
             return self();
         }

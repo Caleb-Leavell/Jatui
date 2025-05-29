@@ -24,28 +24,13 @@ public class TUIModuleFactory {
     }
 
     /**
-     * Builds a Function Module that finds the child of a parent by name then terminates it.
-     * Will do nothing no if the parent's module tree does not have a child with the given name.
-     * @param moduleToTerminate The name of the module to terminate (it will terminate when this module is run)
-     * @param parentModule The module that the <strong>module to terminate</strong> is the child of
-     * @param name The name of the module to be returned
-     * @return The Function Module that terminates the inputted module
-     */
-    public static TUIFunctionModule.Builder Terminate(String moduleToTerminate, TUIModule parentModule, String name) {
-        return new TUIFunctionModule.Builder(name, () -> {
-            TUIModule toTerminate = parentModule.getChild(moduleToTerminate);
-            if(toTerminate != null) toTerminate.terminate();
-        });
-    }
-
-    /**
      * Builds a Function Module that calls another module's run method.
      * @param moduleToRun The module to run (it will run when this module is run)
      * @param name The name of the module to be returned
      * @return The Function Module that calls another module's run method
      */
-    public static TUIFunctionModule.Builder Run(TUIModule moduleToRun, String name) {
-        return new TUIFunctionModule.Builder(name, moduleToRun::run);
+    public static TUIFunctionModule.Builder Run(TUIModule.Builder<?> moduleToRun, String name) {
+        return new TUIFunctionModule.Builder(name, () -> moduleToRun.build().run());
     }
 
     /**
@@ -58,8 +43,8 @@ public class TUIModuleFactory {
      */
     public static TUIFunctionModule.Builder Run(String moduleToRun, TUIModule parentModule, String name) {
         return new TUIFunctionModule.Builder(name, () -> {
-            TUIModule toRun = parentModule.getChild(moduleToRun);
-            if(toRun != null) toRun.run();
+            TUIModule.Builder<?> toRun = parentModule.getChild(moduleToRun);
+            if(toRun != null) toRun.build().run();
         });
     }
 
@@ -76,7 +61,7 @@ public class TUIModuleFactory {
         return new TUIFunctionModule.Builder(name, () -> {
             int choice;
             TUIModule.NameOrModule moduleChoice;
-            TUIModule moduleToRun;
+            TUIModule.Builder<?> moduleToRun;
             try {
                 String choiceInput = app.getInput(inputName, String.class);
                 if(choiceInput == null) return "Error: incorrect inputName \"" + inputName + "\" or improper updating of app input";
@@ -87,14 +72,14 @@ public class TUIModuleFactory {
             }
             catch(NumberFormatException|IndexOutOfBoundsException e) {
                 System.out.println("Error: Invalid Input (1-" + modules.size() + ")");
-                TUIModule thisModule = app.getChild(selectorModuleName);
+                TUIModule.Builder<?> thisModule = app.getChild(selectorModuleName);
                 if(thisModule == null) return "Error: module \"" + name + "\" didn't get added to the app";
                 // update directly instead of returning after because otherwise recursion would make the error the final update
                 app.updateInput(name, "Error: Invalid User Input");
-                thisModule.run();
+                thisModule.build().run();
                 return app.getInput(name);
             }
-            moduleToRun.run();
+            moduleToRun.build().run();
             return "Success: retrieved and ran scene " + moduleToRun.getName();
         });
     }
@@ -116,8 +101,8 @@ public class TUIModuleFactory {
      * To access the counter, call <app>.getInput(<name>, Integer.class). Note that this will likely be null before this module is run.
      * @param name The name of the module to be returned
      * @param app The Application Module that this module will be the child of
-     * @param begin The number to begin at (eg. begin = 5 -> 5, 6, 7, 8, ...)
-     * @param step The amount to increment each time (eg. step = 5 -> 1, 6, 11, ...)
+     * @param begin The number to begin at (e.g. begin = 5 -> 5, 6, 7, 8, ...)
+     * @param step The amount to increment each time (e.g. step = 5 -> 1, 6, 11, ...)
      * @return The Function Module that increments a counter
      */
     public static TUIFunctionModule.Builder Counter(TUIApplicationModule app, String name, int begin, int step) {
@@ -128,12 +113,12 @@ public class TUIModuleFactory {
         });
     }
 
-    public static class NumberedList extends TUIGenericModule.Builder<NumberedList> {
+    public static class NumberedList extends TUIModule.Template<NumberedList> {
         private List<String> listText;
         private int start = 1;
         private int step = 1;
         private String inputVariableName;
-        private List<TUITextInputModule> getInput = new ArrayList<>();
+        private List<TUITextInputModule.Builder> getInput = new ArrayList<>();
 
         public NumberedList(String name, String... listText) {
             super(NumberedList.class, name);
@@ -161,15 +146,14 @@ public class TUIModuleFactory {
          * @param inputIdentifier The variable name of the input used when calling TUIApplicationModule.getInput()
          * @return self
          */
-        public NumberedList collectInput(String inputMessage, String inputIdentifier) {
-            TUITextInputModule input = new TUITextInputModule.Builder(inputMessage, inputIdentifier).build();
+        public NumberedList collectInput(String inputIdentifier, String inputMessage) {
+            TUITextInputModule.Builder input = new TUITextInputModule.Builder(inputIdentifier, inputMessage);
             getInput.add(input);
             return self();
         }
 
         @Override
         public TUIContainerModule build() {
-            TUIContainerModule.Builder main = new TUIContainerModule.Builder(name + "-main");
             for(int i = 0; i < listText.size(); i ++) {
                 int currentNum = (i * step) + start;
                 main.addChild(
@@ -179,12 +163,12 @@ public class TUIModuleFactory {
             for(var input : getInput) {
                 main.addChild(input);
             }
-            this.addChild(0, main);
-            return new TUIContainerModule(this);
+
+            return super.build();
         }
     }
 
-    public static class NumberedModuleSelector extends TUIGenericModule.Builder<NumberedModuleSelector> {
+    public static class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSelector> {
         private List<TUIModule.NameOrModule> modules = new ArrayList<>();
         private List<String> listText = new ArrayList<>();
         private TUIApplicationModule app;
@@ -195,7 +179,7 @@ public class TUIModuleFactory {
             this.app = app;
         }
 
-        public NumberedModuleSelector(String name, TUIApplicationModule app, TUIModule... modules) {
+        public NumberedModuleSelector(String name, TUIApplicationModule app, TUIModule.Builder<?>... modules) {
             super(NumberedModuleSelector.class, name);
             Arrays.asList(modules).forEach(m -> this.modules.add(new TUIModule.NameOrModule(m)));
             this.app = app;
@@ -211,7 +195,7 @@ public class TUIModuleFactory {
             return self();
         }
 
-        public NumberedModuleSelector addScene(TUIModule module) {
+        public NumberedModuleSelector addScene(TUIModule.Builder<?> module) {
             this.modules.add(new TUIModule.NameOrModule(module));
             return self();
         }
@@ -221,7 +205,7 @@ public class TUIModuleFactory {
             return self();
         }
 
-        public NumberedModuleSelector addScenes(TUIModule... modules) {
+        public NumberedModuleSelector addScenes(TUIModule.Builder<?>... modules) {
             Arrays.asList(modules).forEach(m -> this.modules.add(new TUIModule.NameOrModule(m)));
             return self();
         }
@@ -239,13 +223,13 @@ public class TUIModuleFactory {
                 }
             }
 
-            list.collectInput("Your choice: ", name + "-input");
+            list.collectInput(name + "-input", "Your choice: ");
 
             list.addChild(TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules));
 
-            this.addChild(0, list);
+            main.addChild(0, list);
 
-            return new TUIContainerModule(this);
+            return super.build();
         }
     }
 

@@ -15,48 +15,81 @@ public interface TUIModule {
     String getName();
     void setName(String name);
 
-    List<TUIModule> getChildren();
-    void setChildren(List<TUIModule> children);
-
-    TUIModule getChild(String name);
-
-    TUIModule getChildHelper(String name, List<TUIModule> visited);
+    List<Builder<?>> getChildren();
+    void setChildren(List<Builder<?>> children);
 
     TUIApplicationModule getApplication();
-    void setApplication(TUIApplicationModule application);
 
-    /**
-     * Same as SetApplicationRecursive, but it doesn't edit the current app.
-     * @param app The application to apply
-     */
     void setChildrenApplication(TUIApplicationModule app);
 
-    /**
-     * Sets the module app and the app of all its children to the inputted app.
-     * Only sets the app if it's currently null.
-     * @param app The application to apply
-     */
-    void setApplicationRecursive(TUIApplicationModule app);
+    TUIModule.Builder<?> getChild(String name);
 
     void terminate();
     boolean isTerminated();
 
+    TUIModule getCurrentRunningChild();
+
+    List<TUIModule> getCurrentRunningBranch();
+
     String toString(int indent, boolean displayChildren);
 
-    public static class NameOrModule {
-        private TUIModule module;
+    public final static class NameOrModule {
+        private TUIModule.Builder<?> module; // TODO: finish updating everything to deal only with Builders until running
         private String moduleName;
 
-        public NameOrModule(TUIModule module) {
+        public NameOrModule(TUIModule.Builder<?> module) {
             this.module = module;
         }
         public NameOrModule(String moduleName) {
             this.moduleName = moduleName;
         }
 
-        public TUIModule getModule(TUIApplicationModule app) {
+        public TUIModule.Builder<?> getModule(TUIApplicationModule app) {
             if(module != null) return module;
             else return app.getChild(moduleName);
         }
+    }
+
+    public abstract static class Template<B extends Template<B>> extends TUIGenericModule.Builder<B> {
+        protected TUIContainerModule.Builder main;
+
+        public Template(Class<B> type, String name) {
+            super(type, name);
+            main = new TUIContainerModule.Builder(name + "-main");
+            this.addChild(main);
+        }
+
+        @Override
+        public TUIContainerModule build() {
+            this.application(application);
+            TUIContainerModule output = new TUIContainerModule(self());
+            main = new TUIContainerModule.Builder(name + "-main");
+            return output;
+        }
+    }
+
+    public static interface Builder<B extends Builder<B>> {
+
+        public B application(TUIApplicationModule application);
+
+        public List<Builder<?>> applicationHelper(TUIApplicationModule application, List<Builder<?>> visited);
+
+        public B children(List<Builder<?>> children);
+
+        public B children(Builder<?>... children);
+
+        public B addChild(Builder<?> child);
+
+        public B addChild(int index, Builder<?> child);
+
+        public String getName();
+
+        public Builder<?> getChild(String name);
+
+        public Builder<?> getChildHelper(String name, List<Builder<?>> visited);
+
+        public B self();
+
+        public TUIModule build();
     }
 }

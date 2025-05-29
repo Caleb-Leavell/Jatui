@@ -65,6 +65,11 @@ public class TUITextModule extends TUIGenericModule {
             return self();
         }
 
+        public Builder append(String text) {
+            this.text += text;
+            return self();
+        }
+
         @Override
         public TUITextModule build() {
             return new TUITextModule(self());
