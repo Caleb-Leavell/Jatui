@@ -1,4 +1,4 @@
-package com.calebleavell.tuiava.modules;
+package com.calebleavell.jatui.modules;
 
 import java.util.Map;
 import java.util.HashMap;

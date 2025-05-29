@@ -1,4 +1,4 @@
-package com.calebleavell.tuiava.modules;
+package com.calebleavell.jatui.modules;
 
 import java.util.List;
 
@@ -65,7 +65,7 @@ public interface TUIModule {
         public TUIContainerModule build() {
             this.application(application);
             TUIContainerModule output = new TUIContainerModule(self());
-            main = new TUIContainerModule.Builder(name + "-main");
+            main = new TUIContainerModule.Builder(main.getName());
             return output;
         }
     }
@@ -84,6 +84,8 @@ public interface TUIModule {
 
         public B addChild(int index, Builder<?> child);
 
+        public B alterChildNames (boolean alterChildNames);
+
         public String getName();
 
         public Builder<?> getChild(String name);
@@ -91,6 +93,8 @@ public interface TUIModule {
         public Builder<?> getChildHelper(String name, List<Builder<?>> visited);
 
         public TUIApplicationModule getApplication();
+
+        public void prependToName(String name);
 
         public B self();
 

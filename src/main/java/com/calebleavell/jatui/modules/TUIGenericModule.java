@@ -1,4 +1,4 @@
-package com.calebleavell.tuiava.modules;
+package com.calebleavell.jatui.modules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +151,9 @@ public abstract class TUIGenericModule implements TUIModule {
         protected String name;
         protected TUIApplicationModule application;
         protected List<TUIModule.Builder<?>> children = new ArrayList<>();
+        protected TUIModule.Builder<?> parent;
 
+        protected boolean alterChildNames = false;
         protected final Class<B> type;
 
 
@@ -198,18 +200,33 @@ public abstract class TUIGenericModule implements TUIModule {
         @Override
         public B addChild(TUIModule.Builder<?> child) {
             this.children.add(child);
+            if(alterChildNames) child.prependToName(name);
             return self();
         }
 
         @Override
         public B addChild(int index, TUIModule.Builder<?> child) {
             this.children.add(index, child);
+            if(alterChildNames) child.prependToName(name);
             return self();
         }
 
         @Override
         public String getName() {
             return name;
+        }
+
+        /**
+         * <p>Whether the name of this module will be automatically prepended to the beginning of each child's name. </p>
+         * <p>Must be called before .children() or .addChild() is called to have any effect.</p>
+         *
+         * @param uniqueName If true, child names will be altered
+         * @return self
+         */
+        @Override
+        public B alterChildNames(boolean uniqueName) {
+            this.alterChildNames = true;
+            return self();
         }
 
         /**
@@ -251,6 +268,11 @@ public abstract class TUIGenericModule implements TUIModule {
         @Override
         public TUIApplicationModule getApplication() {
             return this.application;
+        }
+
+        @Override
+        public void prependToName(String name) {
+            this.name = name + "-" + this.name;
         }
 
         @Override

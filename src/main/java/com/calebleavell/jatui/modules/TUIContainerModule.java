@@ -1,4 +1,4 @@
-package com.calebleavell.tuiava.modules;
+package com.calebleavell.jatui.modules;
 
 /**
  * Not only does this class improve modularity by housing other modules,

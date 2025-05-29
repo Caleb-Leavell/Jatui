@@ -1,4 +1,4 @@
-package com.calebleavell.tuiava.modules;
+package com.calebleavell.jatui.modules;
 
 import java.util.List;
 import java.util.Scanner;
@@ -55,7 +55,7 @@ public class TUITextInputModule extends TUIGenericModule {
 
     public static class Builder extends TUIGenericModule.Builder<Builder> {
         protected TUITextModule.Builder displayText;
-        protected TUIFunctionModule.Builder inputConverter;
+        protected TUIFunctionModule.Builder inputConverter; // TODO: migrate to multiple input handlers and verifiers
         protected TUIFunctionModule.Builder inputVerifier;
 
         public Builder(String name, String displayText) {

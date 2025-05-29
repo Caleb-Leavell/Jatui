@@ -1,4 +1,4 @@
-package com.calebleavell.tuiava.modules;
+package com.calebleavell.jatui.modules;
 
 import java.util.*;
 
@@ -179,7 +179,7 @@ public class TUIModuleFactory {
             this.app = app;
         }
 
-        public NumberedModuleSelector(String name, TUIApplicationModule app, TUIModule.Builder<?>... modules) {
+        public NumberedModuleSelector(TUIApplicationModule app, String name, TUIModule.Builder<?>... modules) {
             super(NumberedModuleSelector.class, name);
             Arrays.asList(modules).forEach(m -> this.modules.add(new TUIModule.NameOrModule(m)));
             this.app = app;
