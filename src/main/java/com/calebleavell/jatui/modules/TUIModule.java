@@ -31,6 +31,8 @@ public interface TUIModule {
 
     TUIModule getCurrentRunningChild();
 
+    TUIModule getCurrentRunningChild(String name);
+
     List<TUIModule> getCurrentRunningBranch();
 
     String toString(int indent, boolean displayChildren);

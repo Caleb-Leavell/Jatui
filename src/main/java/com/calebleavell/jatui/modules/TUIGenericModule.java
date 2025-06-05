@@ -1,5 +1,6 @@
 package com.calebleavell.jatui.modules;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,12 +16,13 @@ public abstract class TUIGenericModule implements TUIModule {
 
     public int MAX_ITERATIONS_ON_TO_STRING = 6;
 
-
     @Override
     public void run() {
         terminated = false;
+
+        //List<TUIModule.Builder<?>> childrenIterable = new ArrayList<>(children);
         for(TUIModule.Builder<?> child : children) {
-            if(terminated) return;
+            if(terminated) break;
             TUIModule toRun = child.build();
             currentRunningChild = toRun;
             toRun.run();
@@ -96,6 +98,17 @@ public abstract class TUIGenericModule implements TUIModule {
     }
 
     @Override
+    public TUIModule getCurrentRunningChild(String name) {
+        List<TUIModule> branch = getCurrentRunningBranch();
+
+        for(TUIModule m : branch) {
+            if(m.getName().equals(name)) return m;
+        }
+
+        return null;
+    }
+
+    @Override
     public List<TUIModule> getCurrentRunningBranch() {
         List<TUIModule> currentRunningBranch = new ArrayList<>();
         currentRunningBranch.add(this);
@@ -144,7 +157,7 @@ public abstract class TUIGenericModule implements TUIModule {
     protected TUIGenericModule(Builder<?> builder) {
         this.name = builder.name;
         this.application = builder.application;
-        this.children = builder.children;
+        this.children = new ArrayList<>(builder.children);
     }
 
     public abstract static class Builder<B extends Builder<B>> implements TUIModule.Builder<Builder<B>> {

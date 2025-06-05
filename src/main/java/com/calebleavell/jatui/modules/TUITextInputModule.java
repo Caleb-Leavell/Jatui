@@ -1,14 +1,14 @@
 package com.calebleavell.jatui.modules;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class TUITextInputModule extends TUIGenericModule {
     private String input;
     private TUITextModule displayText;
-    private TUIFunctionModule inputConverter;
-    private TUIFunctionModule inputVerifier;
 
     private final static Scanner scnr = new Scanner(System.in);
 
@@ -17,16 +17,12 @@ public class TUITextInputModule extends TUIGenericModule {
     @Override
     public void run() {
         displayText.run();
+
         input = scnr.nextLine();
 
         TUIApplicationModule app = getApplication();
-        if(app != null) {
-            app.updateInput(this, input);
-            inputConverter.run();
-            app.updateInput(inputConverter.getName(), app.getInput(inputConverter.getName()));
-            inputVerifier.run();
-            app.updateInput(this, app.getInput(inputConverter.getName()));
-        }
+        if(app != null) app.updateInput(this, input);
+
         super.run();
     }
 
@@ -38,122 +34,113 @@ public class TUITextInputModule extends TUIGenericModule {
         return displayText;
     }
 
-    public void setDisplayText(String text) {
-        this.displayText.setText(text);
-    }
-
-    public void setDisplayText(TUITextModule text) {
-        this.displayText = text;
-    }
-
     public TUITextInputModule(Builder builder) {
         super(builder);
         this.displayText = builder.displayText.build();
-        this.inputConverter = builder.inputConverter.build();
-        this.inputVerifier = builder.inputVerifier.build();
     }
 
     public static class Builder extends TUIGenericModule.Builder<Builder> {
         protected TUITextModule.Builder displayText;
-        protected TUIFunctionModule.Builder inputConverter; // TODO: migrate to multiple input handlers and verifiers
-        protected TUIFunctionModule.Builder inputVerifier;
+        protected InputHandlers handlers;
 
         public Builder(String name, String displayText) {
             super(Builder.class, name);
             this.displayText = new TUITextModule.Builder(name + "-display-text", displayText)
                     .printNewLine(false);
-
-            inputConverter = new TUIFunctionModule.Builder(name + "-converter", () -> {
-                TUIApplicationModule app = this.getApplication();
-                if(app != null) return app.getInput(name);
-                else return null;
-            });
-
-            inputVerifier = new TUIFunctionModule.Builder(name + "-verifier", () -> {
-                TUIApplicationModule app = this.getApplication();
-                if(app == null) return;
-                Object converted = app.getInput(inputConverter.getName());
-                if(TUITextInputModule.INVALID.equals(converted)) {
-                    System.out.println("Error: Invalid Input");
-                    app.terminateChild(name);
-                    this.build().run();
-                }
-            });
+            handlers = new InputHandlers("handlers", this);
         }
 
-        public Builder inputConverter(Function<String, ?> converter) {
-            inputConverter.function(() -> {
-                TUIApplicationModule app = this.getApplication();
-                if(app == null) return null;
-                String input = app.getInput(name, String.class);
-                try {
-                    Object converted = converter.apply(input);
-                    app.updateInput(inputConverter.build(), converted);
-                    return converted;
-                }
-                catch(Exception e) {
-                    return TUITextInputModule.INVALID;
-                }
-            });
+        public Builder addHandler(TUIFunctionModule.Builder handler) {
+            handlers.addHandler(handler);
             return self();
         }
 
-        public Builder inputVerifier(Runnable onInvalidInput, Runnable onValidInput) {
-            inputVerifier.function(() -> {
-                TUIApplicationModule app = this.getApplication();
-                if(app == null) return;
-                Object converted = app.getInput(inputConverter.getName());
-                if(TUITextInputModule.INVALID.equals(converted)) {
-                    onInvalidInput.run();
-                }
-                else {
-                    onValidInput.run();
-                }
-            });
+        public Builder addHandler(String name, Function<String, ?> logic) {
+            handlers.addHandler(name, logic);
             return self();
         }
 
-        public Builder inputVerifier(Runnable onInvalidInput) {
-            inputVerifier.function(() -> {
-                TUIApplicationModule app = this.getApplication();
-                if(app == null) return;
-                Object converted = app.getInput(inputConverter.getName());
-                if(TUITextInputModule.INVALID.equals(converted)) {
-                    onInvalidInput.run();
-                }
-            });
+        public <T> Builder addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
+            handlers.addSafeHandler(name, logic, exceptionHandler);
             return self();
         }
 
-        public Builder inputVerifier(String invalidInputMessage) {
-            inputVerifier = new TUIFunctionModule.Builder(name + "-verifier", () -> {
+        public Builder addSafeHandler(String name, Function<String, ?> logic, String exceptionMessage) {
+            handlers.addSafeHandler(name, logic, o -> {
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) return;
-                Object converted = app.getInput(inputConverter.getName());
-                if(TUITextInputModule.INVALID.equals(converted)) {
-                    System.out.println(invalidInputMessage);
-                    app.terminateChild(name);
-                    this.build().run();
-                }
+                System.out.println(exceptionMessage);
+                app.terminateChild(this.name);
+
+                this.build().run();
             });
 
             return self();
         }
 
-        @Override
-        public List<TUIModule.Builder<?>> applicationHelper(TUIApplicationModule application, List<TUIModule.Builder<?>> visited) {
-            super.applicationHelper(application, visited);
-
-            displayText.application(application);
-            inputConverter.application(application);
-            inputVerifier.application(application);
-
-            return super.applicationHelper(application, visited);
+        public Builder addSafeHandler(String name, Function<String, ?> logic) {
+            this.addSafeHandler(name, logic, "Error: Invalid Input");
+            return self();
         }
 
         @Override
         public TUITextInputModule build() {
+            if(children.isEmpty() || children.getFirst() != handlers) this.addChild(0, handlers);
+            this.application(application);
             return new TUITextInputModule(self());
+        }
+    }
+
+    protected static class InputHandlers extends TUIModule.Template<InputHandlers> {
+
+        protected List<TUIFunctionModule.Builder> handlers = new ArrayList<>();
+        protected Builder inputModule;
+
+        public InputHandlers(String name, Builder inputModule) {
+            super(InputHandlers.class, name);
+            this.inputModule = inputModule;
+        }
+
+        public InputHandlers addHandler(TUIFunctionModule.Builder handler) {
+            handlers.add(handler);
+            return self();
+        }
+
+        public <T> InputHandlers addHandler(String name, Function<String, T> logic) {
+            handlers.add(new TUIFunctionModule.Builder(name, () -> {
+                TUIApplicationModule app = this.getApplication();
+                if(app == null) return null;
+                String input = app.getInput(inputModule.getName(), String.class);
+                T converted = logic.apply(input);
+                app.updateInput(name, converted);
+                return converted;
+            }));
+            return self();
+        }
+
+        public <T> InputHandlers addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
+            handlers.add(new TUIFunctionModule.Builder(name, () -> {
+                TUIApplicationModule app = this.getApplication();
+                if(app == null) return null;
+                String input = app.getInput(inputModule.getName(), String.class);
+                T converted;
+                try {
+                    converted = logic.apply(input);
+                }
+                catch(Exception e) {
+                    exceptionHandler.accept(input);
+                    return app.getInput(name);
+                }
+                app.updateInput(name, converted);
+                return converted;
+            }));
+            return self();
+        }
+
+        @Override
+        public TUIContainerModule build() {
+            handlers.forEach(h -> main.addChild(h)); //method is ambiguous so we can't do a method reference
+            return super.build();
         }
     }
 }

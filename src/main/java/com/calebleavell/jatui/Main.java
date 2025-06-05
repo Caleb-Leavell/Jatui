@@ -2,8 +2,13 @@ package com.calebleavell.jatui;
 
 import com.calebleavell.jatui.modules.*;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.util.ArrayList;
+import java.util.List;
+
+// TODO: implement exit module for TUIApplicationModule
+// TODO: documentation
+// TODO: unit testing
+
 public class Main {
     public static class Rect extends TUIModule.Template<Rect> {
         int x;
@@ -38,39 +43,35 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
+    static TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
 
-        var app = new TUIApplicationModule.Builder("app").build();
+    public static void main(String[] args) {
 
         var exit = new TUITextModule.Builder("exit", "Exiting...");
 
         var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
                 .alterChildNames(true)
                 .children(
-                        new TUITextInputModule.Builder("input", "Maximum Number (or -1 to quit): ")
-                                .inputConverter(s -> {
-                                    int max = Integer.parseInt(s);
-
-                                    if(max < 0) {
-                                        app.terminate();
-                                        exit.build().run();
-                                        return null;
-                                    }
-
-                                    int generated = new java.util.Random().nextInt(max);
-
-                                    return Integer.toString(generated);
-                                }),
-                        new TUITextModule.Builder("generated-number-label", "Generated Number: ").printNewLine(false),
-                        new TUITextModule.Builder("generated-number-display", "random-number-generator-input")
+                        new TUITextInputModule.Builder("input","Maximum Number: ")
+                                .addSafeHandler("generated-number", Main::getRandomInt),
+                        new TUITextModule.Builder("generated-number-label","Generated Number: ")
+                                .printNewLine(false),
+                        new TUITextModule.Builder("generated-number-display","generated-number")
                                 .outputType(TUITextModule.OutputType.OUTPUT_OF_MODULE_NAME),
+
                         new TUIModuleFactory.NumberedModuleSelector("selector", app)
                                 .addScene("random-number-generator")
                                 .addScene(exit)
-                                .listText("Generate another number", "Exit")
+                                .listText( "Generate another number","Exit")
                 );
 
         app.setHome(randomNumberGenerator);
         app.run();
+
+    }
+
+    public static int getRandomInt(String input) {
+        int max = Integer.parseInt(input);
+        return new java.util.Random().nextInt(max);
     }
 }
