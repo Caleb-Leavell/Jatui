@@ -5,7 +5,8 @@ import com.calebleavell.jatui.modules.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: implement exit module for TUIApplicationModule
+// TODO: Ansi
+// TODO: Debug features
 // TODO: documentation
 // TODO: unit testing
 
@@ -50,15 +51,12 @@ public class Main {
         var exit = new TUITextModule.Builder("exit", "Exiting...");
 
         var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
-                .alterChildNames(true)
                 .children(
                         new TUITextInputModule.Builder("input","Maximum Number: ")
                                 .addSafeHandler("generated-number", Main::getRandomInt),
-                        new TUITextModule.Builder("generated-number-label","Generated Number: ")
-                                .printNewLine(false),
-                        new TUITextModule.Builder("generated-number-display","generated-number")
-                                .outputType(TUITextModule.OutputType.OUTPUT_OF_MODULE_NAME),
-
+                        new TUIModuleFactory.TextBuilder("generated-number-display")
+                                .addText("Generated Number: ", false)
+                                .addModuleOutputDisplay("generated-number"),
                         new TUIModuleFactory.NumberedModuleSelector("selector", app)
                                 .addScene("random-number-generator")
                                 .addScene(exit)
@@ -66,6 +64,7 @@ public class Main {
                 );
 
         app.setHome(randomNumberGenerator);
+        System.out.println(app);
         app.run();
 
     }

@@ -7,6 +7,11 @@ public class TUIApplicationModule extends TUIGenericModule {
 
     private final Map<String, Object> inputMap; // maps module names to the input object
 
+    @Override
+    public void run() {
+        super.run();
+    }
+
     public Object getInput(String moduleName) {
         return inputMap.get(moduleName);
     }

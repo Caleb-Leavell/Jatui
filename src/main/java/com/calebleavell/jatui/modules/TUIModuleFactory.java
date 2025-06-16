@@ -233,14 +233,37 @@ public class TUIModuleFactory {
         }
     }
 
+    public static class TextBuilder extends TUIModule.Template<TextBuilder> {
+        private int textCounter = 0;
 
-//    public static abstract class ModuleBuilder extends TUIContainerModule.Builder {
-//        public ModuleBuilder(String name) {
-//            super(TUIContainerModule.Builder.class, name);
-//        }
-//
-//        public TUIContainerModule build() {
-//            return new TUIContainerModule(self());
-//        }
-//    }
+        public TextBuilder(String name) {
+            super(TextBuilder.class, name);
+        }
+
+        public TextBuilder addText(String text, boolean printNewLine, TUITextModule.OutputType outputType) {
+            TUITextModule.Builder module = new TUITextModule.Builder(name + "-" + textCounter, text)
+                    .printNewLine(printNewLine)
+                    .outputType(outputType);
+
+            main.addChild(module);
+
+            textCounter ++;
+
+            return self();
+        }
+
+        public TextBuilder addText(String text, boolean printNewLine) {
+            return addText(text, printNewLine, TUITextModule.OutputType.TEXT);
+        }
+
+        public TextBuilder addText(String text) {
+            return addText(text, false);
+        }
+
+        public TextBuilder addModuleOutputDisplay(String moduleName) {
+            return addText(moduleName, true, TUITextModule.OutputType.OUTPUT_OF_MODULE_NAME);
+        }
+    }
+
+
 }
