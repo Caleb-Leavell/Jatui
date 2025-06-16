@@ -1,14 +1,20 @@
 package com.calebleavell.jatui.modules;
 
+import org.fusesource.jansi.Ansi;
+
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.fusesource.jansi.Ansi.ansi;
 
 public abstract class TUIGenericModule implements TUIModule {
 
     private String name;
     private TUIApplicationModule application;
     private List<TUIModule.Builder<?>> children;
+
+    private Ansi ansi;
 
     private TUIModule currentRunningChild;
 
@@ -21,6 +27,7 @@ public abstract class TUIGenericModule implements TUIModule {
         terminated = false;
 
         //List<TUIModule.Builder<?>> childrenIterable = new ArrayList<>(children);
+
         for(TUIModule.Builder<?> child : children) {
             if(terminated) break;
             TUIModule toRun = child.build();
@@ -111,6 +118,11 @@ public abstract class TUIGenericModule implements TUIModule {
         return currentRunningBranch;
     }
 
+    @Override
+    public Ansi getAnsi() {
+        return this.ansi;
+    }
+
     /**
      * Recursively generates toString with info for this scene and all children.
      * Will only go as deep as MAX_ITERATIONS_ON_TOSTRING
@@ -149,6 +161,7 @@ public abstract class TUIGenericModule implements TUIModule {
         this.name = builder.name;
         this.application = builder.application;
         this.children = new ArrayList<>(builder.children);
+        this.ansi = builder.ansi;
     }
 
     public abstract static class Builder<B extends Builder<B>> implements TUIModule.Builder<Builder<B>> {
@@ -156,9 +169,18 @@ public abstract class TUIGenericModule implements TUIModule {
         protected TUIApplicationModule application;
         protected List<TUIModule.Builder<?>> children = new ArrayList<>();
         protected TUIModule.Builder<?> parent;
+        protected Ansi ansi = ansi();
+        private boolean allowAnsiOverride = true;
 
         protected boolean alterChildNames = false;
         protected final Class<B> type;
+
+        /**
+         * <p>These are children that are only accessible via Builders, but all child operations are also performed on these.</p>
+         * <p>What is done with protectedChildren is not defined here - all that is done in TUIGenericModule.Builder is performing child operations on them.</p>
+         * <p>This means protectedChildren are NOT automatically run when running the built module.</p>
+         */
+        protected List<TUIModule.Builder<?>> protectedChildren = new ArrayList<>();
 
 
         public Builder(Class<B> type, String name) {
@@ -183,6 +205,10 @@ public abstract class TUIGenericModule implements TUIModule {
             visited.add(this);
 
             for(TUIModule.Builder<?> child : children) {
+                visited.addAll(child.applicationHelper(app, visited));
+            }
+
+            for(TUIModule.Builder<?> child : protectedChildren) {
                 visited.addAll(child.applicationHelper(app, visited));
             }
 
@@ -223,19 +249,138 @@ public abstract class TUIGenericModule implements TUIModule {
         /**
          * <p>Whether the name of this module will be automatically prepended to the beginning of each child's name. </p>
          * <p>Must be called before .children() or .addChild() is called to have any effect.</p>
+         * <p>More testing is required, but it currently seems more convenient in general to keep this as the default (false).</p>
          *
-         * @param uniqueName If true, child names will be altered
+         * @param alterChildNames If true, child names will be altered (false by default)
          * @return self
          */
         @Override
-        public B alterChildNames(boolean uniqueName) {
-            this.alterChildNames = true;
+        public B alterChildNames(boolean alterChildNames) {
+            this.alterChildNames = alterChildNames;
+            return self();
+        }
+
+        /**
+         * <p>Sets the ansi for the module (using Jansi).</p>
+         * <p>Also sets the ansi for all children that are currently added .</p>
+         * <p>The ansi value for this and its children can be overriden if setAnsi is called on a parent module, or if setAnsi is called again.</p>
+         * <p>Note: ansi for TUITextModules is automatically reset after running </p>
+         * @param ansi The Jansi provided Ansi object
+         * @return self
+         */
+        @Override
+        public B setAnsi(Ansi ansi) { // named setAnsi to avoid collision with Jansi's ansi()
+
+            if(!allowAnsiOverride) return self();
+
+            this.ansi = ansi;
+
+            for(TUIModule.Builder<?> child : children) {
+                child.setAnsi(ansi);
+            }
+
+            for(TUIModule.Builder<?> child : protectedChildren) {
+                child.setAnsi(ansi);
+            }
+
+            return self();
+        }
+
+        /**
+         * <p>Prepends the ansi to the module's ansi (using Jansi).</p>
+         * <p>Also prepends the ansi for all children that are currently added .</p>
+         * <p>The ansi value for this and its children can be overriden if setAnsi is called on a parent module, or if setAnsi is called again.</p>
+         * <p>Note: ansi for TUITextModules is automatically reset after running </p>
+         * @param ansi The Jansi provided Ansi object
+         * @return self
+         */
+        @Override
+        public B prependAnsi(Ansi ansi) {
+
+            if(!allowAnsiOverride) return self();
+
+            this.ansi = ansi().a(ansi).a(this.ansi);
+
+            for(TUIModule.Builder<?> child : children) {
+                child.prependAnsi(ansi);
+            }
+
+            for(TUIModule.Builder<?> child : protectedChildren) {
+                child.prependAnsi(ansi);
+            }
+
+            return self();
+        }
+
+        /**
+         * <p>Appends the ansi to the module's ansi (using Jansi).</p>
+         * <p>Also appends the ansi for all children that are currently added .</p>
+         * <p>The ansi value for this and its children can be overriden if setAnsi is called on a parent module, or if setAnsi is called again.</p>
+         * <p>Note: ansi for TUITextModules is automatically reset after running </p>
+         * @param ansi The Jansi provided Ansi object
+         * @return self
+         */
+        @Override
+        public B appendAnsi(Ansi ansi) {
+
+            if(!allowAnsiOverride) return self();
+
+            this.ansi = ansi.a(this.ansi).a(ansi);
+
+            for(TUIModule.Builder<?> child : children) {
+                child.setAnsi(ansi);
+            }
+
+            for(TUIModule.Builder<?> child : protectedChildren) {
+                child.setAnsi(ansi);
+            }
+
+            return self();
+        }
+
+        /**
+         * <p>Permanently sets the ansi for the module (using Jansi). This value won't be overriden later.</p>
+         * <p>Also permanently sets the ansi for all children that are currently added .</p>
+         * <p>Note: ansi for TUITextModules is automatically reset after running </p>
+         * @param ansi The Jansi provided Ansi object
+         * @return self
+         */
+        @Override
+        public B hardSetAnsi(Ansi ansi) { // named setAnsi to avoid collision with Jansi's ansi()
+
+            if(!allowAnsiOverride) return self();
+
+            this.ansi = ansi;
+            this.allowAnsiOverride = false;
+
+            for(TUIModule.Builder<?> child : children) {
+                child.hardSetAnsi(ansi);
+            }
+
+            for(TUIModule.Builder<?> child : protectedChildren) {
+                child.hardSetAnsi(ansi);
+            }
+
+            return self();
+        }
+
+        /**
+         * <p>If true, setAnsi may override this module and it's children's ansi values</p>
+         * <p>If false, setAni will be blocked for this module and it's children</p>
+         * @param allowed - whether setAnsi can override this module and it's children's ansi values
+         * @return self
+         */
+        @Override
+        public B allowAnsiOverride(boolean allowed) {
+            this.allowAnsiOverride = allowed;
+
             return self();
         }
 
         /**
          * Finds a child matching the name.
          * It is recommended to name all modules uniquely so this returns a unique module every time.
+         * Also checks protected children.
          *
          * @param name The name of the child
          * @return The first found child (DFS), or <i>null</i> if none is found
@@ -260,6 +405,13 @@ public abstract class TUIGenericModule implements TUIModule {
             visited.add(this);
 
             for(TUIModule.Builder<?> child : children) {
+                if(visited.contains(child)) continue;
+
+                TUIModule.Builder<?> found = child.getChildHelper(name, visited);
+                if(found != null) return found;
+            }
+
+            for(TUIModule.Builder<?> child : protectedChildren) {
                 if(visited.contains(child)) continue;
 
                 TUIModule.Builder<?> found = child.getChildHelper(name, visited);

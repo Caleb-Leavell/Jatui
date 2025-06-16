@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public class TUITextInputModule extends TUIGenericModule {
     private String input;
-    private TUITextModule displayText;
+    private TUIModule.Builder<?> displayText;
 
     private final static Scanner scnr = new Scanner(System.in);
 
@@ -16,8 +16,7 @@ public class TUITextInputModule extends TUIGenericModule {
 
     @Override
     public void run() {
-        displayText.run();
-
+        displayText.build().run();
         input = scnr.nextLine();
 
         TUIApplicationModule app = getApplication();
@@ -30,23 +29,20 @@ public class TUITextInputModule extends TUIGenericModule {
         return input;
     }
 
-    public TUITextModule getDisplayText() {
-        return displayText;
-    }
-
     public TUITextInputModule(Builder builder) {
         super(builder);
-        this.displayText = builder.displayText.build();
+        displayText = builder.protectedChildren.get(0);
     }
 
     public static class Builder extends TUIGenericModule.Builder<Builder> {
-        protected TUITextModule.Builder displayText;
+
         protected InputHandlers handlers;
 
         public Builder(String name, String displayText) {
             super(Builder.class, name);
-            this.displayText = new TUITextModule.Builder(name + "-display-text", displayText)
-                    .printNewLine(false);
+
+            protectedChildren.add(new TUITextModule.Builder(name+"display", displayText).printNewLine(false));
+
             handlers = new InputHandlers("handlers", this);
         }
 

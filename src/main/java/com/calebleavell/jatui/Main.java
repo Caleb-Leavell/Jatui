@@ -1,8 +1,11 @@
 package com.calebleavell.jatui;
 
 import com.calebleavell.jatui.modules.*;
+import static com.calebleavell.jatui.modules.TUITextModule.OutputType.*;
 
+import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
+
 import static org.fusesource.jansi.Ansi.*;
 import static org.fusesource.jansi.Ansi.Color.*;
 
@@ -10,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // TODO: Ansi
+// TODO: applying ansi to children (currently being reset)
 // TODO: Debug features
 // TODO: documentation
 // TODO: unit testing
@@ -52,23 +56,22 @@ public class Main {
 
     public static void main(String[] args) {
 
-        var exit = new TUITextModule.Builder("exit", "Exiting...");
-
-        AnsiConsole.systemInstall();
+        var exit = new TUITextModule.Builder("exit", "Exiting...")
+                .hardSetAnsi(ansi().fgRgb(150, 100, 100))
+                .addChild(new TUIContainerModule.Builder("erase-screen").setAnsi(ansi().eraseScreen()));
 
         var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
                 .children(
-                        new TUITextInputModule.Builder("input","Maximum Number: ")
+                        new TUITextInputModule.Builder("input", "Maximum Number: ")
                                 .addSafeHandler("generated-number", Main::getRandomInt),
                         new TUIModuleFactory.TextBuilder("generated-number-display")
-                                .addText("Generated Number: ", false)
-                                .addText(ansi().bold().toString())
-                                .addModuleOutputDisplay("generated-number")
-                                .addText(ansi().reset().toString()),
+                                .addText("Generated Number: ")
+                                .addText(new TUITextModule.Builder("display-generated-number", "generated-number")
+                                        .outputType(DISPLAY_MODULE_OUTPUT)
+                                        .hardSetAnsi(ansi().bold().fgRgb(255, 255, 0))),
                         new TUIModuleFactory.NumberedModuleSelector("selector", app)
-                                .addScene("random-number-generator")
-                                .addScene(exit)
-                                .listText( "Generate another number", ansi().fg(RED).a("Exit").reset().toString() )
+                                .addScene("Generated another number", "random-number-generator")
+                                .addScene("Exit", exit)
                 );
 
         app.setHome(randomNumberGenerator);

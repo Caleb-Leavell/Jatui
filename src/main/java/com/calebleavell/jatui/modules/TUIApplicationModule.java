@@ -1,5 +1,7 @@
 package com.calebleavell.jatui.modules;
 
+import org.fusesource.jansi.AnsiConsole;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -9,7 +11,9 @@ public class TUIApplicationModule extends TUIGenericModule {
 
     @Override
     public void run() {
+        AnsiConsole.systemInstall();
         super.run();
+        AnsiConsole.systemUninstall();
     }
 
     public Object getInput(String moduleName) {

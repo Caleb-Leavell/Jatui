@@ -4,6 +4,8 @@ import org.fusesource.jansi.Ansi;
 
 import java.util.*;
 
+import static org.fusesource.jansi.Ansi.ansi;
+
 public class TUIModuleFactory {
 
     /**
@@ -119,8 +121,9 @@ public class TUIModuleFactory {
         private List<String> listText;
         private int start = 1;
         private int step = 1;
+        private int i = 0;
         private String inputVariableName;
-        private List<TUITextInputModule.Builder> getInput = new ArrayList<>();
+        private List<TUIModule.Builder<?>> getInput = new ArrayList<>();
 
         public NumberedList(String name, String... listText) {
             super(NumberedList.class, name);
@@ -128,7 +131,11 @@ public class TUIModuleFactory {
         }
 
         public NumberedList addListText(String listText) {
-            this.listText.add(listText);
+            int currentNum = (i * step) + start;
+            main.addChild(
+                    new TUITextModule.Builder(name + "-" + currentNum, currentNum + ". " + listText)
+            );
+            i ++;
             return this;
         }
 
@@ -151,17 +158,12 @@ public class TUIModuleFactory {
         public NumberedList collectInput(String inputIdentifier, String inputMessage) {
             TUITextInputModule.Builder input = new TUITextInputModule.Builder(inputIdentifier, inputMessage);
             getInput.add(input);
+            protectedChildren.add(input);
             return self();
         }
 
         @Override
         public TUIContainerModule build() {
-            for(int i = 0; i < listText.size(); i ++) {
-                int currentNum = (i * step) + start;
-                main.addChild(
-                        new TUITextModule.Builder(name + "-" + currentNum, currentNum + ". " + listText.get(i))
-                );
-            }
             for(var input : getInput) {
                 main.addChild(input);
             }
@@ -174,11 +176,16 @@ public class TUIModuleFactory {
         private List<TUIModule.NameOrModule> modules = new ArrayList<>();
         private List<String> listText = new ArrayList<>();
         private TUIApplicationModule app;
+        private NumberedList list;
+        private TUITextInputModule collectInput;
 
         public NumberedModuleSelector(String name, TUIApplicationModule app, String... moduleNames) {
             super(NumberedModuleSelector.class, name);
             Arrays.asList(moduleNames).forEach(m -> modules.add(new TUIModule.NameOrModule(m)));
             this.app = app;
+            list = new NumberedList(name + "-list");
+            list.collectInput(name + "-input", "Your choice: ");
+            main.addChild(list);
         }
 
         public NumberedModuleSelector(TUIApplicationModule app, String name, TUIModule.Builder<?>... modules) {
@@ -187,49 +194,29 @@ public class TUIModuleFactory {
             this.app = app;
         }
 
-        public NumberedModuleSelector listText(String... listText) {
-            this.listText.addAll(Arrays.asList(listText));
+        public NumberedModuleSelector addScene(String displayText, String moduleName) {
+            this.modules.add(new TUIModule.NameOrModule(moduleName));
+            list.addListText(displayText);
+            return self();
+        }
+
+        public NumberedModuleSelector addScene(String displayText, TUIModule.Builder<?> module) {
+            this.modules.add(new TUIModule.NameOrModule(module));
+            list.addListText(displayText);
             return self();
         }
 
         public NumberedModuleSelector addScene(String moduleName) {
-            this.modules.add(new TUIModule.NameOrModule(moduleName));
-            return self();
+            return addScene(moduleName, moduleName);
         }
 
         public NumberedModuleSelector addScene(TUIModule.Builder<?> module) {
-            this.modules.add(new TUIModule.NameOrModule(module));
-            return self();
-        }
-
-        public NumberedModuleSelector addScenes(String... moduleNames) {
-            Arrays.asList(moduleNames).forEach(m -> modules.add(new TUIModule.NameOrModule(m)));
-            return self();
-        }
-
-        public NumberedModuleSelector addScenes(TUIModule.Builder<?>... modules) {
-            Arrays.asList(modules).forEach(m -> this.modules.add(new TUIModule.NameOrModule(m)));
-            return self();
+            return addScene(module.getName(), module);
         }
 
         @Override
         public TUIContainerModule build() {
-            NumberedList list = new NumberedList(name + "-list");
-
-            if(listText != null && listText.size() == modules.size()) {
-                listText.forEach(list::addListText);
-            }
-            else {
-                for(TUIModule.NameOrModule m : modules) {
-                    list.addListText(m.getModule(app).getName());
-                }
-            }
-
-            list.collectInput(name + "-input", "Your choice: ");
-
             list.addChild(TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules));
-
-            main.addChild(0, list);
 
             return super.build();
         }
@@ -240,6 +227,12 @@ public class TUIModuleFactory {
 
         public TextBuilder(String name) {
             super(TextBuilder.class, name);
+        }
+
+        public TextBuilder addText(TUITextModule.Builder text) {
+            main.addChild(text);
+            textCounter ++;
+            return self();
         }
 
         public TextBuilder addText(String text, boolean printNewLine, TUITextModule.OutputType outputType) {
@@ -255,16 +248,21 @@ public class TUIModuleFactory {
         }
 
         public TextBuilder addText(String text, boolean printNewLine) {
-            return addText(text, printNewLine, TUITextModule.OutputType.TEXT);
+            return addText(text, printNewLine, TUITextModule.OutputType.DISPLAY_TEXT);
         }
 
         public TextBuilder addText(String text) {
             return addText(text, false);
         }
 
-        public TextBuilder addModuleOutputDisplay(String moduleName) {
-            return addText(moduleName, true, TUITextModule.OutputType.OUTPUT_OF_MODULE_NAME);
+        public TextBuilder addText(String text, Ansi ansi) {
+            return addText(text, false, TUITextModule.OutputType.DISPLAY_TEXT);
         }
+
+        public TextBuilder addModuleOutputDisplay(String moduleName) {
+            return addText(moduleName, true, TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT);
+        }
+
     }
 
 

@@ -1,22 +1,26 @@
 package com.calebleavell.jatui.modules;
 
+import static org.fusesource.jansi.Ansi.ansi;
+
 public class TUITextModule extends TUIGenericModule {
     private String text;
     private final boolean printNewLine;
     private final OutputType outputType;
 
     public enum OutputType {
-            TEXT,
-            OUTPUT_OF_MODULE_NAME
+            DISPLAY_TEXT,
+            DISPLAY_MODULE_OUTPUT
     }
 
     @Override
     public void run() {
+
+        System.out.print(getAnsi());
         switch(outputType) {
-            case TEXT:
+            case DISPLAY_TEXT:
                 System.out.print(text);
                 break;
-            case OUTPUT_OF_MODULE_NAME:
+            case DISPLAY_MODULE_OUTPUT:
                 if (getApplication() != null)
                     System.out.print(getApplication().getInput(text));
                 break;
@@ -24,6 +28,8 @@ public class TUITextModule extends TUIGenericModule {
                 System.out.println("ERROR: TUITextModule has not implemented functionality for outputType " + outputType);
                 break;
         }
+        System.out.print(ansi().reset());
+
         if(printNewLine) System.out.println();
         super.run();
     }
@@ -46,7 +52,7 @@ public class TUITextModule extends TUIGenericModule {
     public static class Builder extends TUIGenericModule.Builder<Builder> {
         protected String text;
         protected boolean printNewLine = true;
-        protected OutputType outputType = OutputType.TEXT;
+        protected OutputType outputType = OutputType.DISPLAY_TEXT;
 
         public Builder(String name, String text) {
             super(Builder.class, name);

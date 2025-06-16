@@ -1,5 +1,7 @@
 package com.calebleavell.jatui.modules;
 
+import org.fusesource.jansi.Ansi;
+
 import java.util.List;
 
 public interface TUIModule {
@@ -35,6 +37,8 @@ public interface TUIModule {
 
     String toString(int indent, boolean displayChildren);
 
+    Ansi getAnsi();
+
     public final static class NameOrModule {
         private TUIModule.Builder<?> module;
         private String moduleName;
@@ -65,7 +69,6 @@ public interface TUIModule {
         public TUIContainerModule build() {
             this.application(application);
             TUIContainerModule output = new TUIContainerModule(self());
-            main = new TUIContainerModule.Builder(main.getName());
             return output;
         }
     }
@@ -84,7 +87,17 @@ public interface TUIModule {
 
         public B addChild(int index, Builder<?> child);
 
-        public B alterChildNames (boolean alterChildNames);
+        public B alterChildNames(boolean alterChildNames);
+
+        public B setAnsi(Ansi ansi);
+
+        public B prependAnsi(Ansi ansi);
+
+        public B appendAnsi(Ansi ansi);
+
+        public B hardSetAnsi(Ansi ansi);
+
+        public B allowAnsiOverride(boolean allow);
 
         public String getName();
 
