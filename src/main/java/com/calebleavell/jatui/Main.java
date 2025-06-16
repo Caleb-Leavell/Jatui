@@ -1,7 +1,6 @@
 package com.calebleavell.jatui;
 
 import com.calebleavell.jatui.modules.*;
-import com.calebleavell.jatui.ansi.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,14 +64,8 @@ public class Main {
                 );
 
         app.setHome(randomNumberGenerator);
-        //System.out.println(app);
-        //app.run();
-
-        System.out.println(AnsiSequences.ESC.code + "[1;34;3mHello!");
-
-        char ESC = 0x1b;
-
-        System.out.println(AnsiSequences.ESC.code + "[1;31mHello");
+        System.out.println(app);
+        app.run();
 
     }
 
