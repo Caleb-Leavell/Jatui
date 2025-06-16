@@ -29,13 +29,9 @@ public enum AnsiErase {
     /** Erase the entire line. */
     LINE_ENTIRE(String.format("%c[2K", AnsiSequences.ESC.code));
 
-    private final String sequence;
+    public final String code;
 
-    AnsiErase(String sequence) {
-        this.sequence = sequence;
-    }
-
-    public String getSequence() {
-        return sequence;
+    AnsiErase(String code) {
+        this.code = code;
     }
 }

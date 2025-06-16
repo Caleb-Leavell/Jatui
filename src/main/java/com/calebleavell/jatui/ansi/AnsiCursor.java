@@ -1,7 +1,5 @@
 package com.calebleavell.jatui.ansi;
 
-import com.calebleavell.jatui.Ansi;
-
 /**
  * <p>Acknowledgement: Ansi Descriptions adapted from Christian Petersen (fnky) at: <br/>
  * <a href="https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797">https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797</a></p>
