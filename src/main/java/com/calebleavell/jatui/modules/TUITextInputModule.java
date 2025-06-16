@@ -89,7 +89,6 @@ public class TUITextInputModule extends TUIGenericModule {
 
     protected static class InputHandlers extends TUIModule.Template<InputHandlers> {
 
-        protected List<TUIFunctionModule.Builder> handlers = new ArrayList<>();
         protected Builder inputModule;
 
         public InputHandlers(String name, Builder inputModule) {
@@ -98,12 +97,12 @@ public class TUITextInputModule extends TUIGenericModule {
         }
 
         public InputHandlers addHandler(TUIFunctionModule.Builder handler) {
-            handlers.add(handler);
+            main.addChild(handler);
             return self();
         }
 
         public <T> InputHandlers addHandler(String name, Function<String, T> logic) {
-            handlers.add(new TUIFunctionModule.Builder(name, () -> {
+            main.addChild(new TUIFunctionModule.Builder(name, () -> {
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) return null;
                 String input = app.getInput(inputModule.getName(), String.class);
@@ -115,7 +114,7 @@ public class TUITextInputModule extends TUIGenericModule {
         }
 
         public <T> InputHandlers addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
-            handlers.add(new TUIFunctionModule.Builder(name, () -> {
+            main.addChild(new TUIFunctionModule.Builder(name, () -> {
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) return null;
                 String input = app.getInput(inputModule.getName(), String.class);
@@ -133,10 +132,5 @@ public class TUITextInputModule extends TUIGenericModule {
             return self();
         }
 
-        @Override
-        public TUIContainerModule build() {
-            handlers.forEach(h -> main.addChild(h)); //method is ambiguous so we can't do a method reference
-            return super.build();
-        }
     }
 }

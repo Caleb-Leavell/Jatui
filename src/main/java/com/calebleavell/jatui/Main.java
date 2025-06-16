@@ -12,8 +12,6 @@ import static org.fusesource.jansi.Ansi.Color.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Ansi
-// TODO: applying ansi to children (currently being reset)
 // TODO: Debug features
 // TODO: documentation
 // TODO: unit testing
@@ -22,6 +20,7 @@ public class Main {
     public static class Rect extends TUIModule.Template<Rect> {
         int x;
         int y;
+
         String cell = ".";
 
         public Rect(String name, int x, int y) {
@@ -38,6 +37,8 @@ public class Main {
 
         @Override
         public TUIContainerModule build() {
+            main.clearChildren();
+
             for(int i = 0; i < y; i ++) {
                 TUITextModule.Builder row = new TUITextModule.Builder(name + "-" + y, "");
 
@@ -50,6 +51,7 @@ public class Main {
 
             return super.build();
         }
+
     }
 
     static TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
@@ -70,11 +72,13 @@ public class Main {
                                         .outputType(DISPLAY_MODULE_OUTPUT)
                                         .hardSetAnsi(ansi().bold().fgRgb(255, 255, 0))),
                         new TUIModuleFactory.NumberedModuleSelector("selector", app)
-                                .addScene("Generated another number", "random-number-generator")
+                                .addScene("Generate another number", "random-number-generator")
                                 .addScene("Exit", exit)
                 );
 
-        app.setHome(randomNumberGenerator);
+        Rect myRect = new Rect("a", 3, 4).cell("#");
+
+        app.setHome(myRect);
         app.run();
     }
 

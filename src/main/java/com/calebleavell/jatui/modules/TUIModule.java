@@ -57,7 +57,7 @@ public interface TUIModule {
     }
 
     public abstract static class Template<B extends Template<B>> extends TUIGenericModule.Builder<B> {
-        protected TUIContainerModule.Builder main;
+        protected final TUIContainerModule.Builder main;
 
         public Template(Class<B> type, String name) {
             super(type, name);
@@ -65,11 +65,15 @@ public interface TUIModule {
             this.addChild(main);
         }
 
+        /**
+         * <p>Builds the finalized ContainerModule</p>
+         * <p><strong>Note:</strong> If you are going to override this method, ensure any changes made to main or other are reset each time it's called.
+         *          We want to ensure calling build() multiple times returns the same output.</p>
+         * @return The built ContainerModule
+         */
         @Override
         public TUIContainerModule build() {
-            this.application(application);
-            TUIContainerModule output = new TUIContainerModule(self());
-            return output;
+            return new TUIContainerModule(self());
         }
     }
 
@@ -86,6 +90,8 @@ public interface TUIModule {
         public B addChild(Builder<?> child);
 
         public B addChild(int index, Builder<?> child);
+
+        public B clearChildren();
 
         public B alterChildNames(boolean alterChildNames);
 

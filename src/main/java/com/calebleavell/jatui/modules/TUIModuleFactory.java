@@ -4,8 +4,6 @@ import org.fusesource.jansi.Ansi;
 
 import java.util.*;
 
-import static org.fusesource.jansi.Ansi.ansi;
-
 public class TUIModuleFactory {
 
     /**
@@ -118,7 +116,6 @@ public class TUIModuleFactory {
     }
 
     public static class NumberedList extends TUIModule.Template<NumberedList> {
-        private List<String> listText;
         private int start = 1;
         private int step = 1;
         private int i = 0;
@@ -127,7 +124,6 @@ public class TUIModuleFactory {
 
         public NumberedList(String name, String... listText) {
             super(NumberedList.class, name);
-            this.listText = new ArrayList<String>(Arrays.asList(listText));
         }
 
         public NumberedList addListText(String listText) {
@@ -150,7 +146,8 @@ public class TUIModuleFactory {
         }
 
         /**
-         * Collect input after the list is displayed (you can add more than 1).
+         * <p>Collect input after the list is displayed (you can add more than 1).</p>
+         * <p>Note: you CAN collect input before displaying all list items.</p>
          * @param inputMessage The input message displayed to the user
          * @param inputIdentifier The variable name of the input used when calling TUIApplicationModule.getInput()
          * @return self
@@ -158,17 +155,8 @@ public class TUIModuleFactory {
         public NumberedList collectInput(String inputIdentifier, String inputMessage) {
             TUITextInputModule.Builder input = new TUITextInputModule.Builder(inputIdentifier, inputMessage);
             getInput.add(input);
-            protectedChildren.add(input);
+            main.addChild(input);
             return self();
-        }
-
-        @Override
-        public TUIContainerModule build() {
-            for(var input : getInput) {
-                main.addChild(input);
-            }
-
-            return super.build();
         }
     }
 
@@ -177,15 +165,19 @@ public class TUIModuleFactory {
         private List<String> listText = new ArrayList<>();
         private TUIApplicationModule app;
         private NumberedList list;
-        private TUITextInputModule collectInput;
+        private TUITextInputModule.Builder collectInput;
+        private TUIFunctionModule.Builder gotoInput;
 
         public NumberedModuleSelector(String name, TUIApplicationModule app, String... moduleNames) {
             super(NumberedModuleSelector.class, name);
             Arrays.asList(moduleNames).forEach(m -> modules.add(new TUIModule.NameOrModule(m)));
             this.app = app;
             list = new NumberedList(name + "-list");
-            list.collectInput(name + "-input", "Your choice: ");
+            collectInput = new TUITextInputModule.Builder(name + "-input", "Your choice: ");
+            gotoInput = TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules);
             main.addChild(list);
+            main.addChild(collectInput);
+            main.addChild(gotoInput);
         }
 
         public NumberedModuleSelector(TUIApplicationModule app, String name, TUIModule.Builder<?>... modules) {
@@ -194,16 +186,19 @@ public class TUIModuleFactory {
             this.app = app;
         }
 
-        public NumberedModuleSelector addScene(String displayText, String moduleName) {
-            this.modules.add(new TUIModule.NameOrModule(moduleName));
+        private NumberedModuleSelector addScene(String displayText, TUIModule.NameOrModule module){
+            this.modules.add(module);
             list.addListText(displayText);
+            gotoInput = TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules);
             return self();
         }
 
+        public NumberedModuleSelector addScene(String displayText, String moduleName) {
+            return addScene(displayText, new TUIModule.NameOrModule(moduleName));
+        }
+
         public NumberedModuleSelector addScene(String displayText, TUIModule.Builder<?> module) {
-            this.modules.add(new TUIModule.NameOrModule(module));
-            list.addListText(displayText);
-            return self();
+            return addScene(displayText, new TUIModule.NameOrModule(module));
         }
 
         public NumberedModuleSelector addScene(String moduleName) {
@@ -212,13 +207,6 @@ public class TUIModuleFactory {
 
         public NumberedModuleSelector addScene(TUIModule.Builder<?> module) {
             return addScene(module.getName(), module);
-        }
-
-        @Override
-        public TUIContainerModule build() {
-            list.addChild(TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules));
-
-            return super.build();
         }
     }
 

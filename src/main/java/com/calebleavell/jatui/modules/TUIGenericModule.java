@@ -2,7 +2,6 @@ package com.calebleavell.jatui.modules;
 
 import org.fusesource.jansi.Ansi;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +45,6 @@ public abstract class TUIGenericModule implements TUIModule {
     public List<TUIModule.Builder<?>> getChildren() {
         return children;
     }
-
 
     @Override
     public TUIModule.Builder<?> getChild(String name) {
@@ -238,6 +236,13 @@ public abstract class TUIGenericModule implements TUIModule {
         public B addChild(int index, TUIModule.Builder<?> child) {
             this.children.add(index, child);
             if(alterChildNames) child.prependToName(name);
+            return self();
+        }
+
+        @Override
+        public Builder<B> clearChildren() {
+            this.children.clear();
+
             return self();
         }
 
