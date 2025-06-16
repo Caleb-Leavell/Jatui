@@ -13,10 +13,8 @@ public interface TUIModule {
     void run();
 
     String getName();
-    void setName(String name);
 
     List<Builder<?>> getChildren();
-    void setChildren(List<Builder<?>> children);
 
     TUIApplicationModule getApplication();
 

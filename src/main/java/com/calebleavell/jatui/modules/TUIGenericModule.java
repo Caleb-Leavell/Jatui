@@ -36,19 +36,10 @@ public abstract class TUIGenericModule implements TUIModule {
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
     public List<TUIModule.Builder<?>> getChildren() {
         return children;
     }
 
-    @Override
-    public void setChildren(List<TUIModule.Builder<?>> children) {
-        this.children = children;
-    }
 
     @Override
     public TUIModule.Builder<?> getChild(String name) {
