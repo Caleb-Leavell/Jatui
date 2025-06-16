@@ -2,6 +2,10 @@ package com.calebleavell.jatui;
 
 import com.calebleavell.jatui.modules.*;
 
+import org.fusesource.jansi.AnsiConsole;
+import static org.fusesource.jansi.Ansi.*;
+import static org.fusesource.jansi.Ansi.Color.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,23 +54,25 @@ public class Main {
 
         var exit = new TUITextModule.Builder("exit", "Exiting...");
 
+        AnsiConsole.systemInstall();
+
         var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
                 .children(
                         new TUITextInputModule.Builder("input","Maximum Number: ")
                                 .addSafeHandler("generated-number", Main::getRandomInt),
                         new TUIModuleFactory.TextBuilder("generated-number-display")
                                 .addText("Generated Number: ", false)
-                                .addModuleOutputDisplay("generated-number"),
+                                .addText(ansi().bold().toString())
+                                .addModuleOutputDisplay("generated-number")
+                                .addText(ansi().reset().toString()),
                         new TUIModuleFactory.NumberedModuleSelector("selector", app)
                                 .addScene("random-number-generator")
                                 .addScene(exit)
-                                .listText( "Generate another number","Exit")
+                                .listText( "Generate another number", ansi().fg(RED).a("Exit").reset().toString() )
                 );
 
         app.setHome(randomNumberGenerator);
-        System.out.println(app);
         app.run();
-
     }
 
     public static int getRandomInt(String input) {

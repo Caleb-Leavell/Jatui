@@ -1,5 +1,7 @@
 package com.calebleavell.jatui.modules;
 
+import org.fusesource.jansi.Ansi;
+
 import java.util.*;
 
 public class TUIModuleFactory {

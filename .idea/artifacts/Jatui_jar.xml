@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Jatui:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Jatui_jar</output-path>
+    <root id="archive" name="Jatui.jar">
+      <element id="module-output" name="Jatui" />
+    </root>
+  </artifact>
+</component>
