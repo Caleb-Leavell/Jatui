@@ -3,14 +3,9 @@ package com.calebleavell.jatui;
 import com.calebleavell.jatui.modules.*;
 import static com.calebleavell.jatui.modules.TUITextModule.OutputType.*;
 
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.AnsiConsole;
 
 import static org.fusesource.jansi.Ansi.*;
-import static org.fusesource.jansi.Ansi.Color.*;
 
-import java.util.ArrayList;
-import java.util.List;
 
 // TODO: Debug features
 // TODO: documentation
@@ -28,6 +23,18 @@ public class Main {
 
             this.x = x;
             this.y = y;
+        }
+
+        protected Rect(Rect original) {
+            super(original);
+            this.x = original.x;
+            this.y = original.y;
+            this.cell = original.cell;
+        }
+
+        @Override
+        public Rect getCopy() {
+            return new Rect(this);
         }
 
         public Rect cell(String cell) {
@@ -54,34 +61,40 @@ public class Main {
 
     }
 
-    static TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
 
     public static void main(String[] args) {
 
-        var exit = new TUITextModule.Builder("exit", "Exiting...")
-                .hardSetAnsi(ansi().fgRgb(150, 100, 100))
-                .addChild(new TUIContainerModule.Builder("erase-screen").setAnsi(ansi().eraseScreen()));
+        // Application object
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
 
+        var moduleOutput = new TUITextModule.Builder("module-output-template", "template")
+                .outputType(DISPLAY_MODULE_OUTPUT)
+                .hardSetAnsi(ansi().bold().fgRgb(220, 180, 0));
+
+        // Front-end
         var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
                 .children(
                         new TUITextInputModule.Builder("input", "Maximum Number: ")
+                                .addSafeHandler("exit-if-negative", s -> {
+                                    if(Integer.parseInt(s) < 0) app.terminate();
+                                    return null;
+                                })
                                 .addSafeHandler("generated-number", Main::getRandomInt),
                         new TUIModuleFactory.TextBuilder("generated-number-display")
                                 .addText("Generated Number: ")
-                                .addText(new TUITextModule.Builder("display-generated-number", "generated-number")
-                                        .outputType(DISPLAY_MODULE_OUTPUT)
-                                        .hardSetAnsi(ansi().bold().fgRgb(255, 255, 0))),
+                                .addText(moduleOutput.getCopy()
+                                        .setName("display-generated-number")
+                                        .text("generated-number")),
                         new TUIModuleFactory.NumberedModuleSelector("selector", app)
                                 .addScene("Generate another number", "random-number-generator")
-                                .addScene("Exit", exit)
-                );
+                                .addScene("Exit", TUIModuleFactory.Terminate(app, "terminate-app")));
 
-        Rect myRect = new Rect("a", 3, 4).cell("#");
-
-        app.setHome(myRect);
+        // Run Application
+        app.setChildren(randomNumberGenerator);
         app.run();
     }
 
+    // "back-end" logic
     public static int getRandomInt(String input) {
         int max = Integer.parseInt(input);
         return new java.util.Random().nextInt(max);

@@ -3,6 +3,7 @@ package com.calebleavell.jatui.modules;
 import org.fusesource.jansi.Ansi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.fusesource.jansi.Ansi.ansi;
@@ -86,6 +87,14 @@ public abstract class TUIGenericModule implements TUIModule {
             return type.cast(child);
         }
         else return null;
+    }
+
+    /**
+     * Sets the children of the app. The first child is the home.
+     * @param children The list of child module builders.
+     */
+    public void setChildren(TUIModule.Builder<?>... children) {
+        this.children = new ArrayList<>(Arrays.asList(children));
     }
 
 
@@ -189,7 +198,6 @@ public abstract class TUIGenericModule implements TUIModule {
         protected String name;
         protected TUIApplicationModule application;
         protected List<TUIModule.Builder<?>> children = new ArrayList<>();
-        protected TUIModule.Builder<?> parent;
         protected Ansi ansi = ansi();
         private boolean allowAnsiOverride = true;
 
@@ -203,10 +211,23 @@ public abstract class TUIGenericModule implements TUIModule {
          */
         protected List<TUIModule.Builder<?>> protectedChildren = new ArrayList<>();
 
-
         public Builder(Class<B> type, String name) {
             this.type = type;
             this.name = name;
+        }
+
+        protected Builder(Builder<B> original) {
+            this.name = original.name;
+            this.application = original.application;
+            this.children = new ArrayList<>();
+            for(TUIModule.Builder<?> child : original.children) {
+                this.children.add(child.getCopy());
+            }
+            this.ansi = original.ansi;
+            this.allowAnsiOverride = original.allowAnsiOverride;
+            this.alterChildNames = original.alterChildNames;
+            this.type = original.type;
+            this.protectedChildren = original.protectedChildren;
         }
 
         @Override
@@ -272,6 +293,12 @@ public abstract class TUIGenericModule implements TUIModule {
         @Override
         public String getName() {
             return name;
+        }
+
+        @Override
+        public B setName(String name) {
+            this.name = name;
+            return self();
         }
 
         /**

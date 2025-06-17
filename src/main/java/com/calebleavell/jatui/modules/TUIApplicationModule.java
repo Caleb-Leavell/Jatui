@@ -1,6 +1,7 @@
 package com.calebleavell.jatui.modules;
 
 import org.fusesource.jansi.AnsiConsole;
+import static org.fusesource.jansi.Ansi.ansi;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -8,12 +9,12 @@ import java.util.HashMap;
 public class TUIApplicationModule extends TUIGenericModule {
 
     private final Map<String, Object> inputMap; // maps module names to the input object
+    private final TUIModule.Builder<?> onExit;
 
     @Override
     public void run() {
-        AnsiConsole.systemInstall();
         super.run();
-        AnsiConsole.systemUninstall();
+        onExit.build().run();
     }
 
     public Object getInput(String moduleName) {
@@ -48,30 +49,63 @@ public class TUIApplicationModule extends TUIGenericModule {
         setChildrenApplication(this);
     }
 
+    @Override
+    public void setChildren(TUIModule.Builder<?>... children) {
+        super.setChildren(children);
+        setChildrenApplication(this);
+    }
+
     public TUIModule.Builder<?> getHome() {
         if(this.getChildren().isEmpty()) return null;
         return this.getChildren().getFirst();
     }
 
     public void terminateChild(String moduleName) {
-        getCurrentRunningBranch().forEach(m -> {if(m.getName().equals(moduleName)) m.terminate();});
+        getCurrentRunningBranch().forEach(m -> {
+            if(m.getName().equals(moduleName)) m.terminate();
+        });
     }
 
     public TUIApplicationModule(Builder builder) {
         super(builder);
         this.inputMap = builder.inputMap;
+        this.onExit = builder.onExit;
+        this.onExit.application(this);
     }
 
     public static class Builder extends TUIGenericModule.Builder<Builder> {
         private final Map<String, Object> inputMap = new HashMap<>();
+        private TUIModule.Builder<?> onExit = new TUITextModule.Builder("exit", "Exiting...")
+                .hardSetAnsi(ansi().fgRgb(125, 100, 100));
 
         public Builder(String name) {
             super(Builder.class, name);
             this.children.add(TUIModuleFactory.Empty("home"));
         }
 
+        protected Builder(Builder original) {
+            super(original);
+            this.inputMap.putAll(original.inputMap);
+            this.onExit = original.onExit.getCopy();
+        }
+
+        /**
+         * <p>Returns a deep copy of the application.</p>
+         * <p>Note: The inputMap is deep-copied, but all entries in the map are shallow-copied.</p>
+         * @return The copy of this object.
+         */
+        @Override
+        public Builder getCopy() {
+            return new Builder(this);
+        }
+
         public Builder home(TUIModule.Builder<?> home) {
             this.children.set(0, home);
+            return self();
+        }
+
+        public Builder onExit(TUIModule.Builder<?> onExit) {
+            this.onExit = onExit;
             return self();
         }
 

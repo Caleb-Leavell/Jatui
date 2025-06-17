@@ -26,6 +26,8 @@ public interface TUIModule {
 
     <T extends Builder<?>> T getChild(String name, Class<T> builderType);
 
+    void setChildren(Builder<?>... children);
+
     void terminate();
     boolean isTerminated();
 
@@ -63,6 +65,11 @@ public interface TUIModule {
             super(type, name);
             main = new TUIContainerModule.Builder(name + "-main");
             this.addChild(main);
+        }
+
+        protected Template(Template<B> original) {
+            super(original);
+            this.main = original.main.getCopy();
         }
 
         /**
@@ -107,6 +114,8 @@ public interface TUIModule {
 
         public String getName();
 
+        public B setName(String name);
+
         public Builder<?> getChild(String name);
 
         public Builder<?> getChildHelper(String name, List<Builder<?>> visited);
@@ -118,5 +127,12 @@ public interface TUIModule {
         public B self();
 
         public TUIModule build();
+
+        /**
+         * <p>Returns a deep copy of the application.</p>
+         * <p>Note: The inputMap is deep-copied, but all entries in the map are shallow-copied.</p>
+         * @return The copy of this object.
+         */
+        public B getCopy();
     }
 }

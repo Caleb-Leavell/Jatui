@@ -56,6 +56,17 @@ public class TUIFunctionModule extends TUIGenericModule {
             return self();
         }
 
+        protected Builder(Builder original) {
+            super(original);
+
+            this.function = original.function;
+        }
+
+        @Override
+        public Builder getCopy() {
+            return new Builder(this);
+        }
+
         @Override
         public TUIFunctionModule build() {
             return new TUIFunctionModule(self());

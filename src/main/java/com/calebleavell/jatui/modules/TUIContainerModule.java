@@ -14,6 +14,15 @@ public class TUIContainerModule extends TUIGenericModule {
             super(Builder.class, name);
         }
 
+        protected Builder(Builder original) {
+            super(original);
+        }
+
+        @Override
+        public Builder getCopy() {
+            return new Builder(this);
+        }
+
         @Override
         public TUIContainerModule build() {
             return new TUIContainerModule(self());

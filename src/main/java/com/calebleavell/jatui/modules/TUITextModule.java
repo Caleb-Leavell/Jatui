@@ -59,6 +59,18 @@ public class TUITextModule extends TUIGenericModule {
             this.text = text;
         }
 
+        protected Builder(Builder original) {
+            super(original);
+            this.text = original.text;
+            this.printNewLine = original.printNewLine;
+            this.outputType = original.outputType;
+        }
+
+        @Override
+        public Builder getCopy() {
+            return new Builder(this);
+        }
+
         public Builder printNewLine(boolean printNewLine) {
             this.printNewLine = printNewLine;
             return self();
@@ -66,6 +78,11 @@ public class TUITextModule extends TUIGenericModule {
 
         public Builder outputType(OutputType type) {
             this.outputType = type;
+            return self();
+        }
+
+        public Builder text(String text) {
+            this.text = text;
             return self();
         }
 

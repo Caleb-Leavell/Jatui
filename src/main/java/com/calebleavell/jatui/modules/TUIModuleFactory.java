@@ -1,6 +1,7 @@
 package com.calebleavell.jatui.modules;
 
 import org.fusesource.jansi.Ansi;
+import org.w3c.dom.Text;
 
 import java.util.*;
 
@@ -120,10 +121,22 @@ public class TUIModuleFactory {
         private int step = 1;
         private int i = 0;
         private String inputVariableName;
-        private List<TUIModule.Builder<?>> getInput = new ArrayList<>();
 
         public NumberedList(String name, String... listText) {
             super(NumberedList.class, name);
+        }
+
+        protected NumberedList(NumberedList original) {
+               super(original);
+               this.start = original.start;
+               this.step = original.step;
+               this.i = original.i;
+               this.inputVariableName = original.inputVariableName;
+        }
+
+        @Override
+        public NumberedList getCopy() {
+            return new NumberedList(this);
         }
 
         public NumberedList addListText(String listText) {
@@ -154,36 +167,50 @@ public class TUIModuleFactory {
          */
         public NumberedList collectInput(String inputIdentifier, String inputMessage) {
             TUITextInputModule.Builder input = new TUITextInputModule.Builder(inputIdentifier, inputMessage);
-            getInput.add(input);
+            main.addChild(input);
+            return self();
+        }
+
+        /**
+         * <p>Collect input after the list is displayed (you can add more than 1).</p>
+         * <p>Note: you CAN collect input before displaying all list items.</p>
+         * @param input The TUITextInputModule Builder that will be collecting the input.
+         * @return self
+         */
+        public NumberedList collectInput(TUITextInputModule.Builder input) {
             main.addChild(input);
             return self();
         }
     }
 
     public static class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSelector> {
-        private List<TUIModule.NameOrModule> modules = new ArrayList<>();
-        private List<String> listText = new ArrayList<>();
+        private final List<TUIModule.NameOrModule> modules = new ArrayList<>();
         private TUIApplicationModule app;
         private NumberedList list;
-        private TUITextInputModule.Builder collectInput;
         private TUIFunctionModule.Builder gotoInput;
 
-        public NumberedModuleSelector(String name, TUIApplicationModule app, String... moduleNames) {
+        public NumberedModuleSelector(String name, TUIApplicationModule app) {
             super(NumberedModuleSelector.class, name);
-            Arrays.asList(moduleNames).forEach(m -> modules.add(new TUIModule.NameOrModule(m)));
             this.app = app;
             list = new NumberedList(name + "-list");
-            collectInput = new TUITextInputModule.Builder(name + "-input", "Your choice: ");
+            TUITextInputModule.Builder collectInput = new TUITextInputModule.Builder(name + "-input", "Your choice: ");
             gotoInput = TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules);
             main.addChild(list);
             main.addChild(collectInput);
             main.addChild(gotoInput);
         }
 
-        public NumberedModuleSelector(TUIApplicationModule app, String name, TUIModule.Builder<?>... modules) {
-            super(NumberedModuleSelector.class, name);
-            Arrays.asList(modules).forEach(m -> this.modules.add(new TUIModule.NameOrModule(m)));
-            this.app = app;
+        protected NumberedModuleSelector(NumberedModuleSelector original) {
+            super(original);
+            this.modules.addAll(original.modules);
+            this.app = original.app;
+            this.list = original.list.getCopy();
+            this.gotoInput = original.gotoInput.getCopy();
+        }
+
+        @Override
+        public NumberedModuleSelector getCopy() {
+            return new NumberedModuleSelector(this);
         }
 
         private NumberedModuleSelector addScene(String displayText, TUIModule.NameOrModule module){
@@ -215,6 +242,16 @@ public class TUIModuleFactory {
 
         public TextBuilder(String name) {
             super(TextBuilder.class, name);
+        }
+
+        protected TextBuilder(TextBuilder original) {
+            super(original);
+            this.textCounter = original.textCounter;
+        }
+
+        @Override
+        public TextBuilder getCopy() {
+            return new TextBuilder(this);
         }
 
         public TextBuilder addText(TUITextModule.Builder text) {

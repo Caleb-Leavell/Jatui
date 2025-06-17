@@ -46,6 +46,16 @@ public class TUITextInputModule extends TUIGenericModule {
             handlers = new InputHandlers("handlers", this);
         }
 
+        protected Builder(Builder original) {
+            super(original);
+            this.handlers = original.handlers.getCopy();
+        }
+
+        @Override
+        public Builder getCopy() {
+            return new Builder(this);
+        }
+
         public Builder addHandler(TUIFunctionModule.Builder handler) {
             handlers.addHandler(handler);
             return self();
@@ -94,6 +104,15 @@ public class TUITextInputModule extends TUIGenericModule {
         public InputHandlers(String name, Builder inputModule) {
             super(InputHandlers.class, name);
             this.inputModule = inputModule;
+        }
+
+        protected InputHandlers(InputHandlers original) {
+            super(original);
+            this.inputModule = original.inputModule;
+        }
+
+        public InputHandlers getCopy() {
+            return new InputHandlers(this);
         }
 
         public InputHandlers addHandler(TUIFunctionModule.Builder handler) {
