@@ -7,14 +7,37 @@ import java.util.List;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
+/**
+ * <p>TUIGenericModule provides an abstract implementation of TUIModule.</p>
+ * <p>TUIContainerModule provides a basic implementation of this class.</p>
+ */
 public abstract class TUIGenericModule implements TUIModule {
 
+    /**
+     * <p>The identifier for this module.</p>
+     * <p>It is recommended to try and keep this unique in order to allow identification methods (e.g. TUIApplicationModule.getInput()) to function properly.</p>
+     */
     private String name;
+
+    /**
+     * The application the module is a child of.
+     */
     private TUIApplicationModule application;
+
+    /**
+     * Every child module that should be run.
+     */
     private List<TUIModule.Builder<?>> children;
 
+    /**
+     * <p>The ansi that may be displayed (Jansi object)</p>
+     * <p>Currently, only TUITextModule displays the ansi</p>
+     */
     private Ansi ansi;
 
+    /**
+     * If the for loop is run() is currently active, this will be the child that is currently running.
+     */
     private TUIModule currentRunningChild;
 
     private boolean terminated = false;
