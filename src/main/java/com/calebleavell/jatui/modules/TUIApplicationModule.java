@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class TUIApplicationModule extends TUIGenericModule {
 
     private final Map<String, Object> inputMap; // maps module names to the input object
-    private final TUIModule.Builder<?> onExit;
+    private TUIModule.Builder<?> onExit;
 
     @Override
     public void run() {
@@ -49,15 +49,17 @@ public class TUIApplicationModule extends TUIGenericModule {
         setChildrenApplication(this);
     }
 
-    @Override
-    public void setChildren(TUIModule.Builder<?>... children) {
-        super.setChildren(children);
-        setChildrenApplication(this);
-    }
-
     public TUIModule.Builder<?> getHome() {
         if(this.getChildren().isEmpty()) return null;
         return this.getChildren().getFirst();
+    }
+
+    public void setOnExit(TUIModule.Builder<?> onExit) {
+        this.onExit = onExit;
+    }
+
+    public TUIModule.Builder<?> getOnExit() {
+        return onExit;
     }
 
     public void terminateChild(String moduleName) {

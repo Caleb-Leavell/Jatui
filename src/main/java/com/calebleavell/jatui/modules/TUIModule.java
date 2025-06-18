@@ -26,8 +26,6 @@ public interface TUIModule {
 
     <T extends Builder<?>> T getChild(String name, Class<T> builderType);
 
-    void setChildren(Builder<?>... children);
-
     void terminate();
     boolean isTerminated();
 

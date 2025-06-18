@@ -89,15 +89,6 @@ public abstract class TUIGenericModule implements TUIModule {
         else return null;
     }
 
-    /**
-     * Sets the children of the app. The first child is the home.
-     * @param children The list of child module builders.
-     */
-    public void setChildren(TUIModule.Builder<?>... children) {
-        this.children = new ArrayList<>(Arrays.asList(children));
-    }
-
-
     @Override
     public TUIApplicationModule getApplication() {
         return application;

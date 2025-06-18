@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public class TUITextInputModule extends TUIGenericModule {
     private String input;
-    private TUIModule.Builder<?> displayText;
+    private final TUIModule.Builder<?> displayText;
 
     private final static Scanner scnr = new Scanner(System.in);
 
