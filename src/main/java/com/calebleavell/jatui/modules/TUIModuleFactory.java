@@ -52,42 +52,6 @@ public class TUIModuleFactory {
     }
 
     /**
-     *
-     * @param name
-     * @param inputName
-     * @param selectorModuleName
-     * @param app
-     * @param modules
-     * @return
-     */
-    public static TUIFunctionModule.Builder Run(String name, String inputName, String selectorModuleName, TUIApplicationModule app, List<TUIModule.NameOrModule> modules) {
-        return new TUIFunctionModule.Builder(name, () -> {
-            int choice;
-            TUIModule.NameOrModule moduleChoice;
-            TUIModule.Builder<?> moduleToRun;
-            try {
-                String choiceInput = app.getInput(inputName, String.class);
-                if(choiceInput == null) return "Error: incorrect inputName \"" + inputName + "\" or improper updating of app input";
-                choice = Integer.parseInt(choiceInput);
-                moduleChoice = modules.get(choice - 1);
-                moduleToRun = moduleChoice.getModule(app);
-                if(moduleToRun == null) return "Error: The selected scene doesn't exist";
-            }
-            catch(NumberFormatException|IndexOutOfBoundsException e) {
-                System.out.println("Error: Invalid Input (1-" + modules.size() + ")");
-                TUIModule.Builder<?> thisModule = app.getChild(selectorModuleName);
-                if(thisModule == null) return "Error: module \"" + name + "\" didn't get added to the app";
-                // update directly instead of returning after because otherwise recursion would make the error the final update
-                app.updateInput(name, "Error: Invalid User Input");
-                thisModule.build().run();
-                return app.getInput(name);
-            }
-            moduleToRun.build().run();
-            return "Success: retrieved and ran scene " + moduleToRun.getName();
-        });
-    }
-
-    /**
      * Builds a Function Module that increments a counter every time it's run (starts at 1).
      * This is useful for building things like lists dynamically.
      * To access the counter, call <app>.getInput(<name>, Integer.class). Note that this will likely be null before this module is run.
@@ -187,17 +151,22 @@ public class TUIModuleFactory {
         private final List<TUIModule.NameOrModule> modules = new ArrayList<>();
         private TUIApplicationModule app;
         private NumberedList list;
-        private TUIFunctionModule.Builder gotoInput;
 
         public NumberedModuleSelector(String name, TUIApplicationModule app) {
             super(NumberedModuleSelector.class, name);
             this.app = app;
             list = new NumberedList(name + "-list");
-            TUITextInputModule.Builder collectInput = new TUITextInputModule.Builder(name + "-input", "Your choice: ");
-            gotoInput = TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules);
+            TUITextInputModule.Builder collectInput = new TUITextInputModule.Builder(name + "-input", "Your choice: ")
+                    .addSafeHandler(name + "goto-module", input -> {
+                        int index = Integer.parseInt(input);
+                        TUIModule.NameOrModule nameOrModule = modules.get(index - 1);
+                        nameOrModule.getModule(app).build().run();
+                        return "Successfully ran selected module";
+                    });
+            //gotoInput = TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules);
             main.addChild(list);
             main.addChild(collectInput);
-            main.addChild(gotoInput);
+            //main.addChild(gotoInput);
         }
 
         protected NumberedModuleSelector(NumberedModuleSelector original) {
@@ -205,7 +174,6 @@ public class TUIModuleFactory {
             this.modules.addAll(original.modules);
             this.app = original.app;
             this.list = original.list.getCopy();
-            this.gotoInput = original.gotoInput.getCopy();
         }
 
         @Override
@@ -216,7 +184,6 @@ public class TUIModuleFactory {
         private NumberedModuleSelector addScene(String displayText, TUIModule.NameOrModule module){
             this.modules.add(module);
             list.addListText(displayText);
-            gotoInput = TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules);
             return self();
         }
 
