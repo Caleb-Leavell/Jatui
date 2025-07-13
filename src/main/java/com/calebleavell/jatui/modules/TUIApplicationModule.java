@@ -5,6 +5,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class TUIApplicationModule extends TUIGenericModule {
 
@@ -15,6 +16,7 @@ public class TUIApplicationModule extends TUIGenericModule {
     public void run() {
         super.run();
         onExit.build().run();
+        scnr.close();
     }
 
     public Object getInput(String moduleName) {

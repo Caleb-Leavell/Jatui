@@ -10,8 +10,6 @@ public class TUITextInputModule extends TUIGenericModule {
     private String input;
     private final TUIModule.Builder<?> displayText;
 
-    private final static Scanner scnr = new Scanner(System.in);
-
     public final static String INVALID = "Error: input was invalid";
 
     @Override
@@ -31,17 +29,19 @@ public class TUITextInputModule extends TUIGenericModule {
 
     public TUITextInputModule(Builder builder) {
         super(builder);
-        displayText = builder.protectedChildren.get(0);
+        displayText = builder.displayText;
     }
 
     public static class Builder extends TUIGenericModule.Builder<Builder> {
 
         protected InputHandlers handlers;
+        protected TUITextModule.Builder displayText;
 
         public Builder(String name, String displayText) {
             super(Builder.class, name);
 
-            protectedChildren.add(new TUITextModule.Builder(name+"display", displayText).printNewLine(false));
+            this.displayText = new TUITextModule.Builder(name+"display", displayText).printNewLine(false);
+            this.children.add(this.displayText);
 
             handlers = new InputHandlers("handlers", this);
         }
@@ -91,9 +91,15 @@ public class TUITextInputModule extends TUIGenericModule {
 
         @Override
         public TUITextInputModule build() {
-            if(children.isEmpty() || children.getFirst() != handlers) this.addChild(0, handlers);
+            // remove the display text from the children since we need it to run before the parent module
+            // it's a child in the first place so that things like application() affect it as well
+            this.children.remove(displayText);
+            if(!this.children.contains(handlers)) this.addChild(handlers);
             this.application(application);
-            return new TUITextInputModule(self());
+            TUITextInputModule output = new TUITextInputModule(self());
+            // re-add the child after constructing the module so that it can be edited if needed
+            this.children.addFirst(displayText);
+            return output;
         }
     }
 

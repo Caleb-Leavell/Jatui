@@ -95,7 +95,7 @@ public class Main {
                                     return null;
                                 })
                                 // We add another safe handler that references the logic for generating a random integer
-                                // The input module will provide the logic with the input it collected
+                                // The input module will provide getRandomInt with the input it collected
                                 .addSafeHandler("generated-number", Main::getRandomInt),
                         // Text Modules that display the generated number
                         // This can be done with TUITextModule.Builder, but TextBuilder facilitates chaining text modules.
@@ -114,13 +114,45 @@ public class Main {
                                 // Runs random-number-generator, which effectively restarts the app
                                 .addScene("Generate another number", "random-number-generator")
                                 // TUIModuleFactory also provides Terminate, which returns a TUIFunctionModule builder
-                                // that, when run, simply terminates the app that was inputted into Terminate().
+                                // that, when run, simply terminates the module that was inputted into Terminate().
                                 // So here, it's terminating app.
                                 .addScene("Exit", TUIModuleFactory.Terminate(app, "terminate-app")));
 
+        TUIContainerModule.Builder zigzag = new TUIContainerModule.Builder("zigzag");
+
+        int width = 74;
+
+        for(int i = 0; i < width; i ++) {
+            zigzag.addChild(LineWithDot("zigzag" + i, i));
+        }
+        for(int i = width - 2; i >= 1; i --) {
+            zigzag.addChild(LineWithDot("zigzag" + (i + width), i));
+        }
         // Set the application home and run
+//        app.setHome(zigzag);
+//        app.setOnExit(TUIModuleFactory.Empty("empty-exit"));
+//
+//        while(true)
+//        {
+//            app.run();
+//        }
+
         app.setHome(randomNumberGenerator);
         app.run();
+    }
+
+    public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {
+        String line = "   ".repeat(Math.max(0, dotX)) + "[##]";
+        return new TUIContainerModule.Builder(name).children(
+                new TUITextModule.Builder(name+"dot", line),
+                new TUIFunctionModule.Builder(name+"sleep", () -> {
+                    try {
+                        System.out.flush();
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+        }));
     }
 
     // "back-end" logic

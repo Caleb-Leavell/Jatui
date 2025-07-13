@@ -3,8 +3,11 @@ package com.calebleavell.jatui.modules;
 import org.fusesource.jansi.Ansi;
 
 import java.util.List;
+import java.util.Scanner;
 
 public interface TUIModule {
+
+    static final Scanner SYSTEM_IN = new Scanner(System.in);
 
     /**
      * <p> For TUITextModule: display text </p>
@@ -82,7 +85,7 @@ public interface TUIModule {
         }
     }
 
-    public static interface Builder<B extends Builder<B>> {
+    public static interface Builder<B extends Builder<B>> extends DirectedGraph<Builder<?>> {
 
         public B application(TUIApplicationModule application);
 
@@ -115,8 +118,6 @@ public interface TUIModule {
         public B setName(String name);
 
         public Builder<?> getChild(String name);
-
-        public Builder<?> getChildHelper(String name, List<Builder<?>> visited);
 
         public TUIApplicationModule getApplication();
 

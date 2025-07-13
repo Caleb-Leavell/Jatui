@@ -2,9 +2,10 @@ package com.calebleavell.jatui.modules;
 
 import org.fusesource.jansi.Ansi;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -35,6 +36,20 @@ public abstract class TUIGenericModule implements TUIModule {
      * <p>Currently, only TUITextModule displays the ansi</p>
      */
     private Ansi ansi;
+
+    /**
+     * <p>The Scanner that reads input from the user-defined source</p>
+     * <p>Is set to System.in by default (defined as SYSTEM_IN in TUIModule) </p>
+     */
+    private Scanner scanner;
+
+    public static Scanner scnr = new Scanner(System.in);
+
+    /**
+     * <p>The PrintStream that outputs data to the user-defined location</p>
+     * <p>Is set to System.out by default</p>
+     */
+    private PrintStream printStream;
 
     /**
      * If the for loop is run() is currently active, this will be the child that is currently running.
@@ -195,13 +210,6 @@ public abstract class TUIGenericModule implements TUIModule {
         protected boolean alterChildNames = false;
         protected final Class<B> type;
 
-        /**
-         * <p>These are children that are only accessible via Builders, but all child operations are also performed on these.</p>
-         * <p>What is done with protectedChildren is not defined here - all that is done in TUIGenericModule.Builder is performing child operations on them.</p>
-         * <p>This means protectedChildren are NOT automatically run when running the built module.</p>
-         */
-        protected List<TUIModule.Builder<?>> protectedChildren = new ArrayList<>();
-
         public Builder(Class<B> type, String name) {
             this.type = type;
             this.name = name;
@@ -218,7 +226,6 @@ public abstract class TUIGenericModule implements TUIModule {
             this.allowAnsiOverride = original.allowAnsiOverride;
             this.alterChildNames = original.alterChildNames;
             this.type = original.type;
-            this.protectedChildren = original.protectedChildren;
         }
 
         @Override
@@ -238,14 +245,15 @@ public abstract class TUIGenericModule implements TUIModule {
             visited.add(this);
 
             for(TUIModule.Builder<?> child : children) {
-                visited.addAll(child.applicationHelper(app, visited));
-            }
-
-            for(TUIModule.Builder<?> child : protectedChildren) {
-                visited.addAll(child.applicationHelper(app, visited));
+                child.applicationHelper(app, visited);
             }
 
             return visited;
+        }
+
+        @Override
+        public List<TUIModule.Builder<?>> getChildren() {
+            return children;
         }
 
         @Override
@@ -325,10 +333,6 @@ public abstract class TUIGenericModule implements TUIModule {
                 child.setAnsi(ansi);
             }
 
-            for(TUIModule.Builder<?> child : protectedChildren) {
-                child.setAnsi(ansi);
-            }
-
             return self();
         }
 
@@ -348,10 +352,6 @@ public abstract class TUIGenericModule implements TUIModule {
             this.ansi = ansi().a(ansi).a(this.ansi);
 
             for(TUIModule.Builder<?> child : children) {
-                child.prependAnsi(ansi);
-            }
-
-            for(TUIModule.Builder<?> child : protectedChildren) {
                 child.prependAnsi(ansi);
             }
 
@@ -377,10 +377,6 @@ public abstract class TUIGenericModule implements TUIModule {
                 child.setAnsi(ansi);
             }
 
-            for(TUIModule.Builder<?> child : protectedChildren) {
-                child.setAnsi(ansi);
-            }
-
             return self();
         }
 
@@ -400,10 +396,6 @@ public abstract class TUIGenericModule implements TUIModule {
             this.allowAnsiOverride = false;
 
             for(TUIModule.Builder<?> child : children) {
-                child.hardSetAnsi(ansi);
-            }
-
-            for(TUIModule.Builder<?> child : protectedChildren) {
                 child.hardSetAnsi(ansi);
             }
 
@@ -429,42 +421,13 @@ public abstract class TUIGenericModule implements TUIModule {
          * Also checks protected children.
          *
          * @param name The name of the child
-         * @return The first found child (DFS), or <i>null</i> if none is found
+         * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
          */
         @Override
         public TUIModule.Builder<?> getChild(String name) {
-            List<TUIModule.Builder<?>> visited = new ArrayList<>();
-            return getChildHelper(name, visited);
-        }
-
-        /**
-         * Executes a DFS.
-         * Helper used so we can keep track of the modules we've visited and thus support cycles
-         *
-         * @param name    The name of the child
-         * @param visited The list of visited modules
-         * @return The first found child (DFS), or <i>null</i> if none is found
-         */
-        @Override
-        public TUIModule.Builder<?> getChildHelper(String name, List<TUIModule.Builder<?>> visited) {
-            if(this.name.equals(name)) return this;
-            visited.add(this);
-
-            for(TUIModule.Builder<?> child : children) {
-                if(visited.contains(child)) continue;
-
-                TUIModule.Builder<?> found = child.getChildHelper(name, visited);
-                if(found != null) return found;
-            }
-
-            for(TUIModule.Builder<?> child : protectedChildren) {
-                if(visited.contains(child)) continue;
-
-                TUIModule.Builder<?> found = child.getChildHelper(name, visited);
-                if(found != null) return found;
-            }
-
-            return null;
+            return dfs(m -> {
+                return m.getName().equals(name);
+            });
         }
 
         @Override

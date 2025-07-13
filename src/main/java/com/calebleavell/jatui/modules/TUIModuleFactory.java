@@ -37,6 +37,16 @@ public class TUIModuleFactory {
     }
 
     /**
+     * Builds a Function Module that calls another module's run method.
+     * @param moduleToRun The module to run (it will run when this module is run)
+     * @param name The name of the module to be returned
+     * @return The Function Module that calls another module's run method
+     */
+    public static TUIFunctionModule.Builder Run(TUIModule moduleToRun, String name) {
+        return new TUIFunctionModule.Builder(name, moduleToRun::run);
+    }
+
+    /**
      * Builds a Function Module that finds the child of a parent by name then runs it.
      * Will do nothing no if the parent's module tree does not have a child with the given name.
      * @param moduleToRun The name of the module to run (it will run when this module is run)
@@ -163,10 +173,8 @@ public class TUIModuleFactory {
                         nameOrModule.getModule(app).build().run();
                         return "Successfully ran selected module";
                     });
-            //gotoInput = TUIModuleFactory.Run(name+"-goto-module", name+"-input", name, app, modules);
             main.addChild(list);
             main.addChild(collectInput);
-            //main.addChild(gotoInput);
         }
 
         protected NumberedModuleSelector(NumberedModuleSelector original) {
