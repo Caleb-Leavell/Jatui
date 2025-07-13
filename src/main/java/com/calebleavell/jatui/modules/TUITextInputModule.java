@@ -15,7 +15,7 @@ public class TUITextInputModule extends TUIGenericModule {
     @Override
     public void run() {
         displayText.build().run();
-        input = scnr.nextLine();
+        input = getScanner().nextLine();
 
         TUIApplicationModule app = getApplication();
         if(app != null) app.updateInput(this, input);

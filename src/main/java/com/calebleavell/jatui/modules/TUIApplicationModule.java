@@ -16,7 +16,7 @@ public class TUIApplicationModule extends TUIGenericModule {
     public void run() {
         super.run();
         onExit.build().run();
-        scnr.close();
+        getScanner().close();
     }
 
     public Object getInput(String moduleName) {

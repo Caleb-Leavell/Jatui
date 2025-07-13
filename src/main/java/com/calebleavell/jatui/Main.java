@@ -82,7 +82,7 @@ public class Main {
         // Front-end
         // We declare the "scene" in a ContainerModule so that it's nicely compartmentalized and reusable if needed.
         var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
-                .children(
+                .addChildren(
                         // Input Module that gets the maximum number
                         new TUITextInputModule.Builder("input", "Maximum Number (or -1 to exit): ")
                                 // We declare a safe handler to check for negative input.
@@ -145,7 +145,7 @@ public class Main {
 
     public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {
         String line = "   ".repeat(Math.max(0, dotX)) + "[##]";
-        return new TUIContainerModule.Builder(name).children(
+        return new TUIContainerModule.Builder(name).addChildren(
                 new TUITextModule.Builder(name+"dot", line),
                 new TUIFunctionModule.Builder(name+"sleep", () -> {
                     try {

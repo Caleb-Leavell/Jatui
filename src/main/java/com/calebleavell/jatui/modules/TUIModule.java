@@ -2,6 +2,7 @@ package com.calebleavell.jatui.modules;
 
 import org.fusesource.jansi.Ansi;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Scanner;
 
@@ -39,6 +40,10 @@ public interface TUIModule {
     String toString(int indent, boolean displayChildren);
 
     Ansi getAnsi();
+
+    Scanner getScanner();
+
+    PrintStream getPrintStream();
 
     public final static class NameOrModule {
         private TUIModule.Builder<?> module;
@@ -89,9 +94,9 @@ public interface TUIModule {
 
         B setApplicationRecursive(TUIApplicationModule app);
 
-        B children(List<Builder<?>> children);
+        B addChildren(List<Builder<?>> children);
 
-        B children(Builder<?>... children);
+        B addChildren(Builder<?>... children);
 
         B addChild(Builder<?> child);
 
@@ -110,6 +115,10 @@ public interface TUIModule {
         B hardSetAnsi(Ansi ansi);
 
         B allowAnsiOverride(boolean allow);
+
+        B setScanner(Scanner scanner);
+
+        B setPrintStream(PrintStream printStream);
 
         String getName();
 

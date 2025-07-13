@@ -15,17 +15,17 @@ public class TUITextModule extends TUIGenericModule {
     @Override
     public void run() {
 
-        System.out.print(getAnsi());
+        getPrintStream().print(getAnsi());
         switch(outputType) {
             case DISPLAY_TEXT:
-                System.out.print(text);
+                getPrintStream().print(text);
                 break;
             case DISPLAY_MODULE_OUTPUT:
                 if (getApplication() != null)
-                    System.out.print(getApplication().getInput(text));
+                    getPrintStream().print(getApplication().getInput(text));
                 break;
             default:
-                System.out.println("ERROR: TUITextModule has not implemented functionality for outputType " + outputType);
+                getPrintStream().println("ERROR: TUITextModule has not implemented functionality for outputType " + outputType);
                 break;
         }
         System.out.print(ansi().reset());

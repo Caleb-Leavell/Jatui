@@ -43,8 +43,6 @@ public abstract class TUIGenericModule implements TUIModule {
      */
     private Scanner scanner;
 
-    public static Scanner scnr = new Scanner(System.in);
-
     /**
      * <p>The PrintStream that outputs data to the user-defined location</p>
      * <p>Is set to System.out by default</p>
@@ -161,6 +159,16 @@ public abstract class TUIGenericModule implements TUIModule {
         return this.ansi;
     }
 
+    @Override
+    public Scanner getScanner() {
+        return this.scanner;
+    }
+
+    @Override
+    public PrintStream getPrintStream() {
+        return this.printStream;
+    }
+
     /**
      * Recursively generates toString with info for this scene and all children.
      * Will only go as deep as MAX_ITERATIONS_ON_TOSTRING
@@ -200,14 +208,20 @@ public abstract class TUIGenericModule implements TUIModule {
         this.application = builder.application;
         this.children = new ArrayList<>(builder.children);
         this.ansi = builder.ansi;
+        this.scanner = builder.scanner;
+        this.printStream = builder.printStream;
     }
 
     public abstract static class Builder<B extends Builder<B>> implements TUIModule.Builder<Builder<B>> {
         protected String name;
         protected TUIApplicationModule application;
         protected List<TUIModule.Builder<?>> children = new ArrayList<>();
+
         protected Ansi ansi = ansi();
         private boolean allowAnsiOverride = true;
+
+        protected Scanner scanner = TUIModule.SYSTEM_IN;
+        protected PrintStream printStream = System.out;
 
         protected boolean alterChildNames = false;
         protected final Class<B> type;
@@ -252,13 +266,13 @@ public abstract class TUIGenericModule implements TUIModule {
         }
 
         @Override
-        public B children(List<TUIModule.Builder<?>> children) {
+        public B addChildren(List<TUIModule.Builder<?>> children) {
             for(TUIModule.Builder<?> child : children) addChild(child);
             return self();
         }
 
         @Override
-        public B children(TUIModule.Builder<?>... children) {
+        public B addChildren(TUIModule.Builder<?>... children) {
             for(TUIModule.Builder<?> child : children) addChild(child);
             return self();
         }
@@ -407,6 +421,19 @@ public abstract class TUIGenericModule implements TUIModule {
         public B allowAnsiOverride(boolean allowed) {
             this.allowAnsiOverride = allowed;
 
+            return self();
+        }
+
+        @Override
+        public B setScanner(Scanner scanner) {
+            this.scanner = scanner;
+
+            return self();
+        }
+
+        @Override
+        public B setPrintStream(PrintStream printStream) {
+            this.printStream = printStream;
             return self();
         }
 
