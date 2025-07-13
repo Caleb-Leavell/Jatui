@@ -170,7 +170,8 @@ public class TUIModuleFactory {
                     .addSafeHandler(name + "goto-module", input -> {
                         int index = Integer.parseInt(input);
                         TUIModule.NameOrModule nameOrModule = modules.get(index - 1);
-                        nameOrModule.getModule(app).build().run();
+                        TUIModule toRun = nameOrModule.getModule(app).build();
+                        app.runModuleAsChild(toRun);
                         return "Successfully ran selected module";
                     });
             main.addChild(list);

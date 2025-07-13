@@ -75,6 +75,13 @@ public abstract class TUIGenericModule implements TUIModule {
         }
     }
 
+    public void runModuleAsChild(TUIModule module) {
+        TUIModule previousRunningChild = currentRunningChild;
+        currentRunningChild = module;
+        module.run();
+        currentRunningChild = previousRunningChild;
+    }
+
     @Override
     public String getName() {
         return name;
@@ -107,11 +114,6 @@ public abstract class TUIGenericModule implements TUIModule {
     @Override
     public TUIApplicationModule getApplication() {
         return application;
-    }
-
-    @Override
-    public void setChildrenApplication(TUIApplicationModule app) {
-        for(TUIModule.Builder<?> child : children) child.application(app);
     }
 
     @Override
@@ -229,26 +231,19 @@ public abstract class TUIGenericModule implements TUIModule {
         }
 
         @Override
-        public B application(TUIApplicationModule app) {
-            applicationHelper(app, new ArrayList<>());
+        public B setApplicationRecursive(TUIApplicationModule app) {
+            this.forEach(m -> {
+                m.setApplication(app);
+            });
 
             return self();
         }
 
         @Override
-        public List<TUIModule.Builder<?>> applicationHelper(TUIApplicationModule app, List<TUIModule.Builder<?>> visited) {
-
-            if(visited.contains(this)) return new ArrayList<>();
-
+        public B setApplication(TUIApplicationModule app) {
             this.application = app;
 
-            visited.add(this);
-
-            for(TUIModule.Builder<?> child : children) {
-                child.applicationHelper(app, visited);
-            }
-
-            return visited;
+            return self();
         }
 
         @Override

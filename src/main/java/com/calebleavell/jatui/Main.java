@@ -84,16 +84,18 @@ public class Main {
         var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
                 .children(
                         // Input Module that gets the maximum number
-                        new TUITextInputModule.Builder("input", "Maximum Number (or -1 to quit): ")
+                        new TUITextInputModule.Builder("input", "Maximum Number (or -1 to exit): ")
                                 // We declare a safe handler to check for negative input.
                                 // Since it's a safe handler, the input will rerun if the handler throws an exception.
                                 // (we can define custom exception behavior if we wish in an overloaded method)
                                 // If we want to only catch certain exceptions, that must be done in a try-catch in a regular handler.
                                 .addSafeHandler("exit-if-negative", s -> {
                                     // If it's negative we exit.
-                                    if(Integer.parseInt(s) < 0) app.terminate();
+                                    if(Integer.parseInt(s) < 0) {
+                                        app.terminate();
+                                    }
                                     return null;
-                                })
+                                }, "Error: input integer (your input might be too large)")
                                 // We add another safe handler that references the logic for generating a random integer
                                 // The input module will provide getRandomInt with the input it collected
                                 .addSafeHandler("generated-number", Main::getRandomInt),

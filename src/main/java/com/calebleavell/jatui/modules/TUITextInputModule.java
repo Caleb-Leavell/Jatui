@@ -95,7 +95,7 @@ public class TUITextInputModule extends TUIGenericModule {
             // it's a child in the first place so that things like application() affect it as well
             this.children.remove(displayText);
             if(!this.children.contains(handlers)) this.addChild(handlers);
-            this.application(application);
+            this.setApplicationRecursive(application);
             TUITextInputModule output = new TUITextInputModule(self());
             // re-add the child after constructing the module so that it can be edited if needed
             this.children.addFirst(displayText);

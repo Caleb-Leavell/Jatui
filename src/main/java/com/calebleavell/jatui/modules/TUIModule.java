@@ -23,8 +23,6 @@ public interface TUIModule {
 
     TUIApplicationModule getApplication();
 
-    void setChildrenApplication(TUIApplicationModule app);
-
     TUIModule.Builder<?> getChild(String name);
 
     <T extends Builder<?>> T getChild(String name, Class<T> builderType);
@@ -85,53 +83,52 @@ public interface TUIModule {
         }
     }
 
-    public static interface Builder<B extends Builder<B>> extends DirectedGraph<Builder<?>> {
+    public static interface Builder<B extends Builder<B>> extends DirectedGraphNode<Builder<?>> {
 
-        public B application(TUIApplicationModule application);
+        B setApplication(TUIApplicationModule app);
 
-        public List<Builder<?>> applicationHelper(TUIApplicationModule application, List<Builder<?>> visited);
+        B setApplicationRecursive(TUIApplicationModule app);
 
-        public B children(List<Builder<?>> children);
+        B children(List<Builder<?>> children);
 
-        public B children(Builder<?>... children);
+        B children(Builder<?>... children);
 
-        public B addChild(Builder<?> child);
+        B addChild(Builder<?> child);
 
-        public B addChild(int index, Builder<?> child);
+        B addChild(int index, Builder<?> child);
 
-        public B clearChildren();
+        B clearChildren();
 
-        public B alterChildNames(boolean alterChildNames);
+        B alterChildNames(boolean alterChildNames);
 
-        public B setAnsi(Ansi ansi);
+        B setAnsi(Ansi ansi);
 
-        public B prependAnsi(Ansi ansi);
+        B prependAnsi(Ansi ansi);
 
-        public B appendAnsi(Ansi ansi);
+        B appendAnsi(Ansi ansi);
 
-        public B hardSetAnsi(Ansi ansi);
+        B hardSetAnsi(Ansi ansi);
 
-        public B allowAnsiOverride(boolean allow);
+        B allowAnsiOverride(boolean allow);
 
-        public String getName();
+        String getName();
 
-        public B setName(String name);
+        B setName(String name);
 
-        public Builder<?> getChild(String name);
+        Builder<?> getChild(String name);
 
-        public TUIApplicationModule getApplication();
+        TUIApplicationModule getApplication();
 
-        public void prependToName(String name);
+        void prependToName(String name);
 
-        public B self();
+        B self();
 
-        public TUIModule build();
+        TUIModule build();
 
         /**
          * <p>Returns a deep copy of the application.</p>
-         * <p>Note: The inputMap is deep-copied, but all entries in the map are shallow-copied.</p>
          * @return The copy of this object.
          */
-        public B getCopy();
+        B getCopy();
     }
 }

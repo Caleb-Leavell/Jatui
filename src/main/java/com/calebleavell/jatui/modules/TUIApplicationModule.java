@@ -48,7 +48,8 @@ public class TUIApplicationModule extends TUIGenericModule {
 
     public void setHome(TUIModule.Builder<?> home) {
         this.getChildren().set(0, home);
-        setChildrenApplication(this);
+
+        setChildrenApplication();
     }
 
     public TUIModule.Builder<?> getHome() {
@@ -70,11 +71,17 @@ public class TUIApplicationModule extends TUIGenericModule {
         });
     }
 
+    private void setChildrenApplication() {
+        for(TUIModule.Builder<?> child : getChildren()) {
+            child.setApplicationRecursive(this);
+        }
+    }
+
     public TUIApplicationModule(Builder builder) {
         super(builder);
         this.inputMap = builder.inputMap;
         this.onExit = builder.onExit;
-        this.onExit.application(this);
+        this.onExit.setApplicationRecursive(this);
     }
 
     public static class Builder extends TUIGenericModule.Builder<Builder> {
@@ -116,7 +123,7 @@ public class TUIApplicationModule extends TUIGenericModule {
         @Override
         public TUIApplicationModule build() {
             TUIApplicationModule app = new TUIApplicationModule(self());
-            app.setChildrenApplication(app);
+            app.setChildrenApplication();
             return app;
         }
     }

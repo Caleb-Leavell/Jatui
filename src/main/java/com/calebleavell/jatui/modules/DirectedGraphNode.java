@@ -2,16 +2,15 @@ package com.calebleavell.jatui.modules;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface DirectedGraph<T extends DirectedGraph<T>> {
+public interface DirectedGraphNode<T extends DirectedGraphNode<T>> {
 
     public List<? extends T> getChildren();
 
     /**
-     * Finds a child matching the name.
-     * It is recommended to name all modules uniquely so this returns a unique module every time.
-     * Also checks protected children.
+     * Executes a DFS on self and all accessible children of the graph. Cycles are supported.
      *
      * @param criteria A function that checks whether a child should be returned
      * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
@@ -22,11 +21,10 @@ public interface DirectedGraph<T extends DirectedGraph<T>> {
     }
 
     /**
-     * Executes a DFS.
-     * Helper used so we can keep track of the modules we've visited and thus support cycles
+     * Executes a DFS on self and all accessible children of the graph. Cycles are supported.
      *
      * @param criteria A function that checks whether a child should be returned
-     * @param visited The list of visited modules
+     * @param visited used so we can keep track of the modules we've visited and thus support cycles
      * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
      */
     default T dfs(Function<T, Boolean> criteria, List<T> visited) {
@@ -45,6 +43,33 @@ public interface DirectedGraph<T extends DirectedGraph<T>> {
         }
 
         return null;
+    }
+
+    /**
+     * Executes the Consumer on self and every accessible node of the graph.
+     * Cycles are supported.
+     *
+     * @param function The Consumer that accepts every accessible node.
+     */
+    default void forEach(Consumer<T> function) {
+        this.dfs(t -> {
+            function.accept(t);
+            return false; // ensures the dfs won't terminate early
+        });
+    }
+
+    /**
+     * Executes the Consumer on every accessible node of the graph, excluding this one.
+     * Cycles are supported.
+     *
+     * @param function The Consumer that accepts every accessible node.
+     */
+    default void forEachChild(Consumer<T> function) {
+        this.dfs(t -> {
+            if(t == this) return false;
+            function.accept(t);
+            return false; // ensures the dfs won't terminate early
+        });
     }
 
 }
