@@ -3,38 +3,71 @@ package com.calebleavell.jatui.modules;
 import org.fusesource.jansi.AnsiConsole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.util.Scanner;
 
 import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TUIApplicationModuleTest {
 
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
 
-    @BeforeEach // For JUnit 5, use @Before for JUnit 4
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outContent));
-    }
+    @org.junit.jupiter.api.Test
+    void testRun_default_exit() {
+        String expected = lines("Exiting...");
 
-    @AfterEach // For JUnit 5, use @After for JUnit 4
-    public void restoreStreams() {
-        System.setOut(originalOut);
+        try(IOCapture io = new IOCapture("");) {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+                    .enableAnsiRecursive(false)
+                    .setPrintStreamRecursive(io.getPrintStream())
+                    .build();
+            app.run();
+            assertEquals(expected, io.getOutput());
+        }
     }
 
     @org.junit.jupiter.api.Test
-    void testRun_empty() {
-        String expected = "Exiting..."; // TODO - either strip ansi or figure out how to test with ansi
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
-        testApp.run();
-        assertEquals(expected, outContent.toString());
+    void testRun_with_text() {
+        String expected = lines("Hello, World!", "Exiting...");
+
+        try(IOCapture io = new IOCapture("");) {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+                    .addChildren(new TUITextModule.Builder("hello-world", "Hello, World!"))
+                    .enableAnsiRecursive(false)
+                    .setPrintStreamRecursive(io.getPrintStream())
+                    .build();
+            app.run();
+            assertEquals(expected, io.getOutput());
+        }
+
     }
 
+    void testRun_with_input() {
+        String expected = lines(
+                "What is your name? Hello, Bob!",
+                "Exiting..."
+        );
+
+        try(IOCapture io = new IOCapture("Bob");) {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+                    .addChildren(
+                            new TUITextInputModule.Builder("input", "What is your name? "),
+                            new TUITextModule.Builder("output", "input").outputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT))
+                    .build();
+
+            app.run();
+            assertEquals(expected, io.getOutput());
+        }
+
+
+    }
+
+    // TODO - add more tests
     @org.junit.jupiter.api.Test
     void getInput() {
+
     }
 
     @org.junit.jupiter.api.Test
@@ -67,5 +100,9 @@ class TUIApplicationModuleTest {
 
     @org.junit.jupiter.api.Test
     void terminateChild() {
+    }
+
+    static String lines(String... lines) {
+        return String.join(System.lineSeparator(), lines) + System.lineSeparator();
     }
 }

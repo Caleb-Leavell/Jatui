@@ -219,6 +219,7 @@ public abstract class TUIGenericModule implements TUIModule {
 
         protected Ansi ansi = ansi();
         private boolean allowAnsiOverride = true;
+        protected boolean enableAnsi = true;
 
         protected Scanner scanner = TUIModule.SYSTEM_IN;
         protected PrintStream printStream = System.out;
@@ -323,6 +324,8 @@ public abstract class TUIGenericModule implements TUIModule {
             return self();
         }
 
+        // TODO: abstract ansi logic out a bit
+
         /**
          * <p>Sets the ansi for the module (using Jansi).</p>
          * <p>Also sets the ansi for all children that are currently added .</p>
@@ -425,6 +428,18 @@ public abstract class TUIGenericModule implements TUIModule {
         }
 
         @Override
+        public B enableAnsi(boolean enable) {
+            this.enableAnsi = enable;
+            return self();
+        }
+
+        @Override
+        public B enableAnsiRecursive(boolean enable) {
+            this.forEach(m -> m.enableAnsi(enable));
+            return self();
+        }
+
+        @Override
         public B setScanner(Scanner scanner) {
             this.scanner = scanner;
 
@@ -432,8 +447,22 @@ public abstract class TUIGenericModule implements TUIModule {
         }
 
         @Override
+        public B setScannerRecursive(Scanner scanner) {
+            this.forEach(m ->  m.setScanner(scanner));
+
+            return self();
+        }
+
+        @Override
         public B setPrintStream(PrintStream printStream) {
             this.printStream = printStream;
+            return self();
+        }
+
+        @Override
+        public B setPrintStreamRecursive(PrintStream printStream) {
+            this.forEach(m -> m.setPrintStream(printStream));
+
             return self();
         }
 

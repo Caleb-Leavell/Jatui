@@ -120,6 +120,10 @@ public class Main {
                                 // So here, it's terminating app.
                                 .addScene("Exit", TUIModuleFactory.Terminate(app, "terminate-app")));
 
+        // Set the application home and run
+        app.setHome(randomNumberGenerator);
+        app.run();
+
         TUIContainerModule.Builder zigzag = new TUIContainerModule.Builder("zigzag");
 
         int width = 74;
@@ -130,7 +134,6 @@ public class Main {
         for(int i = width - 2; i >= 1; i --) {
             zigzag.addChild(LineWithDot("zigzag" + (i + width), i));
         }
-        // Set the application home and run
 //        app.setHome(zigzag);
 //        app.setOnExit(TUIModuleFactory.Empty("empty-exit"));
 //
@@ -138,9 +141,6 @@ public class Main {
 //        {
 //            app.run();
 //        }
-
-        app.setHome(randomNumberGenerator);
-        app.run();
     }
 
     public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {

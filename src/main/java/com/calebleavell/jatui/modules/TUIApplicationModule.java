@@ -16,7 +16,6 @@ public class TUIApplicationModule extends TUIGenericModule {
     public void run() {
         super.run();
         onExit.build().run();
-        getScanner().close();
     }
 
     public Object getInput(String moduleName) {
@@ -92,6 +91,7 @@ public class TUIApplicationModule extends TUIGenericModule {
         public Builder(String name) {
             super(Builder.class, name);
             this.children.add(TUIModuleFactory.Empty("home"));
+            this.children.add(onExit);
         }
 
         protected Builder(Builder original) {
@@ -122,7 +122,9 @@ public class TUIApplicationModule extends TUIGenericModule {
 
         @Override
         public TUIApplicationModule build() {
+            this.getChildren().remove(onExit);
             TUIApplicationModule app = new TUIApplicationModule(self());
+            this.getChildren().add(onExit);
             app.setChildrenApplication();
             return app;
         }

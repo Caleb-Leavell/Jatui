@@ -116,9 +116,17 @@ public interface TUIModule {
 
         B allowAnsiOverride(boolean allow);
 
+        B enableAnsi(boolean enable);
+
+        B enableAnsiRecursive(boolean enable);
+
         B setScanner(Scanner scanner);
 
+        B setScannerRecursive(Scanner scanner);
+
         B setPrintStream(PrintStream printStream);
+
+        B setPrintStreamRecursive(PrintStream printStream);
 
         String getName();
 

@@ -78,7 +78,7 @@ public class TUITextInputModule extends TUIGenericModule {
                 System.out.println(exceptionMessage);
                 app.terminateChild(this.name);
 
-                this.build().run();
+                this.build().run(); // TODO: failure doesn't allow termination
             });
 
             return self();

@@ -6,6 +6,7 @@ public class TUITextModule extends TUIGenericModule {
     private String text;
     private final boolean printNewLine;
     private final OutputType outputType;
+    private final boolean enableAnsi;
 
     public enum OutputType {
             DISPLAY_TEXT,
@@ -15,7 +16,9 @@ public class TUITextModule extends TUIGenericModule {
     @Override
     public void run() {
 
-        getPrintStream().print(getAnsi());
+        if(enableAnsi)
+            getPrintStream().print(getAnsi());
+
         switch(outputType) {
             case DISPLAY_TEXT:
                 getPrintStream().print(text);
@@ -28,9 +31,11 @@ public class TUITextModule extends TUIGenericModule {
                 getPrintStream().println("ERROR: TUITextModule has not implemented functionality for outputType " + outputType);
                 break;
         }
-        System.out.print(ansi().reset());
 
-        if(printNewLine) System.out.println();
+        if(enableAnsi)
+            getPrintStream().print(ansi().reset());
+
+        if(printNewLine) getPrintStream().println();
         super.run();
     }
 
@@ -47,6 +52,7 @@ public class TUITextModule extends TUIGenericModule {
         this.text = builder.text;
         this.printNewLine = builder.printNewLine;
         this.outputType = builder.outputType;
+        this.enableAnsi = builder.enableAnsi;
     }
 
     public static class Builder extends TUIGenericModule.Builder<Builder> {
