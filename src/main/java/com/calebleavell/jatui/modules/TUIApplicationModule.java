@@ -14,6 +14,7 @@ public class TUIApplicationModule extends TUIGenericModule {
 
     @Override
     public void run() {
+        terminated = false;
         super.run();
         onExit.build().run();
     }

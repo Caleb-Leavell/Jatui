@@ -167,10 +167,10 @@ public class TUIModuleFactory {
             this.app = app;
             list = new NumberedList(name + "-list");
             TUITextInputModule.Builder collectInput = new TUITextInputModule.Builder(name + "-input", "Your choice: ")
-                    .addSafeHandler(name + "goto-module", input -> {
+                    .addSafeHandler(name + "-goto-module", input -> {
                         int index = Integer.parseInt(input);
                         TUIModule.NameOrModule nameOrModule = modules.get(index - 1);
-                        TUIModule toRun = nameOrModule.getModule(app).build();
+                        TUIModule.Builder<?> toRun = nameOrModule.getModule(app);
                         app.runModuleAsChild(toRun);
                         return "Successfully ran selected module";
                     });

@@ -14,6 +14,7 @@ public class TUITextInputModule extends TUIGenericModule {
 
     @Override
     public void run() {
+        this.terminated = false;
         displayText.build().run();
         input = getScanner().nextLine();
 
@@ -43,7 +44,7 @@ public class TUITextInputModule extends TUIGenericModule {
             this.displayText = new TUITextModule.Builder(name+"display", displayText).printNewLine(false);
             this.children.add(this.displayText);
 
-            handlers = new InputHandlers("handlers", this);
+            handlers = new InputHandlers(this.name + "-handlers", this);
         }
 
         protected Builder(Builder original) {
@@ -77,8 +78,7 @@ public class TUITextInputModule extends TUIGenericModule {
                 if(app == null) return;
                 System.out.println(exceptionMessage);
                 app.terminateChild(this.name);
-
-                this.build().run(); // TODO: failure doesn't allow termination
+                app.runModuleAsChild(this);
             });
 
             return self();

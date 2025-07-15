@@ -17,6 +17,8 @@ public interface TUIModule {
      * <p>For all: linearly run all child modules </p>
      */
     void run();
+    
+    void runModuleAsChild(Builder<?> module);
 
     String getName();
 

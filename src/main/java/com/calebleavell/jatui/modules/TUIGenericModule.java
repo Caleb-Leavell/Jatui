@@ -54,16 +54,12 @@ public abstract class TUIGenericModule implements TUIModule {
      */
     private TUIModule currentRunningChild;
 
-    private boolean terminated = false;
+    protected boolean terminated = false;
 
     public int MAX_ITERATIONS_ON_TO_STRING = 6;
 
     @Override
     public void run() {
-        terminated = false;
-
-        //List<TUIModule.Builder<?>> childrenIterable = new ArrayList<>(children);
-
         for(TUIModule.Builder<?> child : children) {
             if(terminated) break;
             TUIModule toRun = child.build();
@@ -73,11 +69,18 @@ public abstract class TUIGenericModule implements TUIModule {
         }
     }
 
-    public void runModuleAsChild(TUIModule module) {
-        TUIModule previousRunningChild = currentRunningChild;
-        currentRunningChild = module;
-        module.run();
-        currentRunningChild = previousRunningChild;
+    @Override
+    public void runModuleAsChild(TUIModule.Builder<?> module) {
+        if(currentRunningChild == null) {
+            TUIModule built = module.build();
+            currentRunningChild = built;
+            built.run();
+            currentRunningChild = null;
+            return;
+        }
+
+        TUIModule currentRunningModule = getCurrentRunningBranch().getLast();
+        currentRunningModule.runModuleAsChild(module);
     }
 
     @Override
@@ -116,7 +119,6 @@ public abstract class TUIGenericModule implements TUIModule {
 
     @Override
     public void terminate() {
-        if(this.terminated) return;
         this.terminated = true;
         if(this.currentRunningChild != null) currentRunningChild.terminate();
     }

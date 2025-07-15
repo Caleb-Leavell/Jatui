@@ -5,6 +5,13 @@ package com.calebleavell.jatui.modules;
  * but it also provides a template for extending TUIGenericModule.
  */
 public class TUIContainerModule extends TUIGenericModule {
+
+    @Override
+    public void run() {
+        this.terminated = false;
+        super.run();
+    }
+    
     public TUIContainerModule(TUIGenericModule.Builder<?> builder) {
         super(builder);
     }
