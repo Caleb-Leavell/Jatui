@@ -3,7 +3,10 @@ package com.calebleavell.jatui.modules;
 import org.fusesource.jansi.Ansi;
 import org.w3c.dom.Text;
 
+import javax.sound.sampled.Line;
 import java.util.*;
+
+import static org.fusesource.jansi.Ansi.ansi;
 
 public class TUIModuleFactory {
 
@@ -213,57 +216,62 @@ public class TUIModuleFactory {
         }
     }
 
-    public static class TextBuilder extends TUIModule.Template<TextBuilder> {
-        private int textCounter = 0;
+    public static class LineBuilder extends TUIModule.Template<LineBuilder> {
+        private TUITextModule.Builder current;
+        protected int iterator;
 
-        public TextBuilder(String name) {
-            super(TextBuilder.class, name);
+        public LineBuilder(String name) {
+            super(LineBuilder.class, name);
         }
 
-        protected TextBuilder(TextBuilder original) {
+        public LineBuilder(LineBuilder original) {
             super(original);
-            this.textCounter = original.textCounter;
+            this.current = original.current.getCopy();
+            this.iterator = original.iterator;
+        }
+
+        public LineBuilder addText(TUITextModule.Builder text) {
+            main.addChild(text);
+            current = text;
+            return self();
+        }
+
+        public LineBuilder addText(String text, Ansi ansi) {
+            this.addText(new TUITextModule.Builder(main.getName() + "-" + iterator, text)
+                    .hardSetAnsi(ansi)
+                    .printNewLine(false));
+            return self();
+        }
+
+        public LineBuilder addText(String text) {
+            return addText(text, ansi());
+        }
+
+        public LineBuilder addModuleOutput(String moduleName, Ansi ansi) {
+            this.addText(new TUITextModule.Builder(TUIModule.UNNAMED_ERROR, moduleName)
+                    .outputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .printNewLine(false)
+                    .hardSetAnsi(ansi));
+            return self();
+        }
+
+        public LineBuilder addModuleOutput(String moduleName) {
+            return this.addModuleOutput(moduleName, ansi());
+        }
+
+        public LineBuilder newLine() {
+            if(current != null) current.printNewLine(true);
+            return self();
+        }
+
+        protected TUITextModule.Builder getCurrent() {
+            return current;
         }
 
         @Override
-        public TextBuilder getCopy() {
-            return new TextBuilder(this);
+        public LineBuilder getCopy() {
+            return new LineBuilder(this);
         }
-
-        public TextBuilder addText(TUITextModule.Builder text) {
-            main.addChild(text);
-            textCounter ++;
-            return self();
-        }
-
-        public TextBuilder addText(String text, boolean printNewLine, TUITextModule.OutputType outputType) {
-            TUITextModule.Builder module = new TUITextModule.Builder(name + "-" + textCounter, text)
-                    .printNewLine(printNewLine)
-                    .outputType(outputType);
-
-            main.addChild(module);
-
-            textCounter ++;
-
-            return self();
-        }
-
-        public TextBuilder addText(String text, boolean printNewLine) {
-            return addText(text, printNewLine, TUITextModule.OutputType.DISPLAY_TEXT);
-        }
-
-        public TextBuilder addText(String text) {
-            return addText(text, false);
-        }
-
-        public TextBuilder addText(String text, Ansi ansi) {
-            return addText(text, false, TUITextModule.OutputType.DISPLAY_TEXT);
-        }
-
-        public TextBuilder addModuleOutputDisplay(String moduleName) {
-            return addText(moduleName, true, TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT);
-        }
-
     }
 
 

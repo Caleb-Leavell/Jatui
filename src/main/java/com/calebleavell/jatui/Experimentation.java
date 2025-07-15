@@ -7,6 +7,15 @@ import java.util.Scanner;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {
+        TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+                .addChildren(
+                        new TUITextInputModule.Builder("input", "What is your name? "),
+                        new TUIModuleFactory.LineBuilder("output").addText("Hello, ").addModuleOutput("input").addText("!").newLine())
+                .enableAnsiRecursive(false)
+                .build();
+
+        app.run();
+
         byte[] bytes = "Hello, World!".getBytes();
         InputStream input = new FileInputStream("test.txt");
         Scanner scnr = new Scanner(input);

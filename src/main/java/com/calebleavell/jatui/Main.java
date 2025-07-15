@@ -101,7 +101,7 @@ public class Main {
                                 .addSafeHandler("generated-number", Main::getRandomInt),
                         // Text Modules that display the generated number
                         // This can be done with TUITextModule.Builder, but TextBuilder facilitates chaining text modules.
-                        new TUIModuleFactory.TextBuilder("generated-number-display")
+                        new TUIModuleFactory.LineBuilder("generated-number-display")
                                 .addText("Generated Number: ")
                                 // We create a copy of moduleOutput, declared above
                                 // We update the name and set the text as the name of module "generated-number",
@@ -109,7 +109,8 @@ public class Main {
                                 // So this module will display whatever "generated-number" outputs.
                                 .addText(moduleOutput.getCopy()
                                         .setName("display-generated-number")
-                                        .text("generated-number")),
+                                        .text("generated-number"))
+                                .newLine(),
                         // TUIModuleFactory provides NumberedModuleSelector, which displays a numbered list of
                         // text, asks for user input, and runs the module corresponding to the choice of the user.
                         new TUIModuleFactory.NumberedModuleSelector("selector", app)
@@ -123,6 +124,7 @@ public class Main {
         // Set the application home and run
         app.setHome(randomNumberGenerator);
         app.run();
+
 
         TUIContainerModule.Builder zigzag = new TUIContainerModule.Builder("zigzag");
 

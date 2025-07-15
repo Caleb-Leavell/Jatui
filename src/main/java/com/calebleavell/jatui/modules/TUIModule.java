@@ -10,6 +10,8 @@ public interface TUIModule {
 
     static final Scanner SYSTEM_IN = new Scanner(System.in);
 
+    public static final String UNNAMED_ERROR = "[ERROR: This module was never named!]";
+
     /**
      * <p> For TUITextModule: display text </p>
      * <p> For TUIInputModule: collect input </p>

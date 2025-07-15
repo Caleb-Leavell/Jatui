@@ -44,6 +44,7 @@ class TUIApplicationModuleTest {
 
     }
 
+    @org.junit.jupiter.api.Test
     void testRun_with_input() {
         String expected = lines(
                 "What is your name? Hello, Bob!",
@@ -54,7 +55,11 @@ class TUIApplicationModuleTest {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
                             new TUITextInputModule.Builder("input", "What is your name? "),
-                            new TUITextModule.Builder("output", "input").outputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT))
+                            new TUIModuleFactory.LineBuilder("output")
+                                    .addText("Hello, ").addModuleOutput("input").addText("!").newLine())
+                    .enableAnsiRecursive(false)
+                    .setScannerRecursive(io.getScanner())
+                    .setPrintStreamRecursive(io.getPrintStream())
                     .build();
 
             app.run();
@@ -64,7 +69,31 @@ class TUIApplicationModuleTest {
 
     }
 
-    // TODO - add more tests
+    @org.junit.jupiter.api.Test
+    void testRun_with_function() {
+        String expected = lines(
+                "10",
+                "Exiting..."
+        );
+
+        try(IOCapture io = new IOCapture("")) {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+                    .addChildren(
+                            new TUIFunctionModule.Builder("5+5", () -> {
+                                return 5 + 5;
+                            }),
+                            new TUIModuleFactory.LineBuilder("output").addModuleOutput("5+5").newLine()
+                    )
+                    .enableAnsiRecursive(false)
+                    .setScannerRecursive(io.getScanner())
+                    .setPrintStreamRecursive(io.getPrintStream())
+                    .build();
+
+            app.run();
+            assertEquals(expected, io.getOutput());
+        }
+    }
+
     @org.junit.jupiter.api.Test
     void getInput() {
 
