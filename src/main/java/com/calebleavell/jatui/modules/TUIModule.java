@@ -216,6 +216,7 @@ public abstract class TUIModule {
         this.ansi = builder.ansi;
         this.scanner = builder.scanner;
         this.printStream = builder.printStream;
+        this.enableAnsi = builder.enableAnsi;
     }
 
     public abstract static class Builder<B extends Builder<B>> implements DirectedGraphNode<Property, Builder<?>> {
@@ -252,6 +253,7 @@ public abstract class TUIModule {
             this.ansi = original.ansi;
             this.scanner = original.scanner;
             this.printStream = original.printStream;
+            this.enableAnsi = original.enableAnsi;
             this.type = original.type;
         }
 

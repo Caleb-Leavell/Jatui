@@ -49,7 +49,7 @@ public class TUIApplicationModule extends TUIModule {
         this.getChildren().set(0, home);
 
         for(TUIModule.Builder<?> child : getChildren()) {
-            child.updateProperties(this);
+            child.setApplication(this);
         }
     }
 
@@ -116,7 +116,6 @@ public class TUIApplicationModule extends TUIModule {
             this.getChildren().remove(onExit);
             TUIApplicationModule app = new TUIApplicationModule(self());
             this.getChildren().add(onExit);
-            this.updateProperties(app);
             this.setApplication(app);
             return app;
         }
