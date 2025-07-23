@@ -1,4 +1,4 @@
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

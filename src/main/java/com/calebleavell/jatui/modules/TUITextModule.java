@@ -6,7 +6,6 @@ public class TUITextModule extends TUIModule {
     private String text;
     private final boolean printNewLine;
     private final OutputType outputType;
-    private final boolean enableAnsi;
 
     public enum OutputType {
             DISPLAY_TEXT,
@@ -16,7 +15,7 @@ public class TUITextModule extends TUIModule {
     @Override
     public void run() {
         this.terminated = false;
-        if(enableAnsi)
+        if(getAnsiEnabled())
             getPrintStream().print(getAnsi());
 
         switch(outputType) {
@@ -32,7 +31,7 @@ public class TUITextModule extends TUIModule {
                 break;
         }
 
-        if(enableAnsi)
+        if(getAnsiEnabled())
             getPrintStream().print(ansi().reset());
 
         if(printNewLine) getPrintStream().println();
@@ -52,7 +51,6 @@ public class TUITextModule extends TUIModule {
         this.text = builder.text;
         this.printNewLine = builder.printNewLine;
         this.outputType = builder.outputType;
-        this.enableAnsi = builder.enableAnsi;
     }
 
     public static class Builder extends TUIModule.Builder<Builder> {

@@ -59,6 +59,11 @@ public abstract class TUIModule {
     private PrintStream printStream;
 
     /**
+     * <p>Whether ansi will be displayed or not.</p>
+     */
+    private boolean enableAnsi;
+
+    /**
      * If the for loop is run() is currently active, this will be the child that is currently running.
      */
     private TUIModule currentRunningChild;
@@ -115,10 +120,6 @@ public abstract class TUIModule {
         else return null;
     }
 
-    public TUIApplicationModule getApplication() {
-        return application;
-    }
-
     public void terminate() {
         this.terminated = true;
         if(this.currentRunningChild != null) currentRunningChild.terminate();
@@ -159,6 +160,8 @@ public abstract class TUIModule {
         return currentRunningBranch;
     }
 
+    public TUIApplicationModule getApplication() { return application; }
+
     public Ansi getAnsi() {
         return this.ansi;
     }
@@ -170,6 +173,8 @@ public abstract class TUIModule {
     public PrintStream getPrintStream() {
         return this.printStream;
     }
+
+    public boolean getAnsiEnabled() {return this.enableAnsi; }
 
     /**
      * Recursively generates toString with info for this scene and all children.
@@ -274,6 +279,16 @@ public abstract class TUIModule {
 
         public B unlockProperty(Property property) {
             propertyUpdateFlags.put(property, PropertyUpdateFlag.UPDATE);
+
+            return self();
+        }
+
+        public B updateProperties(TUIModule module) {
+            this.setApplication(module.getApplication());
+            this.setAnsi(module.getAnsi());
+            this.setScanner(module.getScanner());
+            this.setPrintStream(module.getPrintStream());
+            this.enableAnsi(module.getAnsiEnabled());
 
             return self();
         }

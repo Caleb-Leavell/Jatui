@@ -1,5 +1,6 @@
 package com.calebleavell.jatui.modules;
 
+import static com.calebleavell.jatui.modules.TUIModule.Property.ANSI;
 import static org.fusesource.jansi.Ansi.ansi;
 
 import java.util.Map;
@@ -44,11 +45,12 @@ public class TUIApplicationModule extends TUIModule {
         else updateInput(child.build(), input);
     }
 
-    // TODO: implement some sort of way to optionally propagate scanner and printStream
     public void setHome(TUIModule.Builder<?> home) {
         this.getChildren().set(0, home);
 
-        setChildrenApplication();
+        for(TUIModule.Builder<?> child : getChildren()) {
+            child.updateProperties(this);
+        }
     }
 
     public TUIModule.Builder<?> getHome() {
@@ -64,12 +66,6 @@ public class TUIApplicationModule extends TUIModule {
         return onExit;
     }
 
-    private void setChildrenApplication() {
-        for(TUIModule.Builder<?> child : getChildren()) {
-            child.setApplication(this);
-        }
-    }
-
     public TUIApplicationModule(Builder builder) {
         super(builder);
         this.inputMap = builder.inputMap;
@@ -81,7 +77,7 @@ public class TUIApplicationModule extends TUIModule {
         private final Map<String, Object> inputMap = new HashMap<>();
         private TUIModule.Builder<?> onExit = new TUITextModule.Builder("exit", "Exiting...")
                 .setAnsi(ansi().fgRgb(125, 100, 100))
-                .setPropertyUpdateFlag(Property.ANSI, PropertyUpdateFlag.HALT);
+                .lockProperty(ANSI);
 
         public Builder(String name) {
             super(Builder.class, name);
@@ -120,7 +116,8 @@ public class TUIApplicationModule extends TUIModule {
             this.getChildren().remove(onExit);
             TUIApplicationModule app = new TUIApplicationModule(self());
             this.getChildren().add(onExit);
-            app.setChildrenApplication();
+            this.updateProperties(app);
+            this.setApplication(app);
             return app;
         }
     }

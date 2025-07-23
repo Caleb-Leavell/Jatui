@@ -249,6 +249,7 @@ public class TUIModuleFactory {
         public LineBuilder addText(TUITextModule.Builder text) {
             main.addChild(text);
             current = text;
+            iterator ++;
             return self();
         }
 
@@ -265,7 +266,7 @@ public class TUIModuleFactory {
         }
 
         public LineBuilder addModuleOutput(String moduleName, Ansi ansi) {
-            this.addText(new TUITextModule.Builder(TUIModule.UNNAMED_ERROR, moduleName)
+            this.addText(new TUITextModule.Builder(main.getName() + "-" + iterator, moduleName)
                     .outputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
                     .setAnsi(ansi)

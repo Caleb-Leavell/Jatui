@@ -1,12 +1,6 @@
 package com.calebleavell.jatui.modules;
 
-import org.fusesource.jansi.AnsiConsole;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.*;
-import java.util.Scanner;
+import com.calebleavell.jatui.IOCapture;
 
 import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,8 +14,8 @@ class TUIApplicationModuleTest {
 
         try(IOCapture io = new IOCapture("");) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
-                    .enableAnsiRecursive(false)
-                    .setPrintStreamRecursive(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setPrintStream(io.getPrintStream())
                     .build();
             app.run();
             assertEquals(expected, io.getOutput());
@@ -35,8 +29,8 @@ class TUIApplicationModuleTest {
         try(IOCapture io = new IOCapture("");) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(new TUITextModule.Builder("hello-world", "Hello, World!"))
-                    .enableAnsiRecursive(false)
-                    .setPrintStreamRecursive(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setPrintStream(io.getPrintStream())
                     .build();
             app.run();
             assertEquals(expected, io.getOutput());
@@ -57,9 +51,9 @@ class TUIApplicationModuleTest {
                             new TUITextInputModule.Builder("input", "What is your name? "),
                             new TUIModuleFactory.LineBuilder("output")
                                     .addText("Hello, ").addModuleOutput("input").addText("!").newLine())
-                    .enableAnsiRecursive(false)
-                    .setScannerRecursive(io.getScanner())
-                    .setPrintStreamRecursive(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
                     .build();
 
             app.run();
@@ -84,9 +78,9 @@ class TUIApplicationModuleTest {
                             }),
                             new TUIModuleFactory.LineBuilder("output").addModuleOutput("5+5").newLine()
                     )
-                    .enableAnsiRecursive(false)
-                    .setScannerRecursive(io.getScanner())
-                    .setPrintStreamRecursive(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
                     .build();
 
             app.run();
@@ -103,9 +97,9 @@ class TUIApplicationModuleTest {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
                             new TUITextInputModule.Builder("input", "What is your name? "))
-                    .enableAnsiRecursive(false)
-                    .setScannerRecursive(io.getScanner())
-                    .setPrintStreamRecursive(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
                     .build();
 
             app.run();
@@ -127,8 +121,8 @@ class TUIApplicationModuleTest {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
                             new TUIFunctionModule.Builder("input", () -> {return expected;}))
-                    .setScannerRecursive(io.getScanner())
-                    .setPrintStreamRecursive(io.getPrintStream())
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
                     .build();
 
             app.run();
@@ -186,13 +180,11 @@ class TUIApplicationModuleTest {
 
         try(IOCapture io = new IOCapture("")) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
-                    .enableAnsiRecursive(false)
+                    .enableAnsi(false)
+                    .setPrintStream(io.getPrintStream())
                     .build();
 
-            TUITextModule.Builder home = new TUITextModule.Builder("home", "Hello, World!")
-                    .enableAnsiRecursive(false)
-                    .setScannerRecursive(io.getScanner())
-                    .setPrintStreamRecursive(io.getPrintStream());
+            TUITextModule.Builder home = new TUITextModule.Builder("home", "Hello, World!");
 
             app.setHome(home);
             app.run();
