@@ -33,9 +33,9 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * The direction goes from this node to the child nodes.</p>
      * @return The list of children of this node.
      */
-    public List<? extends T> getChildren();
+    List<? extends T> getChildren();
 
-    public Map<P, PropertyUpdateFlag> getPropertyUpdateFlags();
+    Map<P, PropertyUpdateFlag> getPropertyUpdateFlags();
 
     /**
      * Executes a DFS on self and all accessible children of the graph. Cycles are supported.

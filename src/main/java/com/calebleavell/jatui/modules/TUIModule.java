@@ -333,9 +333,7 @@ public abstract class TUIModule {
          * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
          */
         public TUIModule.Builder<?> getChild(String name) {
-            return dfs(m -> {
-                return m.getName().equals(name);
-            });
+            return dfs(m -> m.getName().equals(name));
         }
 
         public String getName() {
@@ -356,7 +354,7 @@ public abstract class TUIModule {
         }
 
         public B setApplication(TUIApplicationModule app) {
-            this.updateProperty(Property.APPLICATION, n -> {n.application = app;});
+            this.updateProperty(Property.APPLICATION, n -> n.application = app);
 
             return self();
         }
@@ -368,7 +366,7 @@ public abstract class TUIModule {
          * @return self
          */
         public B setAnsi(Ansi ansi) {
-            this.updateProperty(Property.SET_ANSI, n -> {n.ansi = ansi;});
+            this.updateProperty(Property.SET_ANSI, n -> n.ansi = ansi);
             this.lockProperty(Property.SET_ANSI);
             return self();
         }
@@ -383,7 +381,7 @@ public abstract class TUIModule {
          * @return self
          */
         public B prependAnsi(Ansi ansi) {
-            this.updateProperty(Property.MERGE_ANSI, n -> {n.ansi = ansi().a(ansi).a(n.ansi);});
+            this.updateProperty(Property.MERGE_ANSI, n -> n.ansi = ansi().a(ansi).a(n.ansi));
 
             return self();
         }
@@ -397,33 +395,27 @@ public abstract class TUIModule {
          * @return self
          */
         public B appendAnsi(Ansi ansi) {
-            this.updateProperty(Property.MERGE_ANSI, n -> {n.ansi = ansi().a(n.ansi).a(ansi);});
+            this.updateProperty(Property.MERGE_ANSI, n -> n.ansi = ansi().a(n.ansi).a(ansi));
 
             return self();
         }
 
         public B setScanner(Scanner scanner) {
-            this.updateProperty(TUIModule.Property.SCANNER, n -> {
-                n.scanner = scanner;
-            });
+            this.updateProperty(TUIModule.Property.SCANNER, n -> n.scanner = scanner);
             this.lockProperty(Property.SCANNER);
 
             return self();
         }
 
         public B setPrintStream(PrintStream printStream) {
-            this.updateProperty(TUIModule.Property.PRINTSTREAM, n -> {
-                n.printStream = printStream;
-            });
+            this.updateProperty(TUIModule.Property.PRINTSTREAM, n -> n.printStream = printStream);
             this.lockProperty(Property.PRINTSTREAM);
 
             return self();
         }
 
         public B enableAnsi(boolean enable) {
-            this.updateProperty(Property.ENABLE_ANSI, n -> {
-                n.enableAnsi = enable;
-            });
+            this.updateProperty(Property.ENABLE_ANSI, n -> n.enableAnsi = enable);
             this.lockProperty(Property.ENABLE_ANSI);
             return self();
         }

@@ -2,7 +2,6 @@ package com.calebleavell.jatui.modules;
 
 import com.calebleavell.jatui.IOCapture;
 
-import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TUIApplicationModuleTest {
@@ -12,7 +11,7 @@ class TUIApplicationModuleTest {
     void testRun_default_exit() {
         String expected = lines("Exiting...");
 
-        try(IOCapture io = new IOCapture("");) {
+        try(IOCapture io = new IOCapture("")) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .enableAnsi(false)
                     .setPrintStream(io.getPrintStream())
@@ -26,7 +25,7 @@ class TUIApplicationModuleTest {
     void testRun_with_text() {
         String expected = lines("Hello, World!", "Exiting...");
 
-        try(IOCapture io = new IOCapture("");) {
+        try(IOCapture io = new IOCapture("")) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(new TUITextModule.Builder("hello-world", "Hello, World!"))
                     .enableAnsi(false)
@@ -45,7 +44,7 @@ class TUIApplicationModuleTest {
                 "Exiting..."
         );
 
-        try(IOCapture io = new IOCapture("Bob");) {
+        try(IOCapture io = new IOCapture("Bob")) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
                             new TUITextInputModule.Builder("input", "What is your name? "),
@@ -73,9 +72,7 @@ class TUIApplicationModuleTest {
         try(IOCapture io = new IOCapture("")) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
-                            new TUIFunctionModule.Builder("5+5", () -> {
-                                return 5 + 5;
-                            }),
+                            new TUIFunctionModule.Builder("5+5", () -> 5 + 5),
                             new TUIModuleFactory.LineBuilder("output").addModuleOutput("5+5").newLine()
                     )
                     .enableAnsi(false)
@@ -93,7 +90,7 @@ class TUIApplicationModuleTest {
     void testGetInput_input_module() {
         String expected = "Bob";
 
-        try(IOCapture io = new IOCapture(expected);) {
+        try(IOCapture io = new IOCapture(expected)) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
                             new TUITextInputModule.Builder("input", "What is your name? "))
@@ -117,10 +114,10 @@ class TUIApplicationModuleTest {
     void testGetInput_function_module() {
         int expected = 5;
 
-        try(IOCapture io = new IOCapture("");) {
+        try(IOCapture io = new IOCapture("")) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
-                            new TUIFunctionModule.Builder("input", () -> {return expected;}))
+                            new TUIFunctionModule.Builder("input", () -> expected))
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .build();

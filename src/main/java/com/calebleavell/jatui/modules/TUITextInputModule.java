@@ -47,6 +47,7 @@ public class TUITextInputModule extends TUIModule {
         protected Builder(Builder original) {
             super(original);
             this.handlers = original.handlers.getCopy();
+            this.displayText = original.displayText;
         }
 
         @Override

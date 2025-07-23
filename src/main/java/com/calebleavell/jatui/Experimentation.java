@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {
-        try(IOCapture io = new IOCapture("Bob");) {
+        try(IOCapture io = new IOCapture("Bob")) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
                             new TUITextInputModule.Builder("input", "What is your name? "),
