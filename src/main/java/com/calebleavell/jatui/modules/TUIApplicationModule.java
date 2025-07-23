@@ -1,6 +1,5 @@
 package com.calebleavell.jatui.modules;
 
-import static com.calebleavell.jatui.modules.TUIModule.Property.ANSI;
 import static org.fusesource.jansi.Ansi.ansi;
 
 import java.util.Map;
@@ -50,6 +49,9 @@ public class TUIApplicationModule extends TUIModule {
 
         for(TUIModule.Builder<?> child : getChildren()) {
             child.setApplication(this);
+            child.setPrintStream(this.getPrintStream());
+            child.setScanner(this.getScanner());
+            child.enableAnsi(this.getAnsiEnabled());
         }
     }
 
@@ -76,8 +78,7 @@ public class TUIApplicationModule extends TUIModule {
     public static class Builder extends TUIModule.Builder<Builder> {
         private final Map<String, Object> inputMap = new HashMap<>();
         private TUIModule.Builder<?> onExit = new TUITextModule.Builder("exit", "Exiting...")
-                .setAnsi(ansi().fgRgb(125, 100, 100))
-                .lockProperty(ANSI);
+                .setAnsi(ansi().fgRgb(125, 100, 100));
 
         public Builder(String name) {
             super(Builder.class, name);
@@ -117,6 +118,9 @@ public class TUIApplicationModule extends TUIModule {
             TUIApplicationModule app = new TUIApplicationModule(self());
             this.getChildren().add(onExit);
             this.setApplication(app);
+            this.setPrintStream(this.printStream);
+            this.setScanner(this.scanner);
+            this.enableAnsi(this.enableAnsi);
             return app;
         }
     }

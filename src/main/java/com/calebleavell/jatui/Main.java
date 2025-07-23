@@ -2,8 +2,6 @@ package com.calebleavell.jatui;
 
 import com.calebleavell.jatui.modules.*;
 
-import static com.calebleavell.jatui.modules.DirectedGraphNode.PropertyUpdateFlag.HALT;
-import static com.calebleavell.jatui.modules.TUIModule.Property.ANSI;
 import static com.calebleavell.jatui.modules.TUITextModule.OutputType.*;
 
 
@@ -80,8 +78,7 @@ public class Main {
                 .outputType(DISPLAY_MODULE_OUTPUT)
                 // We set the ansi and lock it so that it can't be overridden later,
                 // since calling setAnsi for a parent overrides the ansi of its children by default.
-                .setAnsi(ansi().bold().fgRgb(220, 180, 0))
-                .lockProperty(ANSI);
+                .setAnsi(ansi().bold().fgRgb(220, 180, 0));
 
         // Front-end
         // We declare the "scene" in a ContainerModule so that it's nicely compartmentalized and reusable if needed.

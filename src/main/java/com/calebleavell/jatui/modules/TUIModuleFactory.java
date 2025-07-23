@@ -4,7 +4,6 @@ import org.fusesource.jansi.Ansi;
 
 import java.util.*;
 
-import static com.calebleavell.jatui.modules.TUIModule.Property.ANSI;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class TUIModuleFactory {
@@ -256,7 +255,6 @@ public class TUIModuleFactory {
         public LineBuilder addText(String text, Ansi ansi) {
             this.addText(new TUITextModule.Builder(main.getName() + "-" + iterator, text)
                     .setAnsi(ansi)
-                    .lockProperty(ANSI)
                     .printNewLine(false));
             return self();
         }
@@ -269,8 +267,7 @@ public class TUIModuleFactory {
             this.addText(new TUITextModule.Builder(main.getName() + "-" + iterator, moduleName)
                     .outputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
-                    .setAnsi(ansi)
-                    .lockProperty(ANSI));
+                    .setAnsi(ansi));
             return self();
         }
 

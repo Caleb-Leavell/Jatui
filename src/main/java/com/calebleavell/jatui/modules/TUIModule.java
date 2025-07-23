@@ -18,7 +18,10 @@ public abstract class TUIModule {
 
     public enum Property {
         APPLICATION,
-        ANSI,
+        /** Deals with replacing the ansi completely with setAnsi() **/
+        SET_ANSI,
+        /** Deals with appending to or prepending to the ansi */
+        MERGE_ANSI,
         SCANNER,
         PRINTSTREAM,
         ENABLE_ANSI
@@ -358,8 +361,15 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * <p>Recursively replaces the ansi with the provided ansi.</p>
+         * <p>Automatically locks the ansi after calling.</p>
+         * @param ansi The ansi to recursively replace
+         * @return self
+         */
         public B setAnsi(Ansi ansi) {
-            this.updateProperty(Property.ANSI, n -> {n.ansi = ansi;});
+            this.updateProperty(Property.SET_ANSI, n -> {n.ansi = ansi;});
+            this.lockProperty(Property.SET_ANSI);
             return self();
         }
 
@@ -367,12 +377,13 @@ public abstract class TUIModule {
          * <p>Prepends the ansi to the module's ansi.</p>
          * <p>Also prepends the ansi for all children that are currently added .</p>
          * <p>Whether this can be overridden depends on the ANSI property flag.</p>
-         * <p>Note: ansi for TUITextModules is automatically reset after running </p>
+         * <p>Note: ansi for TUITextModules is automatically reset after running </p>;
+         * <p>Note: no property is automatically locked after calling this method.</p>
          * @param ansi The Jansi provided Ansi object
          * @return self
          */
         public B prependAnsi(Ansi ansi) {
-            this.updateProperty(Property.ANSI, n -> {n.ansi = ansi().a(ansi).a(n.ansi);});
+            this.updateProperty(Property.MERGE_ANSI, n -> {n.ansi = ansi().a(ansi).a(n.ansi);});
 
             return self();
         }
@@ -386,7 +397,7 @@ public abstract class TUIModule {
          * @return self
          */
         public B appendAnsi(Ansi ansi) {
-            this.updateProperty(Property.ANSI, n -> {n.ansi = ansi().a(n.ansi).a(ansi);});
+            this.updateProperty(Property.MERGE_ANSI, n -> {n.ansi = ansi().a(n.ansi).a(ansi);});
 
             return self();
         }
@@ -395,6 +406,7 @@ public abstract class TUIModule {
             this.updateProperty(TUIModule.Property.SCANNER, n -> {
                 n.scanner = scanner;
             });
+            this.lockProperty(Property.SCANNER);
 
             return self();
         }
@@ -403,6 +415,7 @@ public abstract class TUIModule {
             this.updateProperty(TUIModule.Property.PRINTSTREAM, n -> {
                 n.printStream = printStream;
             });
+            this.lockProperty(Property.PRINTSTREAM);
 
             return self();
         }
@@ -411,6 +424,7 @@ public abstract class TUIModule {
             this.updateProperty(Property.ENABLE_ANSI, n -> {
                 n.enableAnsi = enable;
             });
+            this.lockProperty(Property.ENABLE_ANSI);
             return self();
         }
 
