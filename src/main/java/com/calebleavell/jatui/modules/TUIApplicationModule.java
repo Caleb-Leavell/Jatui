@@ -1,13 +1,11 @@
 package com.calebleavell.jatui.modules;
 
-import org.fusesource.jansi.AnsiConsole;
 import static org.fusesource.jansi.Ansi.ansi;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Scanner;
 
-public class TUIApplicationModule extends TUIGenericModule {
+public class TUIApplicationModule extends TUIModule {
 
     private final Map<String, Object> inputMap; // maps module names to the input object
     private TUIModule.Builder<?> onExit;
@@ -46,6 +44,7 @@ public class TUIApplicationModule extends TUIGenericModule {
         else updateInput(child.build(), input);
     }
 
+    // TODO: implement some sort of way to optionally propagate scanner and printStream
     public void setHome(TUIModule.Builder<?> home) {
         this.getChildren().set(0, home);
 
@@ -65,15 +64,9 @@ public class TUIApplicationModule extends TUIGenericModule {
         return onExit;
     }
 
-    public void terminateChild(String moduleName) {
-        getCurrentRunningBranch().forEach(m -> {
-            if(m.getName().equals(moduleName)) m.terminate();
-        });
-    }
-
     private void setChildrenApplication() {
         for(TUIModule.Builder<?> child : getChildren()) {
-            child.setApplicationRecursive(this);
+            child.setApplication(this);
         }
     }
 
@@ -81,13 +74,14 @@ public class TUIApplicationModule extends TUIGenericModule {
         super(builder);
         this.inputMap = builder.inputMap;
         this.onExit = builder.onExit;
-        this.onExit.setApplicationRecursive(this);
+        this.onExit.setApplication(this);
     }
 
-    public static class Builder extends TUIGenericModule.Builder<Builder> {
+    public static class Builder extends TUIModule.Builder<Builder> {
         private final Map<String, Object> inputMap = new HashMap<>();
         private TUIModule.Builder<?> onExit = new TUITextModule.Builder("exit", "Exiting...")
-                .hardSetAnsi(ansi().fgRgb(125, 100, 100));
+                .setAnsi(ansi().fgRgb(125, 100, 100))
+                .setPropertyUpdateFlag(Property.ANSI, PropertyUpdateFlag.HALT);
 
         public Builder(String name) {
             super(Builder.class, name);

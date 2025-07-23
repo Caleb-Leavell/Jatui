@@ -11,7 +11,7 @@ public class Experimentation {
                 .addChildren(
                         new TUITextInputModule.Builder("input", "What is your name? "),
                         new TUIModuleFactory.LineBuilder("output").addText("Hello, ").addModuleOutput("input").addText("!").newLine())
-                .enableAnsiRecursive(false)
+                .enableAnsi(false)
                 .build();
 
         app.run();

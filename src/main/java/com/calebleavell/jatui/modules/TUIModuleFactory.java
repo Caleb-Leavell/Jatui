@@ -1,17 +1,17 @@
 package com.calebleavell.jatui.modules;
 
 import org.fusesource.jansi.Ansi;
-import org.w3c.dom.Text;
 
-import javax.sound.sampled.Line;
 import java.util.*;
 
+import static com.calebleavell.jatui.modules.TUIModule.Property.ANSI;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class TUIModuleFactory {
 
     /**
-     * Returns an empty ContainerModule - simply wraps the basic logic to allow for consistent code (utilizing TUIModuleFactor) if desired.
+     * Returns an empty ContainerModule - simply wraps <pre><code>new TUIContainerModule.Builder([name])</code></pre>
+     * to allow for code that consistently uses TUIModuleFactory if desired.
      * @param name The name of the module
      * @return The empty ContainerModule
      */
@@ -20,7 +20,7 @@ public class TUIModuleFactory {
     }
 
     /**
-     * Builds a Function Module that calls another module's terminate method.
+     * Returns a Function Module that calls another module's terminate method.
      * @param moduleToTerminate  The module to terminate (it will terminate when this module is run)
      * @param name The name of the module to be returned
      * @return The Function Module that terminates the inputted module
@@ -30,7 +30,7 @@ public class TUIModuleFactory {
     }
 
     /**
-     * Builds a Function Module that calls another module's run method.
+     * Returns a Function Module that calls another module's run method.
      * @param moduleToRun The module to run (it will run when this module is run)
      * @param name The name of the module to be returned
      * @return The Function Module that calls another module's run method
@@ -40,7 +40,7 @@ public class TUIModuleFactory {
     }
 
     /**
-     * Builds a Function Module that calls another module's run method.
+     * Returns a Function Module that calls another module's run method.
      * @param moduleToRun The module to run (it will run when this module is run)
      * @param name The name of the module to be returned
      * @return The Function Module that calls another module's run method
@@ -50,7 +50,7 @@ public class TUIModuleFactory {
     }
 
     /**
-     * Builds a Function Module that finds the child of a parent by name then runs it.
+     * Returns a Function Module that finds the child of a parent by name then runs it.
      * Will do nothing no if the parent's module tree does not have a child with the given name.
      * @param moduleToRun The name of the module to run (it will run when this module is run)
      * @param parentModule The module that the <strong>module to run</strong> is the child of
@@ -65,9 +65,9 @@ public class TUIModuleFactory {
     }
 
     /**
-     * Builds a Function Module that increments a counter every time it's run (starts at 1).
+     * Returns a Function Module that increments a counter every time it's run (starts at 1).
      * This is useful for building things like lists dynamically.
-     * To access the counter, call <app>.getInput(<name>, Integer.class). Note that this will likely be null before this module is run.
+     * To access the counter, call [app].getInput([name], Integer.class). Note that this will likely be null before this module is run.
      * @param name The name of the module to be returned
      * @param app The Application Module that this module will be the child of
      * @return The Function Module that increments a counter
@@ -77,7 +77,7 @@ public class TUIModuleFactory {
     }
 
     /**
-     * Builds a Function Module that increments a counter every time it's run (starts at 1).
+     * Returns a Function Module that increments a counter every time it's run (starts at 1).
      * To access the counter, call <app>.getInput(<name>, Integer.class). Note that this will likely be null before this module is run.
      * @param name The name of the module to be returned
      * @param app The Application Module that this module will be the child of
@@ -119,8 +119,10 @@ public class TUIModuleFactory {
         public NumberedList addListText(String listText) {
             int currentNum = (i * step) + start;
             main.addChild(
-                    new TUITextModule.Builder(name + "-" + currentNum, currentNum + ". " + listText)
-            );
+                    new LineBuilder(name + currentNum)
+                            .addText("[" + currentNum + "] ", ansi().bold())
+                            .addText(listText)
+                            .newLine());
             i ++;
             return this;
         }
@@ -216,6 +218,20 @@ public class TUIModuleFactory {
         }
     }
 
+    /**
+     * <p>LineBuilder simplifies chaining text together that is meant to live on the same line.</p>
+     * <p>Ansi is supported with method overloads.</p>
+     * <p><strong>Usage:</strong>
+     * <pre><code>
+     * LineBuilder text = new LineBuilder("name")
+     *     .addText("Regular text: ")
+     *     // this will display what the inputted module outputs
+     *     .addModuleOutput("This string is the name of another module")
+     *     .newLine() // end of line 1
+     *     .addText("Text on the next line.")
+     *     .newLine(); // end of line 2
+     * </code></pre>
+     */
     public static class LineBuilder extends TUIModule.Template<LineBuilder> {
         private TUITextModule.Builder current;
         protected int iterator;
@@ -238,7 +254,8 @@ public class TUIModuleFactory {
 
         public LineBuilder addText(String text, Ansi ansi) {
             this.addText(new TUITextModule.Builder(main.getName() + "-" + iterator, text)
-                    .hardSetAnsi(ansi)
+                    .setAnsi(ansi)
+                    .lockProperty(ANSI)
                     .printNewLine(false));
             return self();
         }
@@ -251,7 +268,8 @@ public class TUIModuleFactory {
             this.addText(new TUITextModule.Builder(TUIModule.UNNAMED_ERROR, moduleName)
                     .outputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
-                    .hardSetAnsi(ansi));
+                    .setAnsi(ansi)
+                    .lockProperty(ANSI));
             return self();
         }
 

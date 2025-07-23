@@ -2,7 +2,7 @@ package com.calebleavell.jatui.modules;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
-public class TUITextModule extends TUIGenericModule {
+public class TUITextModule extends TUIModule {
     private String text;
     private final boolean printNewLine;
     private final OutputType outputType;
@@ -55,7 +55,7 @@ public class TUITextModule extends TUIGenericModule {
         this.enableAnsi = builder.enableAnsi;
     }
 
-    public static class Builder extends TUIGenericModule.Builder<Builder> {
+    public static class Builder extends TUIModule.Builder<Builder> {
         protected String text;
         protected boolean printNewLine = true;
         protected OutputType outputType = OutputType.DISPLAY_TEXT;

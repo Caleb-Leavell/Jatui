@@ -2,7 +2,7 @@ package com.calebleavell.jatui.modules;
 
 import java.util.function.Supplier;
 
-public class TUIFunctionModule extends TUIGenericModule {
+public class TUIFunctionModule extends TUIModule {
     private Supplier<Object> function;
 
 
@@ -27,7 +27,7 @@ public class TUIFunctionModule extends TUIGenericModule {
         this.function = builder.function;
     }
 
-    public static class Builder extends TUIGenericModule.Builder<Builder> {
+    public static class Builder extends TUIModule.Builder<Builder> {
         Supplier<Object> function;
 
         public Builder(String name, Supplier<Object> function) {

@@ -4,7 +4,7 @@ package com.calebleavell.jatui.modules;
  * Not only does this class improve modularity by housing other modules,
  * but it also provides a template for extending TUIGenericModule.
  */
-public class TUIContainerModule extends TUIGenericModule {
+public class TUIContainerModule extends TUIModule {
 
     @Override
     public void run() {
@@ -12,11 +12,11 @@ public class TUIContainerModule extends TUIGenericModule {
         super.run();
     }
     
-    public TUIContainerModule(TUIGenericModule.Builder<?> builder) {
+    public TUIContainerModule(TUIModule.Builder<?> builder) {
         super(builder);
     }
 
-    public static class Builder extends TUIGenericModule.Builder<Builder> {
+    public static class Builder extends TUIModule.Builder<Builder> {
         public Builder(String name) {
             super(Builder.class, name);
         }
