@@ -4,6 +4,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class TUIApplicationModule extends TUIModule {
 
@@ -61,18 +62,65 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     public void setOnExit(TUIModule.Builder<?> onExit) {
+
         this.onExit = onExit;
+        onExit.setApplication(this);
+        onExit.setPrintStream(this.getPrintStream());
+        onExit.setScanner(this.getScanner());
+        onExit.enableAnsi(this.getAnsiEnabled());
     }
 
     public TUIModule.Builder<?> getOnExit() {
         return onExit;
     }
 
+    /**
+     * <p>Checks equality for properties given by the builder.</p>
+     *
+     * <p>For TUIApplicationModule, this includes: </p>
+     * <strong><ul>
+     *     <li>onExit</li>
+     *     <li>name</li>
+     *     <li>application</li>
+     *     <li>children</li>
+     *     <li>ansi</li>
+     *     <li>scanner</li>
+     *     <li>printStream</li>
+     *     <li>enableAnsi</li>
+     * </ul></strong>
+     * <p>Note: Runtime properties (e.g., inputMap, currentRunningChild, terminated), are not considered.</p>
+     * @param o The object to compare (must be a TUIModule object)
+     * @return Whether this object equals o
+     */
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null) return false;
+        if(getClass() != o.getClass()) return false;
+
+        TUIApplicationModule other = (TUIApplicationModule) o;
+
+        return Objects.equals(onExit, other.onExit) && super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(onExit, super.hashCode());
+    }
+
     public TUIApplicationModule(Builder builder) {
         super(builder);
         this.inputMap = builder.inputMap;
         this.onExit = builder.onExit;
-        this.onExit.setApplication(this);
+
+        for(TUIModule.Builder<?> child : getChildren()) {
+            child.setApplication(this);
+            child.setPrintStream(this.getPrintStream());
+            child.setScanner(this.getScanner());
+            child.enableAnsi(this.getAnsiEnabled());
+        }
+
+        this.getChildren().remove(onExit);
     }
 
     public static class Builder extends TUIModule.Builder<Builder> {
@@ -102,26 +150,27 @@ public class TUIApplicationModule extends TUIModule {
             return new Builder(this);
         }
 
-        public Builder home(TUIModule.Builder<?> home) {
+        public TUIModule.Builder<?> getHome() {
+            return this.children.getFirst();
+        }
+
+        public TUIModule.Builder<?> getOnExit() {
+            return this.onExit;
+        }
+
+        public Builder setHome(TUIModule.Builder<?> home) {
             this.children.set(0, home);
             return self();
         }
 
-        public Builder onExit(TUIModule.Builder<?> onExit) {
+        public Builder setOnExit(TUIModule.Builder<?> onExit) {
             this.onExit = onExit;
             return self();
         }
 
         @Override
         public TUIApplicationModule build() {
-            this.getChildren().remove(onExit);
-            TUIApplicationModule app = new TUIApplicationModule(self());
-            this.getChildren().add(onExit);
-            this.setApplication(app);
-            this.setPrintStream(this.printStream);
-            this.setScanner(this.scanner);
-            this.enableAnsi(this.enableAnsi);
-            return app;
+            return new TUIApplicationModule(self());
         }
     }
 }

@@ -7,21 +7,12 @@ import java.util.Scanner;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {
-        try(IOCapture io = new IOCapture("Bob")) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
-                    .addChildren(
-                            new TUITextInputModule.Builder("input", "What is your name? "),
-                            new TUIModuleFactory.LineBuilder("output")
-                                    .addText("Hello, ").addModuleOutput("input").addText("!").newLine())
-                    .enableAnsi(false)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
-                    .build();
+        var appBuilder = new TUIApplicationModule.Builder("app");
 
-            app.run();
-            System.out.println(app);
-            System.out.println(io.getOutput());
-        }
+        var app1 = appBuilder.build();
+        var app2 = appBuilder.getCopy().build();
+
+        System.out.println(app1.getOnExit().equals(app2.getOnExit()));
 
 //        byte[] bytes = "Hello, World!".getBytes();
 //        InputStream input = new FileInputStream("test.txt");

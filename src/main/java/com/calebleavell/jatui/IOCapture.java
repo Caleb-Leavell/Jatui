@@ -19,6 +19,10 @@ public class IOCapture implements AutoCloseable {
         this.strm = new PrintStream(output);
     }
 
+    public IOCapture() {
+        this("");
+    }
+
     public Scanner getScanner() {
         return scnr;
     }

@@ -1,17 +1,20 @@
 package com.calebleavell.jatui.modules;
 
 import com.calebleavell.jatui.IOCapture;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
+import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TUIApplicationModuleTest {
 
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testRun_default_exit() {
         String expected = lines("Exiting...");
 
-        try(IOCapture io = new IOCapture("")) {
+        try(IOCapture io = new IOCapture()) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .enableAnsi(false)
                     .setPrintStream(io.getPrintStream())
@@ -21,11 +24,11 @@ class TUIApplicationModuleTest {
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testRun_with_text() {
         String expected = lines("Hello, World!", "Exiting...");
 
-        try(IOCapture io = new IOCapture("")) {
+        try(IOCapture io = new IOCapture()) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(new TUITextModule.Builder("hello-world", "Hello, World!"))
                     .enableAnsi(false)
@@ -37,7 +40,7 @@ class TUIApplicationModuleTest {
 
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testRun_with_input() {
         String expected = lines(
                 "What is your name? Hello, Bob!",
@@ -62,14 +65,14 @@ class TUIApplicationModuleTest {
 
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testRun_with_function() {
         String expected = lines(
                 "10",
                 "Exiting..."
         );
 
-        try(IOCapture io = new IOCapture("")) {
+        try(IOCapture io = new IOCapture()) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
                             new TUIFunctionModule.Builder("5+5", () -> 5 + 5),
@@ -86,7 +89,7 @@ class TUIApplicationModuleTest {
     }
 
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testGetInput_input_module() {
         String expected = "Bob";
 
@@ -104,17 +107,17 @@ class TUIApplicationModuleTest {
                     () -> assertEquals(expected, app.getInput("input")),
                     () -> assertEquals(expected, app.getInput("input", String.class)),
                     () -> assertNull(app.getInput("input", Integer.class)),
-                    () -> assertNull(app.getInput("INPUT")),
+                    () -> assertNull(app.getInput("INPUT")), // ensure naming is case-sensitive
                     () -> assertNull(app.getInput("random name")));
 
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testGetInput_function_module() {
         int expected = 5;
 
-        try(IOCapture io = new IOCapture("")) {
+        try(IOCapture io = new IOCapture()) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
                     .addChildren(
                             new TUIFunctionModule.Builder("input", () -> expected))
@@ -133,14 +136,14 @@ class TUIApplicationModuleTest {
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testUpdateInput_no_module() {
         TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
         app.updateInput("input", 5);
         assertNull(app.getInput("input"));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testUpdateInput_module_name() {
         int expected = 5;
 
@@ -153,7 +156,7 @@ class TUIApplicationModuleTest {
                 () -> assertEquals(expected, app.getInput("input", Integer.class)));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testUpdateInput_module_object() {
         int expected = 5;
 
@@ -168,37 +171,130 @@ class TUIApplicationModuleTest {
                 () -> assertEquals(expected, app.getInput("input", Integer.class)));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testSetHome() {
         String expected = lines(
                 "Hello, World!",
                 "Exiting..."
         );
 
-        try(IOCapture io = new IOCapture("")) {
+        try(IOCapture io = new IOCapture()) {
             TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
-                    .enableAnsi(false)
+                    .setAnsi(ansi().bold()) // set to non-default value to test against home ansi
                     .setPrintStream(io.getPrintStream())
+                    .setScanner(io.getScanner()) //also set to test against home ansi
+                    .enableAnsi(false)
                     .build();
 
             TUITextModule.Builder home = new TUITextModule.Builder("home", "Hello, World!");
 
             app.setHome(home);
             app.run();
-            assertEquals(expected, io.getOutput());
+            assertAll(
+                    () -> assertEquals(expected, io.getOutput()),
+                    () -> assertEquals(home, app.getHome()),
+                    () -> assertEquals(app, home.getApplication()),
+                    () -> assertEquals(app.getScanner(), home.getScanner()),
+                    () -> assertEquals(app.getPrintStream(), home.getPrintStream()),
+                    () -> assertEquals(app.getAnsiEnabled(), home.getAnsiEnabled()),
+                    () -> assertNotEquals(app.getAnsi(), home.getAnsi())
+            );
         }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testGetHome() {
+        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home");
+        TUIApplicationModule app = new TUIApplicationModule.Builder("test-app").build();
+        app.setHome(home);
+        assertEquals(app.getHome(), home);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testSetOnExit() {
+        String expected = lines(
+                "this should come first",
+                "test exit!");
+
+        try(IOCapture io = new IOCapture()) {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+                    .setAnsi(ansi().bold()) // all properties set to non-default values to test against the onExit module
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .build();
+
+            TUITextModule.Builder onExit = new TUITextModule.Builder("exit", "test exit!");
+
+            app.setOnExit(onExit);
+
+            // we add this manually after setOnExit to make sure it doesn't get added after the exit
+            app.getChildren().add(
+                    new TUITextModule.Builder("text", "this should come first")
+                            .setPrintStream(io.getPrintStream())
+                            .enableAnsi(false));
+
+            app.run();
+
+            assertAll(
+                    () -> assertEquals(expected, io.getOutput()),
+                    () -> assertEquals(app.getOnExit(), onExit),
+                    () -> assertEquals(app, onExit.getApplication()),
+                    () -> assertEquals(app.getScanner(), onExit.getScanner()),
+                    () -> assertEquals(app.getPrintStream(), onExit.getPrintStream()),
+                    () -> assertEquals(app.getAnsiEnabled(), onExit.getAnsiEnabled()),
+                    () -> assertNotEquals(app.getAnsi(), onExit.getAnsi())
+            );
+        }
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testGetOnExit() {
+        TUIContainerModule.Builder onExit = new TUIContainerModule.Builder("exit");
+        TUIApplicationModule app = new TUIApplicationModule.Builder("test-app").build();
+        app.setOnExit(onExit);
+        assertEquals(app.getOnExit(), onExit);
+    }
+
+    @Nested
+    class BuilderTest {
+        @Test
+        void getCopyTest() {
+
+            var home = new TUIContainerModule.Builder("home");
+            var onExit = new TUIContainerModule.Builder("onExit");
+            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("name")
+                    .setHome(home)
+                    .setOnExit(onExit);
+
+            TUIApplicationModule.Builder copy = app.getCopy();
+
+            assertEquals(app.build(), copy.build());
+
+        }
+
+        @Test
+        void setOnExitTest() {
+            var onExit = new TUIContainerModule.Builder("onExit");
+            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("name")
+                    .setOnExit(onExit);
+
+            assertEquals(app.getOnExit(), onExit);
+        }
+
+        @Test
+        void setHomeTest() {
+            var home = new TUIContainerModule.Builder("home");
+            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("name")
+                    .setHome(home);
+
+            assertEquals(app.getHome(), home);
+        }
+
+        @Test
+        void buildTest() {
+
+        }
     }
 
     // helper methods

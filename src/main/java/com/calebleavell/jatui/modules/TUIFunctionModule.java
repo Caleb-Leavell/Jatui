@@ -1,5 +1,6 @@
 package com.calebleavell.jatui.modules;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class TUIFunctionModule extends TUIModule {
@@ -20,6 +21,40 @@ public class TUIFunctionModule extends TUIModule {
 
     public void setFunction(Supplier<Object> function) {
         this.function = function;
+    }
+
+    /**
+     * <p>Checks equality for properties given by the builder.</p>
+     *
+     * <p>For TUIFunctionModule, this includes: </p>
+     * <strong><ul>
+     *     <li>function </strong><i>(Note: this will cause this method to return false in most cases.)</i><strong></li>
+     *     <li>name</li>
+     *     <li>application</li>
+     *     <li>children</li>
+     *     <li>ansi</li>
+     *     <li>scanner</li>
+     *     <li>printStream</li>
+     *     <li>enableAnsi</li>
+     * </ul></strong>
+     * <p>Note: Runtime properties (e.g., inputMap, currentRunningChild, terminated), are not considered.</p>
+     * @param o The object to compare (must be a TUIModule object)
+     * @return Whether this object equals o
+     */
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null) return false;
+        if(getClass() != o.getClass()) return false;
+
+        TUIFunctionModule other = (TUIFunctionModule) o;
+
+        return Objects.equals(function, other.function) && super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(function, super.hashCode());
     }
 
     public TUIFunctionModule(Builder builder) {

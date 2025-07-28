@@ -212,6 +212,48 @@ public abstract class TUIModule {
         return output.toString();
     }
 
+
+    // TODO: move the .equals() method to Builder (or have equals in both places)
+    /**
+     * <p>Checks equality for properties given by the builder.</p>
+     *
+     * <p>For TUIModule, this includes: </p>
+     * <strong><ul>
+     *     <li>name</li>
+     *     <li>application</li>
+     *     <li>children</li>
+     *     <li>ansi</li>
+     *     <li>scanner</li>
+     *     <li>printStream</li>
+     *     <li>enableAnsi</li>
+     * </ul></strong>
+     * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered.</p>
+     * @param o The object to compare (must be a TUIModule object)
+     * @return Whether this object equals o
+     */
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null) return false;
+        if(getClass() != o.getClass()) return false;
+
+        TUIModule other = (TUIModule) o;
+
+        return (Objects.equals(name, other.name) &&
+                Objects.equals(application, other.application) &&
+                Objects.equals(children, other.children) &&
+                Objects.equals(ansi.toString(), other.ansi.toString()) &&
+                Objects.equals(scanner, other.scanner) &&
+                Objects.equals(printStream, other.printStream) &&
+                enableAnsi == other.enableAnsi);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, application, children, ansi.toString(), scanner, printStream, enableAnsi);
+    }
+
+
     protected TUIModule(Builder<?> builder) {
         this.name = builder.name;
         this.application = builder.application;
@@ -351,6 +393,22 @@ public abstract class TUIModule {
 
         public TUIApplicationModule getApplication() {
             return this.application;
+        }
+
+        public Ansi getAnsi() {
+            return this.ansi;
+        }
+
+        public Scanner getScanner() {
+            return this.scanner;
+        }
+
+        public PrintStream getPrintStream() {
+            return this.printStream;
+        }
+
+        public boolean getAnsiEnabled() {
+            return this.enableAnsi;
         }
 
         public B setApplication(TUIApplicationModule app) {

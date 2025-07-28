@@ -35,6 +35,16 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      */
     List<? extends T> getChildren();
 
+    /**
+     * <p>Get the map of the flag set for each property.</p>
+     *
+     * @implSpec Every property that may be used should have a default flag
+     * (e.g., {@link PropertyUpdateFlag#UPDATE}) present in this map. Implementations
+     * must ensure that this map is non-null and contains a flag for every property
+     * that will be passed to {@code updateProperty}.
+     *
+     * @return The map that associates each property with its corresponding update flag.
+     */
     Map<P, PropertyUpdateFlag> getPropertyUpdateFlags();
 
     /**
@@ -99,6 +109,13 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
         });
     }
 
+    /**
+     * <p>Updates this node based on the flag of a property. Utilizes the flag for each property to determine traversal.</p>
+     * <p>Assuming all flags are set to UPDATE, traversal is depth-first.</p>
+     * @param property The property to check the flag for.
+     * @param updater The function that updates this node.
+     * @param visited The set of nodes that have already been visited.
+     */
     default void updateProperty(P property, Consumer<T> updater, Set<T> visited) {
         @SuppressWarnings("unchecked") // safe to suppress since "this" will always be an instance of T
         T self = (T) this;
@@ -130,6 +147,12 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
         }
     }
 
+    /**
+     * <p>Updates this node based on the flag of a property. Utilizes the flag for each property to determine traversal.</p>
+     * <p>Assuming all flags are set to UPDATE, traversal is depth-first.</p>
+     * @param property The property to check the flag for.
+     * @param updater The function that updates this node.
+     */
     default void updateProperty(P property, Consumer<T> updater) {
         Set<T> visited = new HashSet<>();
         updateProperty(property, updater, visited);
