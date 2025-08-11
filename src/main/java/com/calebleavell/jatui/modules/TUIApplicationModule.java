@@ -82,30 +82,26 @@ public class TUIApplicationModule extends TUIModule {
      *     <li>onExit</li>
      *     <li>name</li>
      *     <li>application</li>
-     *     <li>children</li>
      *     <li>ansi</li>
      *     <li>scanner</li>
      *     <li>printStream</li>
      *     <li>enableAnsi</li>
      * </ul></strong>
      * <p>Note: Runtime properties (e.g., inputMap, currentRunningChild, terminated), are not considered.</p>
-     * @param o The object to compare (must be a TUIModule object)
+     * @param other The object to compare (must be a TUIModule object)
      * @return Whether this object equals o
+     * @implNote There is no need for an equals or equalTo method that overrides {@link TUIModule.Builder#equals(TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
+     * child within the Builder, but not in the built module. This ensures property propagation is applied to onExit before building, but
+     * after building it is run last.
      */
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null) return false;
-        if(getClass() != o.getClass()) return false;
+    public boolean equals(TUIApplicationModule other) {
+        if(this == other) return true;
+        if(other == null) return false;
 
-        TUIApplicationModule other = (TUIApplicationModule) o;
+        if((onExit == null) != (other.onExit == null)) return false;
+        if(onExit != null && !onExit.equals(other.onExit)) return false;
 
-        return Objects.equals(onExit, other.onExit) && super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(onExit, super.hashCode());
+        return super.equals(other);
     }
 
     public TUIApplicationModule(Builder builder) {
@@ -114,7 +110,9 @@ public class TUIApplicationModule extends TUIModule {
         this.onExit = builder.onExit;
 
         for(TUIModule.Builder<?> child : getChildren()) {
-            child.setApplication(this);
+            if(this.getApplication() == null) child.setApplication(this);
+            else child.setApplication(this.getApplication());
+
             child.setPrintStream(this.getPrintStream());
             child.setScanner(this.getScanner());
             child.enableAnsi(this.getAnsiEnabled());

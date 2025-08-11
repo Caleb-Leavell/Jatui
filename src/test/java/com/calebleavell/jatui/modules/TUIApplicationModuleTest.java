@@ -1,6 +1,7 @@
 package com.calebleavell.jatui.modules;
 
 import com.calebleavell.jatui.IOCapture;
+import org.fusesource.jansi.Ansi;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -256,6 +257,46 @@ class TUIApplicationModuleTest {
         assertEquals(app.getOnExit(), onExit);
     }
 
+    @Test
+    void equalsTest() {
+        TUIContainerModule.Builder exit = new TUIContainerModule.Builder("exit");
+        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+
+        TUIApplicationModule app1 = new TUIApplicationModule.Builder("app")
+                .setApplication(testApp)
+                .setOnExit(exit.getCopy())
+                .build();
+
+        TUIApplicationModule app2 = new TUIApplicationModule.Builder("app")
+                .setApplication(testApp)
+                .setOnExit(exit.getCopy())
+                .build();
+
+        TUIApplicationModule app3 = new TUIApplicationModule.Builder("app")
+                .setApplication(testApp)
+                .setOnExit(exit.getCopy())
+                .build();
+
+        TUIApplicationModule app4 = new TUIApplicationModule.Builder("app")
+                .setOnExit(exit.getCopy())
+                .build();
+
+        TUIApplicationModule app5 = new TUIApplicationModule.Builder("app")
+                .setApplication(testApp)
+                .build();
+
+        assertAll(
+            () -> assertTrue(app1.equals(app1)),
+            () -> assertFalse(app1.equals(null)),
+            () -> assertTrue(app1.equals(app2)),
+            () -> assertTrue(app2.equals(app3)),
+            () -> assertTrue(app1.equals(app3)),
+            () -> assertFalse(app1.equals(app4)),
+            () -> assertFalse(app1.equals(app5))
+
+        );
+    }
+
     @Nested
     class BuilderTest {
         @Test
@@ -263,20 +304,23 @@ class TUIApplicationModuleTest {
 
             var home = new TUIContainerModule.Builder("home");
             var onExit = new TUIContainerModule.Builder("onExit");
-            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("name")
+            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("test-app")
                     .setHome(home)
                     .setOnExit(onExit);
 
             TUIApplicationModule.Builder copy = app.getCopy();
 
-            assertEquals(app.build(), copy.build());
+            assertAll(
+                    () -> assertTrue(app.equals(copy)),
+                    () -> assertFalse(app.build().equals(copy.build())) // should be false since their respective applications will not have the same reference
+            );
 
         }
 
         @Test
         void setOnExitTest() {
             var onExit = new TUIContainerModule.Builder("onExit");
-            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("name")
+            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("test-app")
                     .setOnExit(onExit);
 
             assertEquals(app.getOnExit(), onExit);
@@ -285,15 +329,63 @@ class TUIApplicationModuleTest {
         @Test
         void setHomeTest() {
             var home = new TUIContainerModule.Builder("home");
-            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("name")
+            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("test-app")
                     .setHome(home);
 
             assertEquals(app.getHome(), home);
         }
 
         @Test
-        void buildTest() {
+        void buildTest_fields_equal() {
+            TUIApplicationModule setApp = new TUIApplicationModule.Builder("setApp").build();
+            Ansi ansi = ansi().bold();
+            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home");
+            TUIContainerModule.Builder onExit = new TUIContainerModule.Builder("exit");
 
+            try(IOCapture io = new IOCapture()) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+                        .setApplication(setApp)
+                        .setAnsi(ansi)
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream())
+                        .setHome(home)
+                        .enableAnsi(false)
+                        .setOnExit(onExit)
+                        .build();
+
+                assertAll(
+                        () -> assertEquals(app.getApplication(), setApp),
+                        () -> assertEquals(app.getAnsi(), ansi),
+                        () -> assertEquals(app.getHome(), home),
+                        () -> assertEquals(app.getOnExit(), onExit),
+                        () -> assertEquals(app.getPrintStream(), io.getPrintStream()),
+                        () -> assertEquals(app.getScanner(), io.getScanner())
+                );
+            }
+        }
+
+        @Test
+        void buildTest_equivalent_builds() {
+            TUIApplicationModule setApp = new TUIApplicationModule.Builder("setApp").build();
+            Ansi ansi = ansi().bold();
+            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home");
+            TUIContainerModule.Builder onExit = new TUIContainerModule.Builder("exit");
+
+            try(IOCapture io = new IOCapture()) {
+                TUIApplicationModule.Builder appBuilder = new TUIApplicationModule.Builder("test-app")
+                        .setApplication(setApp)
+                        .setAnsi(ansi)
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream())
+                        .setHome(home)
+                        .enableAnsi(false)
+                        .setOnExit(onExit);
+
+                TUIApplicationModule app1 = appBuilder.build();
+                TUIApplicationModule app2 = appBuilder.build();
+
+                assertTrue(app1.equals(app2));
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.calebleavell.jatui.modules;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -14,17 +15,20 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      *     <li><strong>UPDATE:</strong> Update this node and continue the recursion</li>
      *     <li><strong>UPDATE_THEN_HALT:</strong> Update this node but don't continue the recursion</li>
      *     <li><strong>SKIP:</strong> Don't update this node but continue the recursion</li>
-     *     <li><strong>HALT:</strong> Don't update this node but don't continue the recursion</li>
+     *     <li><strong>HALT:</strong> Don't update this node and don't continue the recursion</li>
      * </ol>
      */
     enum PropertyUpdateFlag {
         /** Update this node and continue the recursion */
         UPDATE,
+
         /** Update this node but don't continue the recursion */
         UPDATE_THEN_HALT,
+
         /** Don't update this node but continue the recursion */
         SKIP,
-        /** Don't update this node but don't continue the recursion **/
+
+        /** Don't update this node and don't continue the recursion **/
         HALT
     }
 
@@ -32,18 +36,17 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * <p>Connections between nodes are established by giving a node "children". <br>
      * The direction goes from this node to the child nodes.</p>
      * @return The list of children of this node.
+     * @implSpec Must return a non-null list (may be empty).
      */
     List<? extends T> getChildren();
 
     /**
      * <p>Get the map of the flag set for each property.</p>
-     *
+     * @return The map that associates each property with its corresponding update flag.
      * @implSpec Every property that may be used should have a default flag
      * (e.g., {@link PropertyUpdateFlag#UPDATE}) present in this map. Implementations
      * must ensure that this map is non-null and contains a flag for every property
      * that will be passed to {@code updateProperty}.
-     *
-     * @return The map that associates each property with its corresponding update flag.
      */
     Map<P, PropertyUpdateFlag> getPropertyUpdateFlags();
 
@@ -66,8 +69,7 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
      */
     default T dfs(Function<T, Boolean> criteria, Set<T> visited) {
-        @SuppressWarnings("unchecked") // safe to suppress since "this" will always be an instance of T
-        T self = (T) this;
+        T self = self();
 
         if(criteria.apply(self)) return self;
 
@@ -117,8 +119,7 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * @param visited The set of nodes that have already been visited.
      */
     default void updateProperty(P property, Consumer<T> updater, Set<T> visited) {
-        @SuppressWarnings("unchecked") // safe to suppress since "this" will always be an instance of T
-        T self = (T) this;
+        T self = self();
 
         if(visited.contains(self)) return;
         visited.add(self);
@@ -158,4 +159,54 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
         updateProperty(property, updater, visited);
     }
 
+    /**
+     * <p>Checks for equality with another node based on equalityCriteria. The children are also checked recursively.</p>
+     * @param other The other node to check.
+     * @param equalityCriteria A BiFunction that returns whether two inputted nodes are equal.
+     * @param visited The list of visited nodes (prevents infinite recursion).
+     * @return Whether this node equals other based on equalityCriteria.
+     */
+    default boolean equals(T other, BiFunction<T, T, Boolean> equalityCriteria, Set<T> visited) {
+        if(other == null) return false;
+        if(this == other) return true;
+
+        // enforce equivalent structure if there's cycles
+        if(visited.contains(self()) && visited.contains(other)) return true;
+        if(visited.contains(self()) || visited.contains(other)) return false;
+
+        visited.add(self());
+        visited.add(other);
+
+        if(!equalityCriteria.apply(self(), other)) return false;
+
+        List<? extends T> children = this.getChildren();
+        List<? extends T> otherChildren = other.getChildren();
+
+        if(children.size() != otherChildren.size()) return false;
+
+        for(int i = 0; i < children.size(); i ++) {
+            // ensure if one of the children are null, the corresponding child for other also is
+            if(children.get(i) == null && otherChildren.get(i) == null) continue;
+            if(children.get(i) == null || otherChildren.get(i) == null) return false;
+
+            if(!children.get(i).equals(otherChildren.get(i), equalityCriteria, visited)) return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * <p>Checks for equality with another node based on equalityCriteria. The children are also checked recursively.</p>
+     * @param other The other node to check.
+     * @param equalityCriteria A BiFunction that returns whether two inputted nodes are equal.
+     * @return Whether this node equals other based on equalityCriteria.
+     */
+    default boolean equals(T other, BiFunction<T, T, Boolean> equalityCriteria) {
+        return equals(other, equalityCriteria, new HashSet<>());
+    }
+
+    @SuppressWarnings("unchecked") // safe to suppress since "this" will always be an instance of T
+    default T self() {
+        return (T) this;
+    }
 }

@@ -4,6 +4,7 @@ import org.fusesource.jansi.Ansi;
 
 import java.io.PrintStream;
 import java.util.*;
+import java.util.function.BiFunction;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -67,7 +68,7 @@ public abstract class TUIModule {
     private boolean enableAnsi;
 
     /**
-     * If the for loop is run() is currently active, this will be the child that is currently running.
+     * If the for loop in {@link TUIModule#run() } is currently active, this will be the child that is currently running.
      */
     private TUIModule currentRunningChild;
 
@@ -213,7 +214,6 @@ public abstract class TUIModule {
     }
 
 
-    // TODO: move the .equals() method to Builder (or have equals in both places)
     /**
      * <p>Checks equality for properties given by the builder.</p>
      *
@@ -228,20 +228,31 @@ public abstract class TUIModule {
      *     <li>enableAnsi</li>
      * </ul></strong>
      * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered.</p>
-     * @param o The object to compare (must be a TUIModule object)
-     * @return Whether this object equals o
+     * @param other The TUIModule to compare
+     * @return true if this module equals {@code other} according to builder-provided properties
+     * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
+     *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
      */
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null) return false;
-        if(getClass() != o.getClass()) return false;
+    public boolean equals(TUIModule other) {
+        if(this == other) return true;
+        if(other == null) return false;
 
-        TUIModule other = (TUIModule) o;
+        // check equality of children
+        List<TUIModule.Builder<?>> children = this.getChildren();
+        List<TUIModule.Builder<?>> otherChildren = other.getChildren();
+
+        if(children.size() != otherChildren.size()) return false;
+
+        for(int i = 0; i < children.size(); i ++) {
+            // ensure if one of the children are null, the corresponding child for other also is
+            if(children.get(i) == null && otherChildren.get(i) == null) continue;
+            if(children.get(i) == null || otherChildren.get(i) == null) return false;
+
+            if(!children.get(i).equals(otherChildren.get(i))) return false;
+        }
 
         return (Objects.equals(name, other.name) &&
-                Objects.equals(application, other.application) &&
-                Objects.equals(children, other.children) &&
+                Objects.equals(application, other.application) && // this is intentionally a reference equality check
                 Objects.equals(ansi.toString(), other.ansi.toString()) &&
                 Objects.equals(scanner, other.scanner) &&
                 Objects.equals(printStream, other.printStream) &&
@@ -369,7 +380,6 @@ public abstract class TUIModule {
         /**
          * Finds a child matching the name.
          * It is recommended to name all modules uniquely so this returns a unique module every time.
-         * Also checks protected children.
          *
          * @param name The name of the child
          * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
@@ -483,6 +493,44 @@ public abstract class TUIModule {
         }
 
         public abstract B getCopy();
+
+        /**
+         * <p>Checks equality for properties given by the builder.</p>
+         *
+         * <p>For TUIModule, this includes: </p>
+         * <strong><ul>
+         *     <li>name</li>
+         *     <li>application</li>
+         *     <li>ansi</li>
+         *     <li>scanner</li>
+         *     <li>printStream</li>
+         *     <li>enableAnsi</li>
+         * </ul></strong>
+         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
+         *  but are considered in {@link TUIModule.Builder#equals(Builder)}.
+         * @param first The first TUIModule to compare
+         * @param second The second TUIModule to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode, BiFunction)}
+         */
+        public static boolean equalTo(TUIModule.Builder<?> first, TUIModule.Builder<?> second) {
+            if(first == second) return true;
+            if(first == null || second == null) return false;
+
+            String firstAnsi = first.ansi != null ? first.ansi.toString() : null;
+            String secondAnsi = second.ansi != null ? second.ansi.toString() : null;
+
+            return (Objects.equals(first.name, second.name) &&
+                    Objects.equals(first.application, second.application) && // intentionally checks by reference
+                    Objects.equals(firstAnsi, secondAnsi) &&
+                    Objects.equals(first.scanner, second.scanner) &&
+                    Objects.equals(first.printStream, second.printStream) &&
+                    first.enableAnsi == second.enableAnsi);
+        }
+
+        public boolean equals(TUIModule.Builder<?> other) {
+            return equals(other, Builder::equalTo);
+        }
 
         public abstract TUIModule build();
     }
