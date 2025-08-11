@@ -1,5 +1,8 @@
 package com.calebleavell.jatui.modules;
 
+import java.util.Objects;
+import java.util.function.BiFunction;
+
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class TUITextModule extends TUIModule {
@@ -44,6 +47,36 @@ public class TUITextModule extends TUIModule {
 
     void setText(String text) {
         this.text = text;
+    }
+
+    /**
+     * <p>Checks equality for properties given by the builder.</p>
+     *
+     * <p>For TUITextModule, this includes: </p>
+     * <ul>
+     *     <li><strong>text</strong></li>
+     *     <li><strong>printNewLine</strong></li>
+     *     <li><strong>outputType</strong></li>
+     *     <li>name</li>
+     *     <li>application</li>
+     *     <li>ansi</li>
+     *     <li>scanner</li>
+     *     <li>printStream</li>
+     *     <li>enableAnsi</li>
+     * </ul>
+     * @param other The TUITextModule to compare
+     * @return true if this module equals {@code other} according to builder-provided properties
+     * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
+     *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
+     */
+    public boolean equals(TUITextModule other) {
+        if(this == other) return true;
+        if(other == null) return false;
+
+        return Objects.equals(text, other.text)
+                && Objects.equals(printNewLine, other.printNewLine)
+                && Objects.equals(outputType, other.outputType)
+                && super.equals(other);
     }
 
     public TUITextModule(Builder builder) {
@@ -93,6 +126,43 @@ public class TUITextModule extends TUIModule {
         public Builder append(String text) {
             this.text += text;
             return self();
+        }
+
+        /**
+         * <p>Checks equality for properties given by the builder.</p>
+         *
+         * <p>For TUITextModule.Builder, this includes: </p>
+         * <ul>
+         *     <li><strong>text</strong></li>
+         *     <li><strong>printNewLine</strong></li>
+         *     <li><strong>outputType</strong></li>
+         *     <li>name</li>
+         *     <li>application</li>
+         *     <li>children</li>
+         *     <li>ansi</li>
+         *     <li>scanner</li>
+         *     <li>printStream</li>
+         *     <li>enableAnsi</li>
+         * </ul>
+         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
+         *  but are considered in {@link TUIModule.Builder#equals(TUIModule.Builder)}.
+         * @param first The first TUITextModule.Builder to compare
+         * @param second The second TUITextModule.Builder to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode, BiFunction)}
+         */
+        public static boolean equalTo(TUITextModule.Builder first, TUITextModule.Builder second) {
+            if(first == second) return true;
+            if(first == null || second == null) return false;
+
+            return Objects.equals(first.text, second.text)
+                    && Objects.equals(first.printNewLine, second.printNewLine)
+                    && Objects.equals(first.outputType, second.outputType)
+                    && TUIModule.Builder.equalTo(first, second);
+        }
+
+        public boolean equals(TUITextModule.Builder other) {
+            return equals(other, TUITextModule.Builder::equalTo);
         }
 
         @Override

@@ -78,19 +78,21 @@ public class TUIApplicationModule extends TUIModule {
      * <p>Checks equality for properties given by the builder.</p>
      *
      * <p>For TUIApplicationModule, this includes: </p>
-     * <strong><ul>
-     *     <li>onExit</li>
+     * <ul>
+     *     <li><strong>onExit</strong> (Note: checks structural equality, not reference equality)</li>
      *     <li>name</li>
      *     <li>application</li>
      *     <li>ansi</li>
      *     <li>scanner</li>
      *     <li>printStream</li>
      *     <li>enableAnsi</li>
-     * </ul></strong>
+     * </ul>
      * <p>Note: Runtime properties (e.g., inputMap, currentRunningChild, terminated), are not considered.</p>
-     * @param other The object to compare (must be a TUIModule object)
-     * @return Whether this object equals o
-     * @implNote There is no need for an equals or equalTo method that overrides {@link TUIModule.Builder#equals(TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
+     * @param other The TUIApplicationModule to compare
+     * @return true if this module equals {@code other} according to builder-provided properties
+     * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
+     *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
+     *  Also, There is no need for an equals or equalTo method that overrides {@link TUIModule.Builder#equals(TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
      * child within the Builder, but not in the built module. This ensures property propagation is applied to onExit before building, but
      * after building it is run last.
      */
@@ -98,10 +100,7 @@ public class TUIApplicationModule extends TUIModule {
         if(this == other) return true;
         if(other == null) return false;
 
-        if((onExit == null) != (other.onExit == null)) return false;
-        if(onExit != null && !onExit.equals(other.onExit)) return false;
-
-        return super.equals(other);
+        return TUIModule.Builder.equals(onExit, other.onExit) && super.equals(other);
     }
 
     public TUIApplicationModule(Builder builder) {

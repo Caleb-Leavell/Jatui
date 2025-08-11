@@ -1,5 +1,7 @@
 package com.calebleavell.jatui.modules;
 
+import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -25,6 +27,33 @@ public class TUITextInputModule extends TUIModule {
         return input;
     }
 
+    /**
+     * <p>Checks equality for properties given by the builder.</p>
+     *
+     * <p>For TUITextInputModule, this includes: </p>
+     * <ul>
+     *     <li><strong>displayText</strong> (Note: this checks structural equality, not reference equality)</li>
+     *     <li>name</li>
+     *     <li>application</li>
+     *     <li>ansi</li>
+     *     <li>scanner</li>
+     *     <li>printStream</li>
+     *     <li>enableAnsi</li>
+     * </ul>
+     * <p>Note: Runtime properties (e.g., input, inputMap, currentRunningChild, terminated), are not considered.</p>
+     * @param other The TUITextInputModule to compare
+     * @return true if this module equals {@code other} according to builder-provided properties
+     * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
+     *  This method is merely for checking structural equality, which is generally only necessary for manual testing. Also, no overloaded equals methods
+     *  exist since {@code displayText} and {@code handlers} are children of the builder and thus checked automatically.
+     */
+    public boolean equals(TUITextInputModule other) {
+        if(this == other) return true;
+        if(other == null) return false;
+
+        return TUIModule.Builder.equals(displayText, other.displayText) && super.equals(other);
+    }
+
     public TUITextInputModule(Builder builder) {
         super(builder);
         displayText = builder.displayText;
@@ -42,6 +71,7 @@ public class TUITextInputModule extends TUIModule {
             this.children.add(this.displayText);
 
             handlers = new InputHandlers(this.name + "-handlers", this);
+            this.children.add(handlers);
         }
 
         protected Builder(Builder original) {
@@ -92,7 +122,11 @@ public class TUITextInputModule extends TUIModule {
             // remove the display text from the children since we need it to run before the parent module
             // it's a child in the first place so that things like application() affect it as well
             this.children.remove(displayText);
-            if(!this.children.contains(handlers)) this.addChild(handlers);
+
+            // re-add handlers to force them to the end
+            // we add them before to allow for property propagation
+            this.children.remove(handlers);
+            this.children.add(handlers);
             this.setApplication(application);
             TUITextInputModule output = new TUITextInputModule(self());
             // re-add the child after constructing the module so that it can be edited if needed
@@ -153,6 +187,39 @@ public class TUITextInputModule extends TUIModule {
                 return converted;
             }));
             return self();
+        }
+
+        /**
+         * <p>Checks equality for properties given by the builder.</p>
+         *
+         * <p>For InputHandlers, this includes: </p>
+         * <ul>
+         *     <li><strong>inputModule</strong> <i>(Note: this checks reference equality, not structural equality.)</i></li>
+         *     <li>name</li>
+         *     <li>application</li>
+         *     <li>children</li>
+         *     <li>ansi</li>
+         *     <li>scanner</li>
+         *     <li>printStream</li>
+         *     <li>enableAnsi</li>
+         * </ul>
+         *
+         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
+         *  but are considered in {@link InputHandlers#equals(InputHandlers)}.
+         * @param first The first InputHandlers to compare
+         * @param second The second InputHandlers to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode, BiFunction)}
+         */
+        public static boolean equalTo(InputHandlers first, InputHandlers second) {
+            if(first == second) return true;
+            if(first == null || second == null) return false;
+
+            return Objects.equals(first.inputModule, second.inputModule) && TUIModule.Builder.equalTo(first, second);
+        }
+
+        public boolean equals(InputHandlers other) {
+            return equals(other, InputHandlers::equalTo);
         }
 
     }

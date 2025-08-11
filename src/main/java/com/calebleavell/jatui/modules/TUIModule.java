@@ -220,7 +220,7 @@ public abstract class TUIModule {
      * <p>For TUIModule, this includes: </p>
      * <strong><ul>
      *     <li>name</li>
-     *     <li>application</li>
+     *     <li>application (Note: checks reference equality, not structural equality) </li>
      *     <li>children</li>
      *     <li>ansi</li>
      *     <li>scanner</li>
@@ -388,6 +388,14 @@ public abstract class TUIModule {
             return dfs(m -> m.getName().equals(name));
         }
 
+        public <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
+            TUIModule.Builder<?> child = getChild(name);
+            if(child.getClass() == type) {
+                return type.cast(child);
+            }
+            else return null;
+        }
+
         public String getName() {
             return name;
         }
@@ -530,6 +538,22 @@ public abstract class TUIModule {
 
         public boolean equals(TUIModule.Builder<?> other) {
             return equals(other, Builder::equalTo);
+        }
+
+        /**
+         * Checks whether first or second are equal to each other based on the equality determined by the overloaded method.
+         *  Also performs a null check.
+         *
+         * @param first The first TUIModule to compare
+         * @param second The second TUIModule to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote Polymorphism is automatic here and thus this method does not generally need to be overloaded.
+         */
+        public static boolean equals(TUIModule.Builder<?> first, TUIModule.Builder<?> second) {
+            if(first == second) return true;
+            if(first == null || second == null) return false;
+
+            return first.equals(second);
         }
 
         public abstract TUIModule build();

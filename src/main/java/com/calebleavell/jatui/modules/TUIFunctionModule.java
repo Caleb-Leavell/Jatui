@@ -72,7 +72,6 @@ public class TUIFunctionModule extends TUIModule {
         if(this == other) return true;
         if(other == null) return false;
 
-
         return Objects.equals(function, other.function) && super.equals(other);
     }
 
@@ -161,7 +160,7 @@ public class TUIFunctionModule extends TUIModule {
             new TUIFunctionModule.Builder("four", sup)); // returns true
          * </code></pre>
          * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
-         *  but are considered in {@link TUIModule.Builder#equals(TUIModule.Builder)}.
+         *  but are considered in {@link TUIFunctionModule.Builder#equals(TUIFunctionModule.Builder)}.
          * @param first The first TUIModule to compare
          * @param second The second TUIModule to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
