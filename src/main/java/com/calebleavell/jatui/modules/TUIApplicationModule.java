@@ -4,7 +4,6 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class TUIApplicationModule extends TUIModule {
 
@@ -41,8 +40,7 @@ public class TUIApplicationModule extends TUIModule {
 
     public void updateInput(String moduleName, Object input) {
         TUIModule.Builder<?> child = getChild(moduleName);
-        if(child == null) return;
-        else updateInput(child.build(), input);
+        if(child != null) updateInput(child.build(), input);
     }
 
     public void setHome(TUIModule.Builder<?> home) {

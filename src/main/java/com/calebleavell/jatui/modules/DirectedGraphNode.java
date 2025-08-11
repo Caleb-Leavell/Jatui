@@ -142,7 +142,6 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
             }
         }
 
-
         for(T child : getChildren()) {
             child.updateProperty(property, updater, visited);
         }
