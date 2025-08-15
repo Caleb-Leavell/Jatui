@@ -102,17 +102,27 @@ public class TUIModuleFactory {
             super(NumberedList.class, name);
         }
 
-        protected NumberedList(NumberedList original) {
-               super(original);
-               this.start = original.start;
-               this.step = original.step;
-               this.i = original.i;
-               this.inputVariableName = original.inputVariableName;
+        protected NumberedList() {
+            super(NumberedList.class);
+        }
+
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
+        @Override
+        public NumberedList createInstance() {
+            return new NumberedList();
         }
 
         @Override
-        public NumberedList getCopy() {
-            return new NumberedList(this);
+        public void shallowCopy(NumberedList original) {
+            this.start = original.start;
+            this.step = original.step;
+            this.i = original.i;
+            this.inputVariableName = original.inputVariableName;
+            super.shallowCopy(original);
         }
 
         public NumberedList addListText(String listText) {
@@ -182,16 +192,29 @@ public class TUIModuleFactory {
             main.addChild(collectInput);
         }
 
-        protected NumberedModuleSelector(NumberedModuleSelector original) {
-            super(original);
-            this.modules.addAll(original.modules);
-            this.app = original.app;
-            this.list = original.list.getCopy();
+        protected NumberedModuleSelector() {
+            super(NumberedModuleSelector.class);
         }
 
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
         @Override
-        public NumberedModuleSelector getCopy() {
-            return new NumberedModuleSelector(this);
+        public NumberedModuleSelector createInstance() {
+            return new NumberedModuleSelector();
+        }
+
+
+        @Override
+        public void shallowCopy(NumberedModuleSelector original) {
+            for(TUIModule.NameOrModule m : original.modules) {
+                this.modules.add(m.getCopy());
+            }
+            this.app = original.app;
+            this.list = original.list.getCopy();
+            super.shallowCopy(original);
         }
 
         private NumberedModuleSelector addScene(String displayText, TUIModule.NameOrModule module){
@@ -239,10 +262,26 @@ public class TUIModuleFactory {
             super(LineBuilder.class, name);
         }
 
-        public LineBuilder(LineBuilder original) {
-            super(original);
+        protected LineBuilder() {
+            super(LineBuilder.class);
+        }
+
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
+        @Override
+        public LineBuilder createInstance() {
+            return new LineBuilder();
+        }
+
+
+        @Override
+        public void shallowCopy(LineBuilder original) {
             this.current = original.current.getCopy();
             this.iterator = original.iterator;
+            super.shallowCopy(original);
         }
 
         public LineBuilder addText(TUITextModule.Builder text) {
@@ -284,10 +323,6 @@ public class TUIModuleFactory {
             return current;
         }
 
-        @Override
-        public LineBuilder getCopy() {
-            return new LineBuilder(this);
-        }
     }
 
 

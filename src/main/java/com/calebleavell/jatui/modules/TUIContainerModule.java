@@ -21,13 +21,18 @@ public class TUIContainerModule extends TUIModule {
             super(Builder.class, name);
         }
 
-        protected Builder(Builder original) {
-            super(original);
+        protected Builder() {
+            super(Builder.class);
         }
 
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
         @Override
-        public Builder getCopy() {
-            return new Builder(this);
+        public Builder createInstance() {
+            return new Builder();
         }
 
         @Override

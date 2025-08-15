@@ -259,11 +259,6 @@ public abstract class TUIModule {
                 enableAnsi == other.enableAnsi);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, application, children, ansi.toString(), scanner, printStream, enableAnsi);
-    }
-
 
     protected TUIModule(Builder<?> builder) {
         this.name = builder.name;
@@ -275,7 +270,7 @@ public abstract class TUIModule {
         this.enableAnsi = builder.enableAnsi;
     }
 
-    public abstract static class Builder<B extends Builder<B>> implements DirectedGraphNode<Property, Builder<?>> {
+    public abstract static class Builder<B extends Builder<B>> implements DirectedGraphNode<Property, Builder<?>, B> {
         protected String name;
         protected List<TUIModule.Builder<?>> children = new ArrayList<>();
         protected Map<Property, PropertyUpdateFlag> propertyUpdateFlags = new HashMap<>();
@@ -297,20 +292,75 @@ public abstract class TUIModule {
             }
         }
 
-        protected Builder(Builder<B> original) {
-            this.name = original.name;
-            for(TUIModule.Builder<?> child : original.children) {
-                this.children.add(child.getCopy());
+        protected Builder(Class<B> type) {
+            this.type = type;
+        }
+
+        protected void deepCopy(B original, Map<Builder<?>, Builder<?>> visited) {
+            if(visited.get(original) != null) return;
+            visited.put(original, this);
+
+            shallowCopy(type.cast(original));
+
+            for(Builder<?> child : original.getChildren()) {
+                Builder<?> newChild = child.createInstance();
+                Builder.deepCopyHelper(child, newChild, visited);
+
+                // we don't even need to check that child and newChild are of the same type since createInstance returns T
+                getChildren().add(newChild);
             }
+        }
+
+        private static <T extends Builder<T>> void deepCopyHelper(Builder<T> original, Builder<?> copyInto, Map<Builder<?>, Builder<?>> visited) {
+            Builder<T> toCopy = original.getType().cast(copyInto);
+            toCopy.deepCopy(original.self(), visited);
+        }
+
+        protected Map<Builder<?>, Builder<?>> deepCopy(B original) {
+            Map<Builder<?>, Builder<?>> copyMap = new HashMap<>();
+            deepCopy(original, copyMap);
+            return copyMap;
+        }
+
+        /**
+         * Creates a deep copy of this node and it's children
+         * @return A deep copy of self
+         */
+        public B getDeepCopy() {
+            B copy = createInstance();
+            copy.deepCopy(self());
+            return copy;
+        }
+
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
+        public abstract B createInstance();
+
+        protected void shallowCopy(B original) {
+            this.name = original.name;
             for(Property key : original.propertyUpdateFlags.keySet()) {
                 this.propertyUpdateFlags.put(key, original.propertyUpdateFlags.get(key));
             }
-            this.application = original.application;
+            this.setApplicationNonRecursive(original.application);
             this.ansi = original.ansi;
             this.scanner = original.scanner;
             this.printStream = original.printStream;
             this.enableAnsi = original.enableAnsi;
-            this.type = original.type;
+        }
+
+        /**
+         * Creates a deep copy of this node and it's children; delegates to getDeepCopy(), created for simplicity.
+         * @return A deep copy of self
+         */
+        public B getCopy() {
+            return getDeepCopy();
+        }
+
+        public Class<B> getType() {
+            return type;
         }
 
         @Override
@@ -373,7 +423,6 @@ public abstract class TUIModule {
 
         public Builder<B> clearChildren() {
             this.children.clear();
-
             return self();
         }
 
@@ -430,8 +479,14 @@ public abstract class TUIModule {
         }
 
         public B setApplication(TUIApplicationModule app) {
-            this.updateProperty(Property.APPLICATION, n -> n.application = app);
+            this.updateProperty(Property.APPLICATION, n -> n.setApplicationNonRecursive(app));
 
+            return self();
+        }
+
+        private B setApplicationNonRecursive(TUIApplicationModule app) {
+            if(this.application != null && app == null) System.out.println("uhhh");
+            this.application = app;
             return self();
         }
 
@@ -500,8 +555,6 @@ public abstract class TUIModule {
             return type.cast(this);
         }
 
-        public abstract B getCopy();
-
         /**
          * <p>Checks equality for properties given by the builder.</p>
          *
@@ -515,13 +568,14 @@ public abstract class TUIModule {
          *     <li>enableAnsi</li>
          * </ul></strong>
          * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
-         *  but are considered in {@link TUIModule.Builder#equals(Builder)}.
+         *  but are considered in equals().
          * @param first The first TUIModule to compare
          * @param second The second TUIModule to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode, BiFunction)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
          */
-        public static boolean equalTo(TUIModule.Builder<?> first, TUIModule.Builder<?> second) {
+        @Override
+        public boolean equalTo(B first, B second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
@@ -536,13 +590,13 @@ public abstract class TUIModule {
                     first.enableAnsi == second.enableAnsi);
         }
 
-        public boolean equals(TUIModule.Builder<?> other) {
-            return equals(other, Builder::equalTo);
-        }
+//        @Override
+//        public String toString() {
+//            return this.name;
+//        }
 
         /**
-         * Checks whether first or second are equal to each other based on the equality determined by the overloaded method.
-         *  Also performs a null check.
+         * This is the same as equalTo, but it's static and does include a recursive children check.
          *
          * @param first The first TUIModule to compare
          * @param second The second TUIModule to compare
@@ -560,7 +614,7 @@ public abstract class TUIModule {
     }
 
     public abstract static class Template<B extends Template<B>> extends TUIModule.Builder<B> {
-        protected final TUIContainerModule.Builder main;
+        protected TUIContainerModule.Builder main;
 
         public Template(Class<B> type, String name) {
             super(type, name);
@@ -568,9 +622,14 @@ public abstract class TUIModule {
             this.addChild(main);
         }
 
-        protected Template(Template<B> original) {
-            super(original);
-            this.main = original.main.getCopy();
+        protected Template(Class<B> type) {
+            super(type);
+        }
+
+        @Override
+        public void deepCopy(B original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
+            super.deepCopy(original, visited);
+            main = (TUIContainerModule.Builder) visited.get(original.main);
         }
 
         /**
@@ -599,6 +658,11 @@ public abstract class TUIModule {
         public TUIModule.Builder<?> getModule(TUIApplicationModule app) {
             if(module != null) return module;
             else return app.getChild(moduleName);
+        }
+
+        public NameOrModule getCopy() {
+            if(module != null) return new NameOrModule(module.getCopy());
+            else return new NameOrModule(moduleName);
         }
     }
 

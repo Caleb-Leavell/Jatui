@@ -90,7 +90,7 @@ public class TUIApplicationModule extends TUIModule {
      * @return true if this module equals {@code other} according to builder-provided properties
      * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
      *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
-     *  Also, There is no need for an equals or equalTo method that overrides {@link TUIModule.Builder#equals(TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
+     *  Also, There is no need for an equalTo method that overrides {@link TUIModule.Builder#equalTo(TUIModule.Builder, TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
      * child within the Builder, but not in the built module. This ensures property propagation is applied to onExit before building, but
      * after building it is run last.
      */
@@ -129,20 +129,18 @@ public class TUIApplicationModule extends TUIModule {
             this.children.add(onExit);
         }
 
-        protected Builder(Builder original) {
-            super(original);
-            this.inputMap.putAll(original.inputMap);
-            this.onExit = original.onExit.getCopy();
+        protected Builder() {
+            super(Builder.class);
         }
 
         /**
-         * <p>Returns a deep copy of the application.</p>
-         * <p>Note: The inputMap is deep-copied, but all entries in the map are shallow-copied.</p>
-         * @return The copy of this object.
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
          */
         @Override
-        public Builder getCopy() {
-            return new Builder(this);
+        public Builder createInstance() {
+            return new TUIApplicationModule.Builder();
         }
 
         public TUIModule.Builder<?> getHome() {

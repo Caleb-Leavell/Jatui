@@ -1,7 +1,7 @@
 package com.calebleavell.jatui.modules;
 
+import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -61,7 +61,7 @@ public class TUITextInputModule extends TUIModule {
 
     public static class Builder extends TUIModule.Builder<Builder> {
 
-        protected InputHandlers handlers;
+        protected InputHandler handlers;
         protected TUITextModule.Builder displayText;
 
         public Builder(String name, String displayText) {
@@ -70,19 +70,31 @@ public class TUITextInputModule extends TUIModule {
             this.displayText = new TUITextModule.Builder(name+"display", displayText).printNewLine(false);
             this.children.add(this.displayText);
 
-            handlers = new InputHandlers(this.name + "-handlers", this);
+            handlers = new InputHandler(this.name + "-handlers", this);
             this.children.add(handlers);
         }
 
-        protected Builder(Builder original) {
-            super(original);
-            this.handlers = original.handlers.getCopy();
-            this.displayText = original.displayText;
+        protected Builder() {
+            super(Builder.class);
+        }
+
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
+        @Override
+        public Builder createInstance() {
+            return new Builder();
         }
 
         @Override
-        public Builder getCopy() {
-            return new Builder(this);
+        protected void deepCopy(Builder original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
+            super.deepCopy(original, visited);
+            this.displayText = original.displayText.getType().cast(visited.get(original.displayText));
+            this.handlers = original.handlers.getType().cast(visited.get(original.handlers));
+            this.handlers.inputModule = this;
+
         }
 
         public Builder addHandler(TUIFunctionModule.Builder handler) {
@@ -135,31 +147,38 @@ public class TUITextInputModule extends TUIModule {
         }
     }
 
-    protected static class InputHandlers extends TUIModule.Template<InputHandlers> {
+    public static class InputHandler extends TUIModule.Template<InputHandler> {
 
         protected Builder inputModule;
 
-        public InputHandlers(String name, Builder inputModule) {
-            super(InputHandlers.class, name);
+        public InputHandler(String name, Builder inputModule) {
+            super(InputHandler.class, name);
             this.inputModule = inputModule;
         }
 
-        protected InputHandlers(InputHandlers original) {
-            super(original);
-            this.inputModule = original.inputModule;
+        protected InputHandler() {
+            super(InputHandler.class);
         }
 
-        public InputHandlers getCopy() {
-            return new InputHandlers(this);
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
+        @Override
+        public InputHandler createInstance() {
+            return new InputHandler();
         }
 
-        public InputHandlers addHandler(TUIFunctionModule.Builder handler) {
+
+        public InputHandler addHandler(TUIFunctionModule.Builder handler) {
             main.addChild(handler);
             return self();
         }
 
-        public <T> InputHandlers addHandler(String name, Function<String, T> logic) {
+        public <T> InputHandler addHandler(String name, Function<String, T> logic) {
             main.addChild(new TUIFunctionModule.Builder(name, () -> {
+                // TODO: this doesn't get turned into the new copy - this lambda has to be rebuilt on copy
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) return null;
                 String input = app.getInput(inputModule.getName(), String.class);
@@ -170,8 +189,9 @@ public class TUITextInputModule extends TUIModule {
             return self();
         }
 
-        public <T> InputHandlers addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
+        public <T> InputHandler addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
             main.addChild(new TUIFunctionModule.Builder(name, () -> {
+                System.out.println(System.identityHashCode(this));
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) return null;
                 String input = app.getInput(inputModule.getName(), String.class);
@@ -205,22 +225,19 @@ public class TUITextInputModule extends TUIModule {
          * </ul>
          *
          * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
-         *  but are considered in {@link InputHandlers#equals(InputHandlers)}.
+         *  but are considered in equals()
          * @param first The first InputHandlers to compare
          * @param second The second InputHandlers to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode, BiFunction)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
          */
-        public static boolean equalTo(InputHandlers first, InputHandlers second) {
+        public boolean equalTo(InputHandler first, InputHandler second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            return Objects.equals(first.inputModule, second.inputModule) && TUIModule.Builder.equalTo(first, second);
+            return Objects.equals(first.inputModule, second.inputModule) && super.equalTo(first, second);
         }
 
-        public boolean equals(InputHandlers other) {
-            return equals(other, InputHandlers::equalTo);
-        }
 
     }
 }

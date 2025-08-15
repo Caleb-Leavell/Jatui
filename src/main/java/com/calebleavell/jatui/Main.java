@@ -26,16 +26,21 @@ public class Main {
             this.y = y;
         }
 
-        protected Rect(Rect original) {
-            super(original);
-            this.x = original.x;
-            this.y = original.y;
-            this.cell = original.cell;
+        protected Rect() {
+            super(Rect.class);
         }
 
         @Override
-        public Rect getCopy() {
-            return new Rect(this);
+        public Rect createInstance() {
+            return new Rect();
+        }
+
+        @Override
+        public void shallowCopy(Rect original) {
+            this.x = original.x;
+            this.y = original.y;
+            cell = original.cell;
+            super.shallowCopy(original);
         }
 
         public Rect cell(String cell) {
@@ -122,9 +127,16 @@ public class Main {
                                 // So here, it's terminating app.
                                 .addScene("Exit", TUIModuleFactory.Terminate(app, "terminate-app")));
 
+        var copy = randomNumberGenerator.getCopy();
+
+        System.out.println(copy.build());
+
         // Set the application home and run
-        app.setHome(randomNumberGenerator);
+        app.setHome(copy);
+        System.out.println(System.identityHashCode(randomNumberGenerator.getChild("input-handlers", TUITextInputModule.InputHandler.class)));
+        System.out.println(System.identityHashCode(copy.getChild("input-handlers", TUITextInputModule.InputHandler.class)));
         app.run();
+        System.out.println(System.identityHashCode(copy.getChild("input-handlers", TUITextInputModule.InputHandler.class)));
 
 
         TUIContainerModule.Builder zigzag = new TUIContainerModule.Builder("zigzag");

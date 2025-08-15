@@ -96,16 +96,27 @@ public class TUITextModule extends TUIModule {
             this.text = text;
         }
 
-        protected Builder(Builder original) {
-            super(original);
+        protected Builder() {
+            super(Builder.class);
+        }
+
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
+        @Override
+        public Builder createInstance() {
+            return new Builder();
+        }
+
+
+        @Override
+        public void shallowCopy(Builder original) {
             this.text = original.text;
             this.printNewLine = original.printNewLine;
             this.outputType = original.outputType;
-        }
-
-        @Override
-        public Builder getCopy() {
-            return new Builder(this);
+            super.shallowCopy(original);
         }
 
         public Builder printNewLine(boolean printNewLine) {
@@ -145,25 +156,22 @@ public class TUITextModule extends TUIModule {
          *     <li>enableAnsi</li>
          * </ul>
          * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
-         *  but are considered in {@link TUIModule.Builder#equals(TUIModule.Builder)}.
+         *  but are considered in equals().
          * @param first The first TUITextModule.Builder to compare
          * @param second The second TUITextModule.Builder to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode, BiFunction)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
          */
-        public static boolean equalTo(TUITextModule.Builder first, TUITextModule.Builder second) {
+        public boolean equalTo(TUITextModule.Builder first, TUITextModule.Builder second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
             return Objects.equals(first.text, second.text)
                     && Objects.equals(first.printNewLine, second.printNewLine)
                     && Objects.equals(first.outputType, second.outputType)
-                    && TUIModule.Builder.equalTo(first, second);
+                    && super.equalTo(first, second);
         }
 
-        public boolean equals(TUITextModule.Builder other) {
-            return equals(other, TUITextModule.Builder::equalTo);
-        }
 
         @Override
         public TUITextModule build() {

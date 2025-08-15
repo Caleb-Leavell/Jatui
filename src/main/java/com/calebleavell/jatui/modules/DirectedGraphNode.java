@@ -1,11 +1,16 @@
 package com.calebleavell.jatui.modules;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.*;
 
-public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNode<P, T>> {
+/**
+ * Provides a mechanism for working with nodes in a directed graph. Uses a recursive structure to simplify attaching nodes as "children."
+ * @param <P> Property Type
+ * @param <A> Abstract Type that all nodes will have
+ * @param <T> Specific Type of this node
+ */
+public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNode<P, A, ?>, T extends DirectedGraphNode<P, A, T>> {
 
     /**
      * <p>Specifies behavior for updating a property of this node. <br>
@@ -38,7 +43,7 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * @return The list of children of this node.
      * @implSpec Must return a non-null list (may be empty).
      */
-    List<? extends T> getChildren();
+    List<A> getChildren();
 
     /**
      * <p>Get the map of the flag set for each property.</p>
@@ -50,14 +55,16 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      */
     Map<P, PropertyUpdateFlag> getPropertyUpdateFlags();
 
+    Class<T> getType();
+
     /**
      * Executes a DFS on self and all accessible children of the graph. Cycles are supported.
      *
      * @param criteria A function that checks whether a child should be returned
      * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
      */
-    default T dfs(Function<T, Boolean> criteria) {
-        Set<T> visited = new HashSet<>();
+    default A dfs(Function<A, Boolean> criteria) {
+        Set<A> visited = new HashSet<>();
         return dfs(criteria, visited);
     }
 
@@ -68,15 +75,16 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * @param visited used so we can keep track of the modules we've visited and thus support cycles
      * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
      */
-    default T dfs(Function<T, Boolean> criteria, Set<T> visited) {
-        T self = self();
+    default A dfs(Function<A, Boolean> criteria, Set<A> visited) {
+        A self = abstractSelf();
+
+        if(visited.contains(self)) return null;
+        visited.add(self);
 
         if(criteria.apply(self)) return self;
 
-        for(T child : getChildren()) {
-            if(visited.contains(child)) continue;
-            visited.add(child);
-            T found = child.dfs(criteria, visited);
+        for(A child : getChildren()) {
+            A found = child.dfs(criteria, visited);
 
             if(found != null) return found;
         }
@@ -90,7 +98,7 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      *
      * @param function The Consumer that accepts every accessible node.
      */
-    default void forEach(Consumer<T> function) {
+    default void forEach(Consumer<A> function) {
         this.dfs(node -> {
             function.accept(node);
             return false; // ensures the dfs won't terminate early
@@ -101,14 +109,26 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * Executes the Consumer on every accessible node of the graph, excluding this one.
      * Cycles are supported.
      *
+     * <p><strong>Note:</strong> This node will not be updated even if cycled back to by another node.</p>
+     *
      * @param function The Consumer that accepts every accessible node.
      */
-    default void forEachChild(Consumer<T> function) {
+    default void forEachChild(Consumer<A> function) {
         this.dfs(node -> {
             if(node == this) return false;
             function.accept(node);
             return false; // ensures the dfs won't terminate early
         });
+    }
+
+    default boolean containsNullNode() {
+        final boolean[] nullNode = new boolean[1];
+
+        forEach(n -> {
+            nullNode[0] = (n == null);
+        });
+
+        return nullNode[0];
     }
 
     /**
@@ -118,8 +138,8 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * @param updater The function that updates this node.
      * @param visited The set of nodes that have already been visited.
      */
-    default void updateProperty(P property, Consumer<T> updater, Set<T> visited) {
-        T self = self();
+    default void updateProperty(P property, Consumer<A> updater, Set<A> visited) {
+        A self = abstractSelf();
 
         if(visited.contains(self)) return;
         visited.add(self);
@@ -142,7 +162,7 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
             }
         }
 
-        for(T child : getChildren()) {
+        for(A child : getChildren()) {
             child.updateProperty(property, updater, visited);
         }
     }
@@ -153,33 +173,38 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
      * @param property The property to check the flag for.
      * @param updater The function that updates this node.
      */
-    default void updateProperty(P property, Consumer<T> updater) {
-        Set<T> visited = new HashSet<>();
+    default void updateProperty(P property, Consumer<A> updater) {
+        Set<A> visited = new HashSet<>();
         updateProperty(property, updater, visited);
     }
 
+    public boolean equalTo(T first, T second);
+
+
     /**
-     * <p>Checks for equality with another node based on equalityCriteria. The children are also checked recursively.</p>
+     * <p>Checks for equality with another node based on equalTo. The children are also checked recursively.</p>
      * @param other The other node to check.
-     * @param equalityCriteria A BiFunction that returns whether two inputted nodes are equal.
      * @param visited The list of visited nodes (prevents infinite recursion).
      * @return Whether this node equals other based on equalityCriteria.
      */
-    default boolean equals(T other, BiFunction<T, T, Boolean> equalityCriteria, Set<T> visited) {
+    default boolean equals(A other, Set<A> visited) {
         if(other == null) return false;
         if(this == other) return true;
 
-        // enforce equivalent structure if there's cycles
-        if(visited.contains(self()) && visited.contains(other)) return true;
-        if(visited.contains(self()) || visited.contains(other)) return false;
+        A self = abstractSelf();
 
-        visited.add(self());
+        // enforce equivalent structure if there's cycles
+        if(visited.contains(self) && visited.contains(other)) return true;
+        if(visited.contains(self) || visited.contains(other)) return false;
+
+        visited.add(self);
         visited.add(other);
 
-        if(!equalityCriteria.apply(self(), other)) return false;
+        if(other.getType() != getType()) return false;
+        if(!equalTo(self(), getType().cast(other))) return false;
 
-        List<? extends T> children = this.getChildren();
-        List<? extends T> otherChildren = other.getChildren();
+        List<? extends A> children = this.getChildren();
+        List<? extends A> otherChildren = other.getChildren();
 
         if(children.size() != otherChildren.size()) return false;
 
@@ -188,7 +213,8 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
             if(children.get(i) == null && otherChildren.get(i) == null) continue;
             if(children.get(i) == null || otherChildren.get(i) == null) return false;
 
-            if(!children.get(i).equals(otherChildren.get(i), equalityCriteria, visited)) return false;
+            if(children.get(i).equals(otherChildren.get(i), visited)) return false;
+
         }
 
         return true;
@@ -196,16 +222,20 @@ public interface DirectedGraphNode<P extends Enum<?>, T extends DirectedGraphNod
 
     /**
      * <p>Checks for equality with another node based on equalityCriteria. The children are also checked recursively.</p>
-     * @param other The other node to check.
-     * @param equalityCriteria A BiFunction that returns whether two inputted nodes are equal.
+     * @param other The other node to check. <strong>Must be the same type as this node to return true.</strong>
      * @return Whether this node equals other based on equalityCriteria.
      */
-    default boolean equals(T other, BiFunction<T, T, Boolean> equalityCriteria) {
-        return equals(other, equalityCriteria, new HashSet<>());
+    default boolean equals(A other) {
+        return equals(other, new HashSet<>());
     }
 
     @SuppressWarnings("unchecked") // safe to suppress since "this" will always be an instance of T
     default T self() {
         return (T) this;
+    }
+
+    @SuppressWarnings("unchecked") // safe to suppress since "this" will always be an instance of T
+    default A abstractSelf() {
+        return (A) this;
     }
 }
