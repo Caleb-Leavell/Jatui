@@ -1,5 +1,7 @@
 package com.calebleavell.jatui.modules;
 
+import jdk.jshell.spi.ExecutionControl;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -61,7 +63,7 @@ public class TUITextInputModule extends TUIModule {
 
     public static class Builder extends TUIModule.Builder<Builder> {
 
-        protected InputHandler handlers;
+        protected InputHandlers handlers;
         protected TUITextModule.Builder displayText;
 
         public Builder(String name, String displayText) {
@@ -70,7 +72,7 @@ public class TUITextInputModule extends TUIModule {
             this.displayText = new TUITextModule.Builder(name+"display", displayText).printNewLine(false);
             this.children.add(this.displayText);
 
-            handlers = new InputHandler(this.name + "-handlers", this);
+            handlers = new InputHandlers(this.name + "-handlers", this);
             this.children.add(handlers);
         }
 
@@ -147,17 +149,19 @@ public class TUITextInputModule extends TUIModule {
         }
     }
 
-    public static class InputHandler extends TUIModule.Template<InputHandler> {
+    private static class InputHandlers extends TUIModule.Template<InputHandlers> {
 
         protected Builder inputModule;
 
-        public InputHandler(String name, Builder inputModule) {
-            super(InputHandler.class, name);
+        int num = 1;
+
+        public InputHandlers(String name, Builder inputModule) {
+            super(InputHandlers.class, name);
             this.inputModule = inputModule;
         }
 
-        protected InputHandler() {
-            super(InputHandler.class);
+        protected InputHandlers() {
+            super(InputHandlers.class);
         }
 
         /**
@@ -166,46 +170,33 @@ public class TUITextInputModule extends TUIModule {
          * @return A fresh, empty instance.
          */
         @Override
-        public InputHandler createInstance() {
-            return new InputHandler();
+        public InputHandlers createInstance() {
+            return new InputHandlers();
+        }
+
+        @Override
+        protected void shallowCopy(InputHandlers other) {
+            super.shallowCopy(other);
+            this.inputModule = other.inputModule;
+            this.num = other.num;
         }
 
 
-        public InputHandler addHandler(TUIFunctionModule.Builder handler) {
-            main.addChild(handler);
+        public InputHandlers addHandler(TUIFunctionModule.Builder handler) {
+            main.addChild(new InputHandler(this.name + "-" + num, inputModule).setHandler(handler));
+            num ++;
             return self();
         }
 
-        public <T> InputHandler addHandler(String name, Function<String, T> logic) {
-            main.addChild(new TUIFunctionModule.Builder(name, () -> {
-                // TODO: this doesn't get turned into the new copy - this lambda has to be rebuilt on copy
-                TUIApplicationModule app = this.getApplication();
-                if(app == null) return null;
-                String input = app.getInput(inputModule.getName(), String.class);
-                T converted = logic.apply(input);
-                app.updateInput(name, converted);
-                return converted;
-            }));
+        public <T> InputHandlers addHandler(String name, Function<String, T> logic) {
+            main.addChild(new InputHandler(this.name + "-" + num, inputModule).setHandler(name, logic));
+            num ++;
             return self();
         }
 
-        public <T> InputHandler addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
-            main.addChild(new TUIFunctionModule.Builder(name, () -> {
-                System.out.println(System.identityHashCode(this));
-                TUIApplicationModule app = this.getApplication();
-                if(app == null) return null;
-                String input = app.getInput(inputModule.getName(), String.class);
-                T converted;
-                try {
-                    converted = logic.apply(input);
-                }
-                catch(Exception e) {
-                    exceptionHandler.accept(input);
-                    return app.getInput(name);
-                }
-                app.updateInput(name, converted);
-                return converted;
-            }));
+        public <T> InputHandlers addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
+            main.addChild(new InputHandler(this.name + "-" + num, inputModule).setHandler(name, logic, exceptionHandler));
+            num ++;
             return self();
         }
 
@@ -231,7 +222,7 @@ public class TUITextInputModule extends TUIModule {
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
          * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
          */
-        public boolean equalTo(InputHandler first, InputHandler second) {
+        public boolean equalTo(InputHandlers first, InputHandlers second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
@@ -239,5 +230,165 @@ public class TUITextInputModule extends TUIModule {
         }
 
 
+    }
+
+    private static class InputHandler extends TUIModule.Template<InputHandler> {
+
+        protected Builder inputModule;
+
+        protected HandlerType handlerType;
+        private TUIFunctionModule.Builder module;
+        private Function<String, ?> logic;
+        private Consumer<String> exceptionHandler;
+        private String moduleName;
+
+        enum HandlerType {
+            MODULE,
+            HANDLER,
+            SAFE_HANDLER
+        }
+
+        public InputHandler(String name, Builder inputModule) {
+            super(InputHandler.class, name);
+            this.inputModule = inputModule;
+        }
+
+        protected InputHandler() {
+            super(InputHandler.class);
+        }
+
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
+        @Override
+        public InputHandler createInstance() {
+            return new InputHandler();
+        }
+
+        @Override
+        protected void shallowCopy(InputHandler other) {
+            super.shallowCopy(other);
+            this.inputModule = other.inputModule;
+            this.handlerType = other.handlerType;
+            if(other.module != null) this.module = other.module.getCopy();
+            this.logic = other.logic;
+            this. exceptionHandler = other.exceptionHandler;
+            this.moduleName = other.moduleName;
+        }
+
+        public InputHandler setHandler(TUIFunctionModule.Builder handler) {
+            this.handlerType = HandlerType.MODULE;
+            this.module = handler;
+            return self();
+        }
+
+        public InputHandler setHandler(String name, Function<String, ?> logic) {
+            this.handlerType = HandlerType.HANDLER;
+            this.moduleName = name;
+            this.logic = logic;
+            return self();
+        }
+
+        public InputHandler setHandler(String name, Function<String, ?> logic, Consumer<String> exceptionHandler) {
+            this.handlerType = HandlerType.SAFE_HANDLER;
+            this.moduleName = name;
+            this.logic = logic;
+            this.exceptionHandler = exceptionHandler;
+            return self();
+        }
+
+
+        private InputHandler addHandler(TUIFunctionModule.Builder handler) {
+            main.addChild(handler);
+            return self();
+        }
+
+        private <T> InputHandler addHandler(String name, Function<String, T> logic) {
+            main.addChild(new TUIFunctionModule.Builder(name, () -> {
+                TUIApplicationModule app = this.getApplication();
+                if(app == null) return null;
+                String input = app.getInput(inputModule.getName(), String.class);
+                T converted = logic.apply(input);
+                app.updateInput(name, converted);
+                return converted;
+            }));
+            return self();
+        }
+
+        private <T> InputHandler addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
+            main.addChild(new TUIFunctionModule.Builder(name, () -> {
+                TUIApplicationModule app = this.getApplication();
+                if(app == null) return null;
+                String input = app.getInput(inputModule.getName(), String.class);
+                T converted;
+                try {
+                    converted = logic.apply(input);
+                }
+                catch(Exception e) {
+                    exceptionHandler.accept(input);
+                    return app.getInput(name);
+                }
+                app.updateInput(name, converted);
+                return converted;
+            }));
+            return self();
+        }
+
+        public TUIContainerModule build() {
+            main.clearChildren();
+
+            switch(handlerType) {
+                case MODULE -> {
+                    addHandler(module);
+                    break;
+                }
+                case HANDLER -> {
+                    addHandler(moduleName, logic);
+                    break;
+                }
+                case SAFE_HANDLER -> {
+                    addSafeHandler(moduleName, logic, exceptionHandler);
+                    break;
+                }
+            }
+
+            return super.build();
+        }
+
+        /**
+         * <p>Checks equality for properties given by the builder.</p>
+         *
+         * <p>For InputHandlers, this includes: </p>
+         * <ul>
+         *     <li><strong>inputModule</strong> <i>(Note: this checks reference equality, not structural equality.)</i></li>
+         *     <li><strong>handlerType</strong>
+         *     <li><strong>moduleName</strong>
+         *     <li>name</li>
+         *     <li>application</li>
+         *     <li>children</li>
+         *     <li>ansi</li>
+         *     <li>scanner</li>
+         *     <li>printStream</li>
+         *     <li>enableAnsi</li>
+         * </ul>
+         *
+         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
+         *  but are considered in equals()
+         * @param first The first InputHandlers to compare
+         * @param second The second InputHandlers to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         */
+        public boolean equalTo(InputHandler first, InputHandler second) {
+            if(first == second) return true;
+            if(first == null || second == null) return false;
+
+            return  Objects.equals(first.inputModule, second.inputModule) &&
+                    Objects.equals(first.handlerType, second.handlerType) &&
+                    Objects.equals(first.moduleName, second.moduleName) &&
+                    super.equalTo(first, second);
+        }
     }
 }

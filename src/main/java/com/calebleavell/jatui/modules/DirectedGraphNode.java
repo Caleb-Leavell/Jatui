@@ -213,7 +213,7 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
             if(children.get(i) == null && otherChildren.get(i) == null) continue;
             if(children.get(i) == null || otherChildren.get(i) == null) return false;
 
-            if(children.get(i).equals(otherChildren.get(i), visited)) return false;
+            if(!children.get(i).equals(otherChildren.get(i), visited)) return false;
 
         }
 

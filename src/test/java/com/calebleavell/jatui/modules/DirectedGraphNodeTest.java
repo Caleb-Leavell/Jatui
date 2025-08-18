@@ -56,16 +56,6 @@ class DirectedGraphNodeTest {
             return false;
         }
 
-        @Override
-        public void shallowCopy(TestNode original) {
-
-        }
-
-        @Override
-        public TestNode createInstance() {
-            return null;
-        }
-
         String getId() {
             return id;
         }
@@ -77,19 +67,6 @@ class DirectedGraphNodeTest {
         void setData(int data) {
             this.data = data;
         }
-
-        private TestNode(TestNode original) {
-            this.propertyUpdateFlags = new HashMap<>();
-            for(Property key : original.getPropertyUpdateFlags().keySet()) {
-                this.propertyUpdateFlags.put(key, original.getPropertyUpdateFlags().get(key));
-            }
-
-            this.children = new ArrayList<>();
-            for(TestNode child : original.children) {
-                this.children.add(child.getDeepCopy());
-            }
-        }
-
     }
 
     @Test
@@ -504,6 +481,7 @@ class DirectedGraphNodeTest {
         );
     }
 
+    // TODO
     @Test
     void testEquals() {
 

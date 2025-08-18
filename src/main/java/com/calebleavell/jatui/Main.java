@@ -130,13 +130,13 @@ public class Main {
         var copy = randomNumberGenerator.getCopy();
 
         System.out.println(copy.build());
+        System.out.println(copy.equals(randomNumberGenerator));
 
         // Set the application home and run
         app.setHome(copy);
-        System.out.println(System.identityHashCode(randomNumberGenerator.getChild("input-handlers", TUITextInputModule.InputHandler.class)));
-        System.out.println(System.identityHashCode(copy.getChild("input-handlers", TUITextInputModule.InputHandler.class)));
         app.run();
-        System.out.println(System.identityHashCode(copy.getChild("input-handlers", TUITextInputModule.InputHandler.class)));
+
+        System.out.println(app);
 
 
         TUIContainerModule.Builder zigzag = new TUIContainerModule.Builder("zigzag");
