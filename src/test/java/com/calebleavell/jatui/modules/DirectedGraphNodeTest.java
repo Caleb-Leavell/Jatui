@@ -5,10 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.desktop.AppReopenedEvent;
 import java.sql.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,7 +50,11 @@ class DirectedGraphNodeTest {
 
         @Override
         public boolean equalTo(TestNode first, TestNode second) {
-            return false;
+            if(first == second) return true;
+            if(first == null || second == null) return false;
+
+            return  Objects.equals(first.id, second.id) &&
+                    Objects.equals(first.data, second.data);
         }
 
         String getId() {
@@ -481,13 +482,37 @@ class DirectedGraphNodeTest {
         );
     }
 
-    // TODO
+    // Note: this test is not very thorough since equals matters more for TUIModule
     @Test
     void testEquals() {
+        TestNode node1 = new TestNode("one", 1);
+        TestNode node1Copy = new TestNode("one", 1);
+        TestNode node2 = new TestNode("two", 2);
+        TestNode node3 = new TestNode("three", 3);
+        TestNode node4 = new TestNode("four", 4);
+        TestNode node5 = new TestNode("five", 5);
+        TestNode node6 = new TestNode("six", 6);
+        TestNode node7 = new TestNode("seven", 7);
+        TestNode node3Alternate = new TestNode("three-alternate", 3);
 
-    }
+        node1.getChildren().add(node3);
+        node1Copy.getChildren().add(node3);
+        node2.getChildren().add(node7);
+        node3.getChildren().addAll(List.of(node4, node3Alternate, node1));
+        node4.getChildren().add(node2);
+        node5.getChildren().add(node4);
 
-    @Test
-    void testSelf() {
+        node3.getPropertyUpdateFlags().put(TestNode.Property.DATA, DirectedGraphNode.PropertyUpdateFlag.SKIP);
+        node2.getPropertyUpdateFlags().put(TestNode.Property.DATA, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+        assertAll(
+                () -> assertTrue(node1.equals(node1)),
+                () -> assertTrue(node1.equals(node1Copy)),
+                () -> assertFalse(node1.equals(node2))
+        );
+
+        node1Copy.setData(5);
+
+        assertFalse(node1.equals(node1Copy));
     }
 }
