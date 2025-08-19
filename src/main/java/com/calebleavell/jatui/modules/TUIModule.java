@@ -77,6 +77,8 @@ public abstract class TUIModule {
     public int MAX_ITERATIONS_ON_TO_STRING = 6;
 
     public void run() {
+        terminated = false;
+
         for(TUIModule.Builder<?> child : children) {
             if(terminated) break;
             TUIModule toRun = child.build();
@@ -635,7 +637,9 @@ public abstract class TUIModule {
         /**
          * <p>Builds the finalized ContainerModule</p>
          * <p><strong>Note:</strong> If you are going to override this method, ensure any changes made to main or other are reset each time it's called.
-         *          We want to ensure calling build() multiple times returns the same output.</p>
+         *          We want to ensure calling build() multiple times returns the same output.
+         *          Most likely, you'll want to call main.clearChildren() as the first line of the override.
+         *          </p>
          * @return The built ContainerModule
          */
         @Override

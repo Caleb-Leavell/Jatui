@@ -136,9 +136,6 @@ public class Main {
         app.setHome(copy);
         app.run();
 
-        System.out.println(app);
-
-
         TUIContainerModule.Builder zigzag = new TUIContainerModule.Builder("zigzag");
 
         int width = 74;
