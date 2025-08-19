@@ -22,8 +22,9 @@ public class Main {
         // information attached to them (e.g. here it has the output type and ansi)
         var moduleOutput = new TUITextModule.Builder("module-output-template", "template")
                 .outputType(DISPLAY_MODULE_OUTPUT)
-                // We set the ansi and lock it so that it can't be overridden later,
-                // since calling setAnsi for a parent overrides the ansi of its children by default.
+                // We set the ansi to a nice gold color.
+                // Setting the ansi automatically locks it from being set again,
+                // but you can unlock it with .unlockProperty(SET_ANSI)
                 .setAnsi(ansi().bold().fgRgb(220, 180, 0));
 
         // Front-end

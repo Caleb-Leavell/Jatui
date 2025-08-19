@@ -9,14 +9,38 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class TUIModuleTest {
 
-    // TODO - all these tests.. good luck o7
-
     @Test
     void testRun_termination() {
         TUIContainerModule test = new TUIContainerModule.Builder("test").build();
         test.terminated = true;
         test.run();
         assertFalse(test.terminated);
+    }
+
+    @Test
+    void testRun_currentRunningChild() {
+        TUIFunctionModule.Builder checkRunning1 = new TUIFunctionModule.Builder("check-running-1", () -> {});
+        TUIFunctionModule.Builder checkRunning2 = new TUIFunctionModule.Builder("check-running-2", () -> {});
+
+        TUIApplicationModule test = new TUIApplicationModule.Builder("test")
+                .addChildren(checkRunning1, checkRunning2)
+                .build();
+
+        checkRunning1.function(() -> {
+            return test.getCurrentRunningChild().equals(checkRunning1.build()) && !test.getCurrentRunningChild().equals(checkRunning2.build());
+        });
+
+        checkRunning2.function(() -> {
+            return test.getCurrentRunningChild().equals(checkRunning2.build()) && !test.getCurrentRunningChild().equals(checkRunning1.build());
+        });
+
+        test.run();
+
+        assertAll(
+                () -> assertTrue(test.getInput("check-running-1", Boolean.class)),
+                () -> assertTrue(test.getInput("check-running-2", Boolean.class)),
+                () -> assertNull(test.getCurrentRunningChild())
+        );
     }
 
     @Test
