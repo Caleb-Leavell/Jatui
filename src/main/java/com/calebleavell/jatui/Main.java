@@ -7,66 +7,7 @@ import static com.calebleavell.jatui.modules.TUITextModule.OutputType.*;
 
 import static org.fusesource.jansi.Ansi.*;
 
-
-// TODO: Debug features
-// TODO: documentation
-// TODO: unit testing
-
 public class Main {
-    public static class Rect extends TUIModule.Template<Rect> {
-        int x;
-        int y;
-
-        String cell = ".";
-
-        public Rect(String name, int x, int y) {
-            super(Rect.class, name);
-
-            this.x = x;
-            this.y = y;
-        }
-
-        protected Rect() {
-            super(Rect.class);
-        }
-
-        @Override
-        public Rect createInstance() {
-            return new Rect();
-        }
-
-        @Override
-        public void shallowCopy(Rect original) {
-            this.x = original.x;
-            this.y = original.y;
-            cell = original.cell;
-            super.shallowCopy(original);
-        }
-
-        public Rect cell(String cell) {
-            this.cell = cell;
-            return self();
-        }
-
-        @Override
-        public TUIContainerModule build() {
-            main.clearChildren();
-
-            for(int i = 0; i < y; i ++) {
-                TUITextModule.Builder row = new TUITextModule.Builder(name + "-" + y, "");
-
-                for(int j = 0; j < x; j ++) {
-                    row.append(cell);
-                }
-
-                main.addChild(row);
-            }
-
-            return super.build();
-        }
-
-    }
-
 
     public static void main(String[] args) {
         // This demo app will get a maximum number from the user, generate a random number between 1-maximum,
@@ -135,24 +76,6 @@ public class Main {
         // Set the application home and run
         app.setHome(copy);
         app.run();
-
-        TUIContainerModule.Builder zigzag = new TUIContainerModule.Builder("zigzag");
-
-        int width = 74;
-
-        for(int i = 0; i < width; i ++) {
-            zigzag.addChild(LineWithDot("zigzag" + i, i));
-        }
-        for(int i = width - 2; i >= 1; i --) {
-            zigzag.addChild(LineWithDot("zigzag" + (i + width), i));
-        }
-//        app.setHome(zigzag);
-//        app.setOnExit(TUIModuleFactory.Empty("empty-exit"));
-//
-//        while(true)
-//        {
-//            app.run();
-//        }
     }
 
     public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {
@@ -177,5 +100,62 @@ public class Main {
         // be parsed as an integer.
         int max = Integer.parseInt(input);
         return new java.util.Random().nextInt(max);
+    }
+
+    /**
+     * Example of a template. This template creates a rectangle when run.
+     */
+    public static class Rect extends TUIModule.Template<Rect> {
+        int x;
+        int y;
+
+        String cell = ".";
+
+        public Rect(String name, int x, int y) {
+            super(Rect.class, name);
+
+            this.x = x;
+            this.y = y;
+        }
+
+        protected Rect() {
+            super(Rect.class);
+        }
+
+        @Override
+        public Rect createInstance() {
+            return new Rect();
+        }
+
+        @Override
+        public void shallowCopy(Rect original) {
+            this.x = original.x;
+            this.y = original.y;
+            cell = original.cell;
+            super.shallowCopy(original);
+        }
+
+        public Rect cell(String cell) {
+            this.cell = cell;
+            return self();
+        }
+
+        @Override
+        public TUIContainerModule build() {
+            main.clearChildren(); // this prevents the children from duplicating every time.
+
+            for(int i = 0; i < y; i ++) {
+                TUITextModule.Builder row = new TUITextModule.Builder(name + "-" + y, "");
+
+                for(int j = 0; j < x; j ++) {
+                    row.append(cell);
+                }
+
+                main.addChild(row);
+            }
+
+            return super.build();
+        }
+
     }
 }
