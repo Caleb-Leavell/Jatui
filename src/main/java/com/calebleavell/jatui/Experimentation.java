@@ -56,6 +56,20 @@ public class Experimentation {
 
     }
 
+    public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {
+        String line = "   ".repeat(Math.max(0, dotX)) + "[##]";
+        return new TUIContainerModule.Builder(name).addChildren(
+                new TUITextModule.Builder(name+"dot", line),
+                new TUIFunctionModule.Builder(name+"sleep", () -> {
+                    try {
+                        System.out.flush();
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }));
+    }
+
     public static Object myMethod() {
         return "Hello, World!";
     }

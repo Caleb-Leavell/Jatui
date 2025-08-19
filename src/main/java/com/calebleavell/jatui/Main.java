@@ -68,28 +68,9 @@ public class Main {
                                 // So here, it's terminating app.
                                 .addScene("Exit", TUIModuleFactory.Terminate(app, "terminate-app")));
 
-        var copy = randomNumberGenerator.getCopy();
-
-        System.out.println(copy.build());
-        System.out.println(copy.equals(randomNumberGenerator));
-
         // Set the application home and run
-        app.setHome(copy);
+        app.setHome(randomNumberGenerator);
         app.run();
-    }
-
-    public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {
-        String line = "   ".repeat(Math.max(0, dotX)) + "[##]";
-        return new TUIContainerModule.Builder(name).addChildren(
-                new TUITextModule.Builder(name+"dot", line),
-                new TUIFunctionModule.Builder(name+"sleep", () -> {
-                    try {
-                        System.out.flush();
-                        Thread.sleep(250);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-        }));
     }
 
     // "back-end" logic
@@ -104,6 +85,7 @@ public class Main {
 
     /**
      * Example of a template. This template creates a rectangle when run.
+     * (Note, this template isn't used in the demo app. Further documentation on templating will come in the future.)
      */
     public static class Rect extends TUIModule.Template<Rect> {
         int x;
