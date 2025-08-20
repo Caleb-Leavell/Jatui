@@ -88,6 +88,7 @@ public abstract class TUIModule {
         }
     }
 
+
     public void runModuleAsChild(TUIModule.Builder<?> module) {
         if(currentRunningChild == null) {
             TUIModule built = module.build();
@@ -120,6 +121,7 @@ public abstract class TUIModule {
 
     public <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
         TUIModule.Builder<?> child = getChild(name);
+        if(child == null) return null;
         if(child.getClass() == type) {
             return type.cast(child);
         }
