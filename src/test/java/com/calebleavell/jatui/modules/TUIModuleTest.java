@@ -1,10 +1,17 @@
 package com.calebleavell.jatui.modules;
 
+import org.fusesource.jansi.Ansi;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.stream.IntStream;
 
+import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -266,14 +273,12 @@ class TUIModuleTest {
     @Test
     void testGetCurrentRunningChild() {
         TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        testApp.getChildren().clear();
+        testApp.getChildren().addAll(
+                List.of(
+                        checkShallowRunning("check-running-1", testApp).setApplication(testApp),
+                        checkShallowRunning("check-running-2", testApp).setApplication(testApp)));
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
-                .addChildren(
-                        checkShallowRunning("check-running-1", testApp),
-                        checkShallowRunning("check-running-2", testApp)
-                );
-
-        testApp.setHome(home);
         testApp.run();
 
         assertAll(
@@ -284,35 +289,81 @@ class TUIModuleTest {
     }
 
     @Test
-    void getCurrentRunningBranch() {
+    void testGetCurrentRunningBranch() {
+        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home");
+
+        TUIContainerModule.Builder nest_0 = new TUIContainerModule.Builder("nest-0");
+        TUIContainerModule.Builder nest_1 = new TUIContainerModule.Builder("nest-1");
+        TUIFunctionModule.Builder nest_2 = new TUIFunctionModule.Builder("nest-2", () -> {});
+        nest_2.function(() -> {
+            List<TUIModule> runningBranch = testApp.getCurrentRunningBranch();
+            List<TUIModule> expectedList = List.of(testApp, home.build(), nest_0.build(), nest_1.build(), nest_2.build());
+
+            return IntStream.range(0, expectedList.size())
+                    .allMatch(i -> runningBranch.get(i).equals(expectedList.get(i)));
+        });
+
+        home.addChildren(
+                        new TUIContainerModule.Builder("empty-1"),
+                        nest_0.addChild(nest_1.addChild(nest_2.addChild(new TUIContainerModule.Builder("empty_2")))),
+                        new TUIContainerModule.Builder("empty_3")
+                );
+
+        testApp.setHome(home);
+        testApp.run();
+
+        assertTrue(testApp.getInput("nest-2", Boolean.class));
     }
 
     @Test
-    void getApplication() {
+    void testGetApplication() {
+        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        TUIContainerModule test = new TUIContainerModule.Builder("test").setApplication(testApp).build();
+        assertEquals(testApp, test.getApplication());
     }
 
     @Test
-    void getAnsi() {
+    void testGetAnsi() {
+        Ansi ansi = ansi().bold().fgRgb(50, 50, 50);
+        TUIContainerModule test = new TUIContainerModule.Builder("test").setAnsi(ansi).build();
+        assertEquals(ansi, test.getAnsi());
     }
 
     @Test
-    void getScanner() {
+    void testGetScanner() {
+        Scanner scnr = new Scanner(new ByteArrayInputStream("test".getBytes()));
+        TUIContainerModule test = new TUIContainerModule.Builder("test").setScanner(scnr).build();
+        assertEquals(scnr, test.getScanner());
     }
 
     @Test
     void getPrintStream() {
+        PrintStream strm = new PrintStream(new ByteArrayOutputStream());
+        TUIContainerModule test = new TUIContainerModule.Builder("test").setPrintStream(strm).build();
+        assertEquals(strm, test.getPrintStream());
     }
 
     @Test
     void getAnsiEnabled() {
+        TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+        boolean enabledBefore = test.build().getAnsiEnabled();
+        test.enableAnsi(false);
+        boolean enabledAfter = test.build().getAnsiEnabled();
+
+        assertAll(
+                () -> assertTrue(enabledBefore),
+                () -> assertFalse(enabledAfter)
+        );
     }
 
     @Test
     void testToString() {
+        // not tested since I want to rework toString and haven't decided how it will be changed
     }
-
 
     @Test
     void testEquals() {
+        // TODO
     }
 }
