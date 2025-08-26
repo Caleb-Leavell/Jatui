@@ -1,6 +1,8 @@
 package com.calebleavell.jatui.modules;
 
+import com.calebleavell.jatui.IOCapture;
 import org.fusesource.jansi.Ansi;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -364,6 +366,281 @@ class TUIModuleTest {
 
     @Test
     void testEquals() {
-        // TODO
+        // Shared IOCapture for modules that should be equal
+        IOCapture ioShared = new IOCapture();
+        TUIApplicationModule app1 = new TUIApplicationModule.Builder("app1").build();
+
+        // Base module
+        TUIContainerModule module1 = new TUIContainerModule.Builder("")
+                .setName("module-name")
+                .setAnsi(ansi().bold())
+                .enableAnsi(false)
+                .setPrintStream(ioShared.getPrintStream())
+                .setScanner(ioShared.getScanner())
+                .setApplication(app1)
+                .build();
+
+        // Exact copy: all properties same
+        TUIContainerModule module2 = new TUIContainerModule.Builder("")
+                .setName("module-name")
+                .setAnsi(ansi().bold())
+                .enableAnsi(false)
+                .setPrintStream(ioShared.getPrintStream())
+                .setScanner(ioShared.getScanner())
+                .setApplication(app1)
+                .build();
+
+        // Differences:
+
+        // Different name
+        TUIContainerModule moduleNameDiff = new TUIContainerModule.Builder("")
+                .setName("different-name")
+                .setAnsi(ansi().bold())
+                .enableAnsi(false)
+                .setPrintStream(ioShared.getPrintStream())
+                .setScanner(ioShared.getScanner())
+                .setApplication(app1)
+                .build();
+
+        // Different application
+        TUIApplicationModule app2 = new TUIApplicationModule.Builder("app2").build();
+        TUIContainerModule moduleAppDiff = new TUIContainerModule.Builder("")
+                .setName("module-name")
+                .setAnsi(ansi().bold())
+                .enableAnsi(false)
+                .setPrintStream(ioShared.getPrintStream())
+                .setScanner(ioShared.getScanner())
+                .setApplication(app2)
+                .build();
+
+        // Different ANSI
+        TUIContainerModule moduleAnsiDiff = new TUIContainerModule.Builder("")
+                .setName("module-name")
+                .setAnsi(ansi().bgRgb(10, 10, 10))
+                .enableAnsi(false)
+                .setPrintStream(ioShared.getPrintStream())
+                .setScanner(ioShared.getScanner())
+                .setApplication(app1)
+                .build();
+
+        // Different ANSI enabled flag
+        TUIContainerModule moduleAnsiEnabledDiff = new TUIContainerModule.Builder("")
+                .setName("module-name")
+                .setAnsi(ansi().bold())
+                .enableAnsi(true)
+                .setPrintStream(ioShared.getPrintStream())
+                .setScanner(ioShared.getScanner())
+                .setApplication(app1)
+                .build();
+
+        // Different print stream (new IOCapture)
+        IOCapture ioOther = new IOCapture();
+        TUIContainerModule modulePrintStreamDiff = new TUIContainerModule.Builder("")
+                .setName("module-name")
+                .setAnsi(ansi().bold())
+                .enableAnsi(false)
+                .setPrintStream(ioOther.getPrintStream())
+                .setScanner(ioShared.getScanner())
+                .setApplication(app1)
+                .build();
+
+        // Different scanner (new IOCapture)
+        TUIContainerModule moduleScannerDiff = new TUIContainerModule.Builder("")
+                .setName("module-name")
+                .setAnsi(ansi().bold())
+                .enableAnsi(false)
+                .setPrintStream(ioShared.getPrintStream())
+                .setScanner(ioOther.getScanner())
+                .setApplication(app1)
+                .build();
+
+        ioShared.close();
+        ioOther.close();
+
+        // Assertions
+        assertAll(
+                () -> assertTrue(module1.equals(module1), "Reflexive check"),
+                () -> assertFalse(module1.equals(null), "Null check"),
+                () -> assertTrue(module1.equals(module2), "Exact copy should be equal"),
+                () -> assertFalse(module1.equals(moduleNameDiff), "Different name"),
+                () -> assertFalse(module1.equals(moduleAppDiff), "Different application"),
+                () -> assertFalse(module1.equals(moduleAnsiDiff), "Different ANSI"),
+                () -> assertFalse(module1.equals(moduleAnsiEnabledDiff), "Different ANSI enabled flag"),
+                () -> assertFalse(module1.equals(modulePrintStreamDiff), "Different print stream"),
+                () -> assertFalse(module1.equals(moduleScannerDiff), "Different scanner")
+        );
+
+    }
+
+
+    @Test
+    void testEqualsWithChildren() {
+        // Children
+        TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+        TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+
+        // Parent with two children
+        TUIContainerModule parent1 = new TUIContainerModule.Builder("parent")
+                .addChild(child1.getCopy())
+                .addChild(child2.getCopy())
+                .build();
+
+        // Exact copy of parent
+        TUIContainerModule parent2 = new TUIContainerModule.Builder("parent")
+                .addChild(child1.getCopy())
+                .addChild(child2.getCopy())
+                .build();
+
+        // Parent with a modified child
+        TUIContainerModule.Builder child3 = new TUIContainerModule.Builder("child3");
+
+        TUIContainerModule parent3 = new TUIContainerModule.Builder("parent")
+                .addChild(child3.getCopy())
+                .addChild(child2.getCopy())
+                .build();
+
+        assertAll(
+                () -> assertTrue(parent1.equals(parent2), "Parents with identical children should be equal"),
+                () -> assertFalse(parent1.equals(parent3), "Parents with one different child should not be equal")
+        );
+    }
+
+    @Nested
+    class BuilderTest {
+
+        @Test
+        void testSetNameAndGetName() {
+            // TODO: test setName and getName
+        }
+
+        @Test
+        void testPrependToName() {
+            // TODO: test prependToName
+        }
+
+        @Test
+        void testSetApplicationAndGetApplication() {
+            // TODO: test setApplication and getApplication
+        }
+
+        @Test
+        void testSetAnsiAndGetAnsi() {
+            // TODO: test setAnsi and getAnsi
+        }
+
+        @Test
+        void testPrependAnsi() {
+            // TODO: test prependAnsi
+        }
+
+        @Test
+        void testAppendAnsi() {
+            // TODO: test appendAnsi
+        }
+
+        @Test
+        void testSetScannerAndGetScanner() {
+            // TODO: test setScanner and getScanner
+        }
+
+        @Test
+        void testSetPrintStreamAndGetPrintStream() {
+            // TODO: test setPrintStream and getPrintStream
+        }
+
+        @Test
+        void testEnableAnsiAndGetAnsiEnabled() {
+            // TODO: test enableAnsi and getAnsiEnabled
+        }
+
+        @Test
+        void testAddChild() {
+            // TODO: test addChild (single)
+        }
+
+        @Test
+        void testAddChildAtIndex() {
+            // TODO: test addChild at specific index
+        }
+
+        @Test
+        void testAddChildrenVarargs() {
+            // TODO: test addChildren with varargs
+        }
+
+        @Test
+        void testAddChildrenList() {
+            // TODO: test addChildren with list
+        }
+
+        @Test
+        void testClearChildren() {
+            // TODO: test clearChildren
+        }
+
+        @Test
+        void testGetChildByName() {
+            // TODO: test getChild(String)
+        }
+
+        @Test
+        void testGetChildByNameAndType() {
+            // TODO: test getChild(String, Class)
+        }
+
+        @Test
+        void testGetChildren() {
+            // TODO: test getChildren list is returned
+        }
+
+        @Test
+        void testSetPropertyUpdateFlag() {
+            // TODO: test setPropertyUpdateFlag
+        }
+
+        @Test
+        void testLockProperty() {
+            // TODO: test lockProperty
+        }
+
+        @Test
+        void testUnlockProperty() {
+            // TODO: test unlockProperty
+        }
+
+        @Test
+        void testUpdateProperties() {
+            // TODO: test updateProperties from TUIModule
+        }
+
+        @Test
+        void testGetPropertyUpdateFlags() {
+            // TODO: test getPropertyUpdateFlags
+        }
+
+        @Test
+        void testGetCopy() {
+            // TODO: test getCopy
+        }
+
+        @Test
+        void testGetDeepCopy() {
+            // TODO: test getDeepCopy
+        }
+
+        @Test
+        void testEqualTo() {
+            // TODO: test equalTo for shallow equality (properties only)
+        }
+
+        @Test
+        void testEqualsWithChildren() {
+            // TODO: test Builder.equals recursively includes children
+        }
+
+        @Test
+        void testBuild() {
+            // TODO: test build() returns proper TUIModule
+        }
     }
 }

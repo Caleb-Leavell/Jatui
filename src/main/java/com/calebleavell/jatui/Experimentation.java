@@ -9,12 +9,16 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Supplier;
 
+import static org.fusesource.jansi.Ansi.ansi;
+
 public class Experimentation {
     public static void main(String[] args) throws IOException {
 
-        List<String> list = new ArrayList<>(List.of("a", "b", "c"));
-        list.remove(null);
-        System.out.println(list);
+            for(int i = 0; i < 122; i ++) {
+                System.out.print(ansi().bgRgb(255 - i * 2, 255 - (int) (i * 1.8), 255 - i * 2).a(" ").reset());
+            }
+            System.out.println();
+
 
 //        // this will be false, since you're technically passing in 2 different lambdas
 //        boolean one = TUIFunctionModule.Builder.equalTo(
