@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -510,87 +511,241 @@ class TUIModuleTest {
 
         @Test
         void testSetNameAndGetName() {
-            // TODO: test setName and getName
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("old-name");
+            String oldName = test.getName();
+            test.setName("new-name");
+            String newName = test.getName();
+
+            assertAll(
+                    () -> assertEquals("old-name", oldName),
+                    () -> assertEquals("new-name", newName)
+            );
         }
 
         @Test
         void testPrependToName() {
-            // TODO: test prependToName
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("name");
+            test.prependToName("new");
+            assertEquals("new-name", test.getName());
         }
 
         @Test
         void testSetApplicationAndGetApplication() {
-            // TODO: test setApplication and getApplication
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            test.addChild(child);
+
+            TUIApplicationModule oldApp = test.getApplication();
+            test.setApplication(app);
+            TUIApplicationModule newApp = test.getApplication();
+            TUIApplicationModule childApp = child.getApplication();
+
+            assertAll(
+                    () -> assertNull(oldApp),
+                    () -> assertEquals(app, newApp),
+                    () -> assertEquals(app, childApp)
+            );
         }
 
         @Test
         void testSetAnsiAndGetAnsi() {
-            // TODO: test setAnsi and getAnsi
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            test.addChild(child);
+
+            Ansi oldAnsi  = test.getAnsi();
+            test.setAnsi(ansi().bold());
+            Ansi newAnsi = test.getAnsi();
+            Ansi childAnsi = child.getAnsi();
+
+            assertAll(
+                    () -> assertEquals(ansi().toString(), oldAnsi.toString()),
+                    () -> assertEquals(ansi().bold().toString(), newAnsi.toString()),
+                    () -> assertEquals(ansi().bold().toString(), childAnsi.toString())
+            );
         }
 
         @Test
         void testPrependAnsi() {
-            // TODO: test prependAnsi
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child")
+                    .setAnsi(ansi().bold().reset());
+            test.addChild(child);
+
+            Ansi oldAnsi = child.getAnsi();
+            test.prependAnsi(ansi().fgRgb(3, 1, 4));
+            Ansi newAnsi = test.getAnsi();
+            Ansi childAnsi = child.getAnsi();
+
+            assertAll(
+                    () -> assertEquals(ansi().bold().reset().toString(), oldAnsi.toString()),
+                    () -> assertEquals(ansi().fgRgb(3, 1, 4).toString(), newAnsi.toString()),
+                    () -> assertEquals(ansi().a(ansi().fgRgb(3, 1, 4)).a(ansi().bold().reset()).toString(), childAnsi.toString())
+            );
         }
 
         @Test
         void testAppendAnsi() {
-            // TODO: test appendAnsi
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child")
+                    .setAnsi(ansi().bold().reset());
+            test.addChild(child);
+
+            Ansi oldAnsi = child.getAnsi();
+            test.appendAnsi(ansi().fgRgb(3, 1, 4));
+            Ansi newAnsi = test.getAnsi();
+            Ansi childAnsi = child.getAnsi();
+
+            assertAll(
+                    () -> assertEquals(ansi().bold().reset().toString(), oldAnsi.toString()),
+                    () -> assertEquals(ansi().fgRgb(3, 1, 4).toString(), newAnsi.toString()),
+                    () -> assertEquals(ansi().a(ansi().bold().reset()).a(ansi().fgRgb(3, 1, 4)).toString(), childAnsi.toString())
+            );
         }
 
         @Test
         void testSetScannerAndGetScanner() {
-            // TODO: test setScanner and getScanner
+            Scanner scanner = new Scanner("test");
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            test.addChild(child);
+
+            Scanner oldScanner = test.getScanner();
+            test.setScanner(scanner);
+            Scanner newScanner = test.getScanner();
+            Scanner childScanner = child.getScanner();
+
+            assertAll(
+                    () -> assertEquals(TUIModule.DEFAULT_SCANNER, oldScanner),
+                    () -> assertEquals(scanner, newScanner),
+                    () -> assertEquals(scanner, childScanner)
+            );
         }
 
         @Test
         void testSetPrintStreamAndGetPrintStream() {
-            // TODO: test setPrintStream and getPrintStream
+            PrintStream ps = new PrintStream(new ByteArrayOutputStream());
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            test.addChild(child);
+
+            PrintStream oldPs = test.getPrintStream();
+            test.setPrintStream(ps);
+            PrintStream newPs = test.getPrintStream();
+            PrintStream childPs = child.getPrintStream();
+
+            assertAll(
+                    () -> assertEquals(System.out, oldPs),
+                    () -> assertEquals(ps, newPs),
+                    () -> assertEquals(ps, childPs)
+            );
         }
 
         @Test
         void testEnableAnsiAndGetAnsiEnabled() {
-            // TODO: test enableAnsi and getAnsiEnabled
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            test.addChild(child);
+
+            boolean oldAnsi = test.getAnsiEnabled();
+            test.enableAnsi(false);
+            boolean newAnsi = test.getAnsiEnabled();
+            boolean childAnsi = child.getAnsiEnabled();
+
+            assertAll(
+                    () -> assertTrue(oldAnsi),
+                    () -> assertFalse(newAnsi),
+                    () -> assertFalse(childAnsi)
+            );
         }
 
         @Test
         void testAddChild() {
-            // TODO: test addChild (single)
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            test.addChild(child1);
+            test.addChild(child2);
+            assertEquals(List.of(child1, child2), test.getChildren());
         }
 
         @Test
         void testAddChildAtIndex() {
-            // TODO: test addChild at specific index
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            test.addChild(child1);
+            test.addChild(0, child2);
+            assertEquals(List.of(child2, child1), test.getChildren());
         }
 
         @Test
         void testAddChildrenVarargs() {
-            // TODO: test addChildren with varargs
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            test.addChildren(child1, child2);
+            assertEquals(List.of(child1, child2), test.getChildren());
         }
 
         @Test
         void testAddChildrenList() {
-            // TODO: test addChildren with list
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            test.addChildren(new ArrayList<>(List.of(child1, child2)));
+            assertEquals(List.of(child1, child2), test.getChildren());
         }
 
         @Test
         void testClearChildren() {
-            // TODO: test clearChildren
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            test.addChildren(child1, child2);
+            test.clearChildren();
+            assertEquals(List.of(), test.getChildren());
         }
 
         @Test
         void testGetChildByName() {
-            // TODO: test getChild(String)
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+
+            test.addChildren(
+                    new TUIContainerModule.Builder("a"),
+                    test,
+                    new TUIContainerModule.Builder("b")
+                            .addChild(child),
+                    new TUIContainerModule.Builder("child")
+            );
+
+            TUIModule.Builder<?> found = test.getChild("child");
+
+            assertEquals(child, found);
         }
 
         @Test
         void testGetChildByNameAndType() {
-            // TODO: test getChild(String, Class)
-        }
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUITextModule.Builder child = new TUITextModule.Builder("child", "child");
 
-        @Test
-        void testGetChildren() {
-            // TODO: test getChildren list is returned
+            test.addChildren(
+                    new TUIContainerModule.Builder("a"),
+                    test,
+                    new TUIContainerModule.Builder("b")
+                            .addChild(child),
+                    new TUIContainerModule.Builder("child")
+            );
+
+            TUITextModule.Builder found = test.getChild("child", TUITextModule.Builder.class);
+            TUIContainerModule.Builder other = test.getChild("child", TUIContainerModule.Builder.class);
+
+            assertAll(
+                    () -> assertEquals(child, found),
+                    () -> assertNull(other)
+            );
         }
 
         @Test

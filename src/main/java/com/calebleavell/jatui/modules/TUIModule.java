@@ -4,7 +4,6 @@ import org.fusesource.jansi.Ansi;
 
 import java.io.PrintStream;
 import java.util.*;
-import java.util.function.BiFunction;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -13,7 +12,7 @@ import static org.fusesource.jansi.Ansi.ansi;
  */
 public abstract class TUIModule {
 
-    static final Scanner SYSTEM_IN = new Scanner(System.in);
+    static final Scanner DEFAULT_SCANNER = new Scanner(System.in);
 
     public static final String UNNAMED_ERROR = "[ERROR: This module was never named!]";
 
@@ -282,7 +281,7 @@ public abstract class TUIModule {
         // properties
         protected TUIApplicationModule application;
         protected Ansi ansi = ansi();
-        protected Scanner scanner = TUIModule.SYSTEM_IN;
+        protected Scanner scanner = TUIModule.DEFAULT_SCANNER;
         protected PrintStream printStream = System.out;
         protected boolean enableAnsi = true;
 
@@ -489,7 +488,7 @@ public abstract class TUIModule {
         }
 
         private B setApplicationNonRecursive(TUIApplicationModule app) {
-            if(this.application != null && app == null) System.out.println("uhhh");
+            if(this.application != null && app == null) return self();
             this.application = app;
             return self();
         }
