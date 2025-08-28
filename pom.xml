@@ -6,7 +6,7 @@
 
     <groupId>com.calebleavell.jatui</groupId>
     <artifactId>Jatui</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 
     <properties>
         <maven.compiler.source>23</maven.compiler.source>
