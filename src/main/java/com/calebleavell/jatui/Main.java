@@ -67,7 +67,7 @@ public class Main {
                                 // TUIModuleFactory also provides Terminate, which returns a TUIFunctionModule builder
                                 // that, when run, simply terminates the module that was inputted into Terminate().
                                 // So here, it's terminating app.
-                                .addScene("Exit", TUIModuleFactory.Terminate(app, "terminate-app")));
+                                .addScene("Exit", TUIModuleFactory.terminate("terminate-app", app)));
 
         // Set the application home and run
         app.setHome(randomNumberGenerator);

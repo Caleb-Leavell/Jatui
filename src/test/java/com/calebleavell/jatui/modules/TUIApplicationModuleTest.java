@@ -149,7 +149,7 @@ class TUIApplicationModuleTest {
         int expected = 5;
 
         TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                .addChild(TUIModuleFactory.Empty("input"))
+                .addChild(TUIModuleFactory.empty("input"))
                 .build();
         app.updateInput("input", expected);
         assertAll(
@@ -161,7 +161,7 @@ class TUIApplicationModuleTest {
     void testUpdateInput_module_object() {
         int expected = 5;
 
-        TUIContainerModule.Builder input = TUIModuleFactory.Empty("input");
+        TUIContainerModule.Builder input = TUIModuleFactory.empty("input");
 
         TUIApplicationModule app = new TUIApplicationModule.Builder("app")
                 .addChild(input)

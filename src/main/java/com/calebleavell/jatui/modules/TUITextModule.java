@@ -5,7 +5,7 @@ import java.util.Objects;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class TUITextModule extends TUIModule {
-    private String text;
+    private final String text;
     private final boolean printNewLine;
     private final OutputType outputType;
 

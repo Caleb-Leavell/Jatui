@@ -124,7 +124,7 @@ public class TUIApplicationModule extends TUIModule {
 
         public Builder(String name) {
             super(Builder.class, name);
-            this.children.add(TUIModuleFactory.Empty("home"));
+            this.children.add(TUIModuleFactory.empty("home"));
             this.children.add(onExit);
         }
 

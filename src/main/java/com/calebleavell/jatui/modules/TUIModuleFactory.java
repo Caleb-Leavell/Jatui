@@ -14,49 +14,66 @@ public class TUIModuleFactory {
      * @param name The name of the module
      * @return The empty ContainerModule
      */
-    public static TUIContainerModule.Builder Empty(String name) {
+    public static TUIContainerModule.Builder empty(String name) {
         return new TUIContainerModule.Builder(name);
     }
 
     /**
      * Returns a Function Module that calls another module's terminate method.
-     * @param moduleToTerminate  The module to terminate (it will terminate when this module is run)
-     * @param name The name of the module to be returned
+     *
+     * @param name              The name of the module to be returned
+     * @param moduleToTerminate The module to terminate (it will terminate when this module is run)
      * @return The Function Module that terminates the inputted module
      */
-    public static TUIFunctionModule.Builder Terminate(TUIModule moduleToTerminate, String name) {
+    public static TUIFunctionModule.Builder terminate(String name, TUIModule moduleToTerminate) {
         return new TUIFunctionModule.Builder(name, moduleToTerminate::terminate);
     }
 
     /**
-     * Returns a Function Module that calls another module's run method.
-     * @param moduleToRun The module to run (it will run when this module is run)
+     * Returns a Function Module that terminates the child of name {@code moduleToTerminate} that is a child of {@code parent}. <br>
+     * Note: {@code moduleToTerminate} doesn't have to be a direct child of {@code parent}. It can be multiple layers deep.
+     *
      * @param name The name of the module to be returned
+     * @param moduleToTerminate The name of the module to terminate
+     * @param parent The parent module that will terminate the module
+     * @return The Function Module that terminates the module corresponding to {@code moduleToTerminate}
+     */
+    public static TUIFunctionModule.Builder terminate(String name, String moduleToTerminate, TUIModule parent) {
+        return new TUIFunctionModule.Builder(name, () -> parent.terminateChild(moduleToTerminate));
+    }
+
+    /**
+     * Returns a Function Module that calls another module's run method.
+     *
+     * @param name        The name of the module to be returned
+     * @param moduleToRun The module to run (it will run when this module is run)
      * @return The Function Module that calls another module's run method
      */
-    public static TUIFunctionModule.Builder Run(TUIModule.Builder<?> moduleToRun, String name) {
+    public static TUIFunctionModule.Builder run(String name, TUIModule.Builder<?> moduleToRun) {
         return new TUIFunctionModule.Builder(name, () -> moduleToRun.build().run());
     }
 
     /**
      * Returns a Function Module that calls another module's run method.
+     *
+     * @param name        The name of the module to be returned
      * @param moduleToRun The module to run (it will run when this module is run)
-     * @param name The name of the module to be returned
      * @return The Function Module that calls another module's run method
      */
-    public static TUIFunctionModule.Builder Run(TUIModule moduleToRun, String name) {
+    public static TUIFunctionModule.Builder run(String name, TUIModule moduleToRun) {
         return new TUIFunctionModule.Builder(name, moduleToRun::run);
     }
 
     /**
      * Returns a Function Module that finds the child of a parent by name then runs it.
      * Will do nothing no if the parent's module tree does not have a child with the given name.
-     * @param moduleToRun The name of the module to run (it will run when this module is run)
+     *
+     * @param name         The name of the module to be returned
      * @param parentModule The module that the <strong>module to run</strong> is the child of
-     * @param name The name of the module to be returned
+     * @param moduleToRun  The name of the module to run (it will run when this module is run)
      * @return The Function Module that calls another module's run method
      */
-    public static TUIFunctionModule.Builder Run(String moduleToRun, TUIModule parentModule, String name) {
+    public static TUIFunctionModule.Builder run(String name, TUIModule parentModule, String moduleToRun) {
         return new TUIFunctionModule.Builder(name, () -> {
             TUIModule.Builder<?> toRun = parentModule.getChild(moduleToRun);
             if(toRun != null) toRun.build().run();
@@ -65,26 +82,31 @@ public class TUIModuleFactory {
 
     /**
      * Returns a Function Module that increments a counter every time it's run (starts at 1).
-     * This is useful for building things like lists dynamically.
-     * To access the counter, call [app].getInput([name], Integer.class). Note that this will likely be null before this module is run.
+     * To access the counter, call <br>
+     * {@code [app].getInput([name], Integer.class)}). <br>
+     * Note that this will likely be null before this module is run.
+     *
      * @param name The name of the module to be returned
-     * @param app The Application Module that this module will be the child of
+     * @param app  The Application Module that this module will be the child of
      * @return The Function Module that increments a counter
      */
-    public static TUIFunctionModule.Builder Counter(TUIApplicationModule app, String name) {
-        return Counter(app, name, 1, 1);
+    public static TUIFunctionModule.Builder counter(String name, TUIApplicationModule app) {
+        return counter(name, app, 1, 1);
     }
 
     /**
      * Returns a Function Module that increments a counter every time it's run (starts at 1).
-     * To access the counter, call <app>.getInput(<name>, Integer.class). Note that this will likely be null before this module is run.
-     * @param name The name of the module to be returned
-     * @param app The Application Module that this module will be the child of
+     * To access the counter, call <br>
+     * {@code [app].getInput([name], Integer.class)}). <br>
+     * Note that this will likely be null before this module is run.
+     *
+     * @param name  The name of the module to be returned
+     * @param app   The Application Module that this module will be the child of
      * @param begin The number to begin at (e.g. begin = 5 -> 5, 6, 7, 8, ...)
-     * @param step The amount to increment each time (e.g. step = 5 -> 1, 6, 11, ...)
+     * @param step  The amount to increment each time (e.g. step = 5 -> 1, 6, 11, ...)
      * @return The Function Module that increments a counter
      */
-    public static TUIFunctionModule.Builder Counter(TUIApplicationModule app, String name, int begin, int step) {
+    public static TUIFunctionModule.Builder counter(String name, TUIApplicationModule app, int begin, int step) {
         return new TUIFunctionModule.Builder(name, () -> {
             Integer counter = app.getInput(name, Integer.class);
             if(counter != null)  return counter + step;
@@ -136,12 +158,12 @@ public class TUIModuleFactory {
             return this;
         }
 
-        public NumberedList start(int start) {
+        public NumberedList setStart(int start) {
             this.start = start;
             return this;
         }
 
-        public NumberedList step(int step) {
+        public NumberedList setStep(int step) {
             this.step = step;
             return this;
         }

@@ -147,7 +147,7 @@ public class TUITextInputModule extends TUIModule {
         }
     }
 
-    private static class InputHandlers extends TUIModule.Template<InputHandlers> {
+    protected static class InputHandlers extends TUIModule.Template<InputHandlers> {
 
         protected Builder inputModule;
 
@@ -230,7 +230,7 @@ public class TUITextInputModule extends TUIModule {
 
     }
 
-    private static class InputHandler extends TUIModule.Template<InputHandler> {
+    protected static class InputHandler extends TUIModule.Template<InputHandler> {
 
         protected Builder inputModule;
 
@@ -334,27 +334,6 @@ public class TUITextInputModule extends TUIModule {
             return self();
         }
 
-        public TUIContainerModule build() {
-            main.clearChildren();
-
-            switch(handlerType) {
-                case MODULE -> {
-                    addHandler(module);
-                    break;
-                }
-                case HANDLER -> {
-                    addHandler(moduleName, logic);
-                    break;
-                }
-                case SAFE_HANDLER -> {
-                    addSafeHandler(moduleName, logic, exceptionHandler);
-                    break;
-                }
-            }
-
-            return super.build();
-        }
-
         /**
          * <p>Checks equality for properties given by the builder.</p>
          *
@@ -387,6 +366,27 @@ public class TUITextInputModule extends TUIModule {
                     Objects.equals(first.handlerType, second.handlerType) &&
                     Objects.equals(first.moduleName, second.moduleName) &&
                     super.equalTo(first, second);
+        }
+
+        public TUIContainerModule build() {
+            main.clearChildren();
+
+            switch(handlerType) {
+                case MODULE -> {
+                    addHandler(module);
+                    break;
+                }
+                case HANDLER -> {
+                    addHandler(moduleName, logic);
+                    break;
+                }
+                case SAFE_HANDLER -> {
+                    addSafeHandler(moduleName, logic, exceptionHandler);
+                    break;
+                }
+            }
+
+            return super.build();
         }
     }
 }
