@@ -4,6 +4,7 @@ import com.calebleavell.jatui.IOCapture;
 import org.fusesource.jansi.Ansi;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.engine.support.hierarchical.Node;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,6 +12,7 @@ import java.io.PrintStream;
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
@@ -750,27 +752,126 @@ class TUIModuleTest {
 
         @Test
         void testSetPropertyUpdateFlag() {
-            // TODO: test setPropertyUpdateFlag
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+
+            test.addChild(child1);
+            child1.addChild(child2);
+
+            child1.setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.SKIP);
+
+            test.setApplication(app);
+
+            assertAll(
+                    () -> assertEquals(app, test.getApplication()),
+                    () -> assertNull(child1.getApplication()),
+                    () -> assertEquals(app, child2.getApplication()),
+                    () -> assertEquals(DirectedGraphNode.PropertyUpdateFlag.SKIP, child1.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION))
+            );
         }
 
         @Test
         void testLockProperty() {
-            // TODO: test lockProperty
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+
+            test.addChild(child1);
+            child1.addChild(child2);
+
+            child1.lockProperty(TUIModule.Property.APPLICATION);
+
+            test.setApplication(app);
+
+            assertAll(
+                    () -> assertEquals(app, test.getApplication()),
+                    () -> assertNull(child1.getApplication()),
+                    () -> assertNull(child2.getApplication()),
+                    () -> assertEquals(DirectedGraphNode.PropertyUpdateFlag.HALT, child1.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION))
+            );
         }
 
         @Test
         void testUnlockProperty() {
-            // TODO: test unlockProperty
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
+            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+
+            test.addChild(child1);
+            child1.addChild(child2);
+
+            child1.lockProperty(TUIModule.Property.APPLICATION);
+            child1.unlockProperty(TUIModule.Property.APPLICATION);
+
+            test.setApplication(app);
+
+            assertAll(
+                    () -> assertEquals(app, test.getApplication()),
+                    () -> assertEquals(app, child1.getApplication()),
+                    () -> assertEquals(app, child2.getApplication()),
+                    () -> assertEquals(DirectedGraphNode.PropertyUpdateFlag.UPDATE, child1.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION))
+            );
         }
 
         @Test
         void testUpdateProperties() {
-            // TODO: test updateProperties from TUIModule
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            IOCapture io = new IOCapture();
+            TUIContainerModule.Builder populated = new TUIContainerModule.Builder("populated")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold());
+
+            TUIContainerModule.Builder empty = new TUIContainerModule.Builder("empty");
+
+            empty.updateProperties(populated.build());
+
+            io.close();
+
+            assertAll(
+                    () -> assertEquals(app, empty.getApplication()),
+                    () -> assertEquals(io.getScanner(), empty.getScanner()),
+                    () -> assertEquals(io.getPrintStream(), empty.getPrintStream()),
+                    () -> assertFalse(empty.getAnsiEnabled()),
+                    () -> assertEquals(ansi().bold().toString(), empty.getAnsi().toString()),
+                    () -> assertEquals("empty", empty.getName()) // name shouldn't be replaced
+            );
+
         }
 
         @Test
         void testGetPropertyUpdateFlags() {
-            // TODO: test getPropertyUpdateFlags
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+
+            DirectedGraphNode.PropertyUpdateFlag oldFlag = test.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION);
+            test.setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.SKIP);
+            DirectedGraphNode.PropertyUpdateFlag newFlag = test.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION);
+
+            assertAll(
+                    () -> assertEquals(DirectedGraphNode.PropertyUpdateFlag.UPDATE, oldFlag),
+                    () -> assertEquals(DirectedGraphNode.PropertyUpdateFlag.SKIP, newFlag)
+            );
+        }
+
+        @Test
+        void testPropertyUpdateFlagDefaults() {
+            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+
+            boolean allUpdate = true;
+            for(TUIModule.Property flag : test.getPropertyUpdateFlags().keySet()) {
+                if(test.getPropertyUpdateFlags().get(flag) != DirectedGraphNode.PropertyUpdateFlag.UPDATE) {
+                    allUpdate = false;
+                }
+            }
+
+            assertTrue(allUpdate);
+
         }
 
         @Test

@@ -12,8 +12,10 @@ import static org.fusesource.jansi.Ansi.ansi;
  */
 public abstract class TUIModule {
 
+    /** reads from System.in **/
     static final Scanner DEFAULT_SCANNER = new Scanner(System.in);
 
+    /** The standard message for when a module isn't named **/
     public static final String UNNAMED_ERROR = "[ERROR: This module was never named!]";
 
     public enum Property {
