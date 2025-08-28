@@ -297,7 +297,6 @@ public class TUITextInputModule extends TUIModule {
             return self();
         }
 
-
         private InputHandler addHandler(TUIFunctionModule.Builder handler) {
             main.addChild(handler);
             return self();

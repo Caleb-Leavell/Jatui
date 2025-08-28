@@ -1111,4 +1111,20 @@ class TUIModuleTest {
             assertTrue(first.equals(second));
         }
     }
+
+    @Nested
+    class NameOrModuleTest {
+
+        // TODO: NameOrModuleTest
+
+        @Test
+        void testGetModule() {
+
+        }
+
+        @Test
+        void testGetName() {
+
+        }
+    }
 }

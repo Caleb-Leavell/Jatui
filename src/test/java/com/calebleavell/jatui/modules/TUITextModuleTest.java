@@ -222,8 +222,6 @@ class TUITextModuleTest {
             before = text.getText();
             text.append("after");
             after = text.getText();
-            text.build().run();
-
 
             assertAll(
                     () -> assertEquals("before", before),
