@@ -138,7 +138,7 @@ public class TUIApplicationModule extends TUIModule {
          * @return A fresh, empty instance.
          */
         @Override
-        public Builder createInstance() {
+        protected Builder createInstance() {
             return new TUIApplicationModule.Builder();
         }
 

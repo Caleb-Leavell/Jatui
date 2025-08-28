@@ -4,15 +4,12 @@ import com.calebleavell.jatui.IOCapture;
 import org.fusesource.jansi.Ansi;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.support.hierarchical.Node;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
@@ -26,7 +23,7 @@ class TUIModuleTest {
 
     public static TUIFunctionModule.Builder checkRunning(String name, TUIModule parent) {
         TUIFunctionModule.Builder checkRunning = new TUIFunctionModule.Builder(name, () -> {});
-        checkRunning.function(() -> {
+        checkRunning.setFunction(() -> {
             return parent.getCurrentRunningBranch().getLast().equals(checkRunning.build());
         });
         return checkRunning;
@@ -34,7 +31,7 @@ class TUIModuleTest {
 
     public static TUIFunctionModule.Builder checkShallowRunning (String name, TUIModule parent) {
         TUIFunctionModule.Builder checkRunning = new TUIFunctionModule.Builder(name, () -> {});
-        checkRunning.function(() -> {
+        checkRunning.setFunction(() -> {
             return parent.getCurrentRunningChild().equals(checkRunning.build());
         });
         return checkRunning;
@@ -301,7 +298,7 @@ class TUIModuleTest {
         TUIContainerModule.Builder nest_0 = new TUIContainerModule.Builder("nest-0");
         TUIContainerModule.Builder nest_1 = new TUIContainerModule.Builder("nest-1");
         TUIFunctionModule.Builder nest_2 = new TUIFunctionModule.Builder("nest-2", () -> {});
-        nest_2.function(() -> {
+        nest_2.setFunction(() -> {
             List<TUIModule> runningBranch = testApp.getCurrentRunningBranch();
             List<TUIModule> expectedList = List.of(testApp, home.build(), nest_0.build(), nest_1.build(), nest_2.build());
 

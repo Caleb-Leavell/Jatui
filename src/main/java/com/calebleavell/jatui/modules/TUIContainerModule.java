@@ -25,7 +25,7 @@ public class TUIContainerModule extends TUIModule {
          * @return A fresh, empty instance.
          */
         @Override
-        public Builder createInstance() {
+        protected Builder createInstance() {
             return new Builder();
         }
 

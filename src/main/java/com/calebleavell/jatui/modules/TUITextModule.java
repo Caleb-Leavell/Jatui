@@ -1,7 +1,6 @@
 package com.calebleavell.jatui.modules;
 
 import java.util.Objects;
-import java.util.function.BiFunction;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -106,7 +105,7 @@ public class TUITextModule extends TUIModule {
          * @return A fresh, empty instance.
          */
         @Override
-        public Builder createInstance() {
+        protected Builder createInstance() {
             return new Builder();
         }
 

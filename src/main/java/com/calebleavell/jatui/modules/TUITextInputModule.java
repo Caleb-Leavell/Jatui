@@ -1,7 +1,5 @@
 package com.calebleavell.jatui.modules;
 
-import jdk.jshell.spi.ExecutionControl;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -86,7 +84,7 @@ public class TUITextInputModule extends TUIModule {
          * @return A fresh, empty instance.
          */
         @Override
-        public Builder createInstance() {
+        protected Builder createInstance() {
             return new Builder();
         }
 
@@ -170,7 +168,7 @@ public class TUITextInputModule extends TUIModule {
          * @return A fresh, empty instance.
          */
         @Override
-        public InputHandlers createInstance() {
+        protected InputHandlers createInstance() {
             return new InputHandlers();
         }
 
@@ -263,7 +261,7 @@ public class TUITextInputModule extends TUIModule {
          * @return A fresh, empty instance.
          */
         @Override
-        public InputHandler createInstance() {
+        protected InputHandler createInstance() {
             return new InputHandler();
         }
 

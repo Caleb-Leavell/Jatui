@@ -106,7 +106,7 @@ public class Main {
         }
 
         @Override
-        public Rect createInstance() {
+        protected Rect createInstance() {
             return new Rect();
         }
 

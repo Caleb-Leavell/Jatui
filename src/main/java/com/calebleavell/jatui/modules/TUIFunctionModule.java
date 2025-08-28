@@ -1,12 +1,9 @@
 package com.calebleavell.jatui.modules;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class TUIFunctionModule extends TUIModule {
-    private Supplier<Object> function;
+    private final Supplier<?> function;
 
 
     @Override
@@ -17,12 +14,8 @@ public class TUIFunctionModule extends TUIModule {
         super.run();
     }
 
-    public Supplier<Object> getFunction() {
+    public Supplier<?> getFunction() {
         return function;
-    }
-
-    public void setFunction(Supplier<Object> function) {
-        this.function = function;
     }
 
     public TUIFunctionModule(Builder builder) {
@@ -31,24 +24,28 @@ public class TUIFunctionModule extends TUIModule {
     }
 
     public static class Builder extends TUIModule.Builder<Builder> {
-        Supplier<Object> function; // this isn't checked in a .equalTo so structural equality can actually return true ;)
+        Supplier<?> function; // this isn't checked in a .equalTo so structural equality can actually return true ;)
 
-        public Builder(String name, Supplier<Object> function) {
+        public Builder(String name, Supplier<?> function) {
             super(Builder.class, name);
             this.function = function;
         }
 
         public Builder(String name, Runnable function) {
             super(Builder.class, name);
-            this.function(function);
+            this.setFunction(function);
         }
 
-        public Builder function(Supplier<Object> function) {
+        public Supplier<?> getFunction() {
+            return function;
+        }
+
+        public Builder setFunction(Supplier<?> function) {
             this.function = function;
             return self();
         }
 
-        public Builder function(Runnable function) {
+        public Builder setFunction(Runnable function) {
             if(function == null) this.function = null;
             else {
                 this.function = () -> {
@@ -70,7 +67,7 @@ public class TUIFunctionModule extends TUIModule {
          * @return A fresh, empty instance.
          */
         @Override
-        public Builder createInstance() {
+        protected Builder createInstance() {
             return new Builder();
         }
 

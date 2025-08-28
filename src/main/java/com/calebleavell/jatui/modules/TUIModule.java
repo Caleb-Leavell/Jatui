@@ -341,7 +341,7 @@ public abstract class TUIModule {
          *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
          * @return A fresh, empty instance.
          */
-        public abstract B createInstance();
+        protected abstract B createInstance();
 
         protected void shallowCopy(B original) {
             this.name = original.name;

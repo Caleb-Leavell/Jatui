@@ -112,7 +112,7 @@ public class TUIModuleFactory {
          * @return A fresh, empty instance.
          */
         @Override
-        public NumberedList createInstance() {
+        protected NumberedList createInstance() {
             return new NumberedList();
         }
 
@@ -202,7 +202,7 @@ public class TUIModuleFactory {
          * @return A fresh, empty instance.
          */
         @Override
-        public NumberedModuleSelector createInstance() {
+        protected NumberedModuleSelector createInstance() {
             return new NumberedModuleSelector();
         }
 
@@ -272,7 +272,7 @@ public class TUIModuleFactory {
          * @return A fresh, empty instance.
          */
         @Override
-        public LineBuilder createInstance() {
+        protected LineBuilder createInstance() {
             return new LineBuilder();
         }
 
