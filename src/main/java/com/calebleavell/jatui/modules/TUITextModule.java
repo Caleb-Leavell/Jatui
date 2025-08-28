@@ -44,9 +44,9 @@ public class TUITextModule extends TUIModule {
         return text;
     }
 
-    void setText(String text) {
-        this.text = text;
-    }
+    OutputType getOutputType() {return outputType;}
+
+    boolean getPrintNewLine() {return printNewLine;}
 
     /**
      * <p>Checks equality for properties given by the builder.</p>
@@ -123,12 +123,20 @@ public class TUITextModule extends TUIModule {
             return self();
         }
 
-        public Builder outputType(OutputType type) {
+        public boolean getPrintNewLine() {
+            return printNewLine;
+        }
+
+        public Builder setOutputType(OutputType type) {
             this.outputType = type;
             return self();
         }
 
-        public Builder text(String text) {
+        public OutputType getOutputType() {
+            return outputType;
+        }
+
+        public Builder setText(String text) {
             this.text = text;
             return self();
         }
@@ -136,6 +144,10 @@ public class TUITextModule extends TUIModule {
         public Builder append(String text) {
             this.text += text;
             return self();
+        }
+
+        public String getText() {
+            return text;
         }
 
         /**

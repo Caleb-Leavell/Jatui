@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TUIFunctionModuleTest {
 
     @Test
-    void run() {
+    void testRun() {
         TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
         TUIFunctionModule.Builder test = new TUIFunctionModule.Builder("test", () -> {
             return "Test Output";
@@ -26,7 +26,7 @@ class TUIFunctionModuleTest {
     }
 
     @Test
-    void getFunction() {
+    void testGetFunction() {
         Supplier<Integer> func = () -> 5;
         TUIFunctionModule test = new TUIFunctionModule.Builder("test", func).build();
         assertEquals(func, test.getFunction());

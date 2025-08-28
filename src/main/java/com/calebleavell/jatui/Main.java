@@ -21,7 +21,7 @@ public class Main {
         // It's generally a good idea to start abstracting modules away like this when they have complex
         // information attached to them (e.g. here it has the output type and ansi)
         var moduleOutput = new TUITextModule.Builder("module-output-template", "template")
-                .outputType(DISPLAY_MODULE_OUTPUT)
+                .setOutputType(DISPLAY_MODULE_OUTPUT)
                 // We set the ansi to a nice gold color.
                 // Setting the ansi automatically locks it from being set again,
                 // but you can unlock it with .unlockProperty(SET_ANSI)
@@ -57,7 +57,7 @@ public class Main {
                                 // So this module will display whatever "generated-number" outputs.
                                 .addText(moduleOutput.getCopy()
                                         .setName("display-generated-number")
-                                        .text("generated-number"))
+                                        .setText("generated-number"))
                                 .newLine(),
                         // TUIModuleFactory provides NumberedModuleSelector, which displays a numbered list of
                         // text, asks for user input, and runs the module corresponding to the choice of the user.

@@ -304,7 +304,7 @@ public class TUIModuleFactory {
 
         public LineBuilder addModuleOutput(String moduleName, Ansi ansi) {
             this.addText(new TUITextModule.Builder(main.getName() + "-" + iterator, moduleName)
-                    .outputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
                     .setAnsi(ansi));
             return self();
