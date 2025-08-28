@@ -301,24 +301,23 @@ public abstract class TUIModule {
             this.type = type;
         }
 
-        protected void deepCopy(B original, Map<Builder<?>, Builder<?>> visited) {
-            if(visited.get(original) != null) return;
+        protected B deepCopy(B original, Map<Builder<?>, Builder<?>> visited) {
+            if(visited.get(original) != null) return original.getType().cast(visited.get(original));
             visited.put(original, this);
 
             shallowCopy(type.cast(original));
 
             for(Builder<?> child : original.getChildren()) {
                 Builder<?> newChild = child.createInstance();
-                Builder.deepCopyHelper(child, newChild, visited);
-
-                // we don't even need to check that child and newChild are of the same type since createInstance returns T
-                getChildren().add(newChild);
+                getChildren().add(Builder.deepCopyHelper(child, newChild, visited));
             }
+
+            return self();
         }
 
-        private static <T extends Builder<T>> void deepCopyHelper(Builder<T> original, Builder<?> copyInto, Map<Builder<?>, Builder<?>> visited) {
+        private static <T extends Builder<T>> Builder<T> deepCopyHelper(Builder<T> original, Builder<?> copyInto, Map<Builder<?>, Builder<?>> visited) {
             Builder<T> toCopy = original.getType().cast(copyInto);
-            toCopy.deepCopy(original.self(), visited);
+            return toCopy.deepCopy(original.self(), visited);
         }
 
         protected Map<Builder<?>, Builder<?>> deepCopy(B original) {
@@ -592,6 +591,7 @@ public abstract class TUIModule {
                     Objects.equals(firstAnsi, secondAnsi) &&
                     Objects.equals(first.scanner, second.scanner) &&
                     Objects.equals(first.printStream, second.printStream) &&
+                    Objects.equals(first.propertyUpdateFlags, second.propertyUpdateFlags) &&
                     first.enableAnsi == second.enableAnsi);
         }
 
@@ -632,9 +632,10 @@ public abstract class TUIModule {
         }
 
         @Override
-        public void deepCopy(B original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
+        public B deepCopy(B original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
             super.deepCopy(original, visited);
             main = (TUIContainerModule.Builder) visited.get(original.main);
+            return self();
         }
 
         /**

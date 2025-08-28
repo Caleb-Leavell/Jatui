@@ -91,12 +91,12 @@ public class TUITextInputModule extends TUIModule {
         }
 
         @Override
-        protected void deepCopy(Builder original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
+        protected Builder deepCopy(Builder original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
             super.deepCopy(original, visited);
             this.displayText = original.displayText.getType().cast(visited.get(original.displayText));
             this.handlers = original.handlers.getType().cast(visited.get(original.handlers));
             this.handlers.inputModule = this;
-
+            return this;
         }
 
         public Builder addHandler(TUIFunctionModule.Builder handler) {

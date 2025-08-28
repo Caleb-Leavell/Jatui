@@ -875,28 +875,243 @@ class TUIModuleTest {
         }
 
         @Test
-        void testGetCopy() {
-            // TODO: test getCopy
+        void testShallowCopy() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            IOCapture io = new IOCapture();
+            TUIContainerModule.Builder original = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder copied  = original.getCopy();
+
+            io.close();
+
+            assertAll(
+                    () -> assertEquals(app, copied.getApplication()),
+                    () -> assertEquals(io.getScanner(), copied.getScanner()),
+                    () -> assertEquals(io.getPrintStream(), copied.getPrintStream()),
+                    () -> assertFalse(copied.getAnsiEnabled()),
+                    () -> assertEquals(ansi().bold().toString(), copied.getAnsi().toString()),
+                    () -> assertEquals(DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT, copied.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION)),
+                    () -> assertEquals("original", copied.getName())
+            );
         }
 
         @Test
         void testGetDeepCopy() {
-            // TODO: test getDeepCopy
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            IOCapture io = new IOCapture();
+            TUIContainerModule.Builder original = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
+                    .addChildren(
+                            new TUIContainerModule.Builder("child1"),
+                            new TUIContainerModule.Builder("child2")
+                                    .setApplication(app),
+                            new TUIContainerModule.Builder("child3")
+                                    .addChild(new TUIContainerModule.Builder("child4")),
+                            new TUIContainerModule.Builder("child5")
+                                    .setAnsi(ansi().a("testAnsi"))
+                    );
+
+            original.getChild("child4").addChild(original);
+
+            TUIContainerModule.Builder copied  = original.getCopy();
+
+            io.close();
+
+            assertTrue(copied.equals(original));
         }
 
+        // equality more thoroughly tested in DirectedGraphNodeTest
         @Test
         void testEqualTo() {
-            // TODO: test equalTo for shallow equality (properties only)
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            IOCapture io = new IOCapture();
+            TUIContainerModule.Builder first = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder second = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder third = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder fourth = new TUIContainerModule.Builder("original")
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder fifth = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder sixth = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder seventh = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder eighth = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+
+            TUIContainerModule.Builder ninth = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold());
+
+            io.close();
+
+            assertAll(
+                    () -> assertTrue(first.equalTo(first, first)),
+                    () -> assertTrue(first.equalTo(first, second)),
+                    () -> assertTrue(second.equalTo(first, third)),
+                    () -> assertTrue(first.equalTo(first, third)),
+                    () -> assertFalse(first.equalTo(first, fourth)),
+                    () -> assertFalse(first.equalTo(first, fifth)),
+                    () -> assertFalse(first.equalTo(first, sixth)),
+                    () -> assertFalse(first.equalTo(first, seventh)),
+                    () -> assertFalse(first.equalTo(first, eighth)),
+                    () -> assertFalse(first.equalTo(first, ninth))
+            );
         }
 
         @Test
-        void testEqualsWithChildren() {
-            // TODO: test Builder.equals recursively includes children
+        void testEquals() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            IOCapture io = new IOCapture();
+
+            TUIContainerModule.Builder first = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
+                    .addChild(new TUIContainerModule.Builder("child"));
+
+            TUIContainerModule.Builder second = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
+                    .addChild(new TUIContainerModule.Builder("child"));
+
+            TUIContainerModule.Builder third = new TUIContainerModule.Builder("original")
+                    .setApplication(app)
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setAnsi(ansi().bold())
+                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
+                    .addChild(new TUIContainerModule.Builder("child").enableAnsi(false));
+
+            io.close();
+
+            assertAll(
+                    () -> assertTrue(TUIModule.Builder.equals(first, first)),
+                    () -> assertTrue(TUIModule.Builder.equals(first, second)),
+                    () -> assertTrue(TUIModule.Builder.equals(second, first)),
+                    () -> assertFalse(TUIModule.Builder.equals(first, third)),
+
+                    () -> assertTrue(first.equals(first)),
+                    () -> assertTrue(first.equals(second)),
+                    () -> assertTrue(second.equals(first)),
+                    () -> assertFalse(first.equals(third))
+            );
         }
 
         @Test
         void testBuild() {
-            // TODO: test build() returns proper TUIModule
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            IOCapture io = new IOCapture();
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+
+            TUIModule test = new TUIContainerModule.Builder("test")
+                    .setApplication(app)
+                    .addChild(child)
+                    .setAnsi(ansi().bold())
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .build();
+
+            io.close();
+
+            assertAll(
+                    () -> assertEquals(app, test.getApplication()),
+                    () -> assertEquals(List.of(child), test.getChildren()),
+                    () -> assertEquals(ansi().bold().toString(), test.getAnsi().toString()),
+                    () -> assertEquals(io.getScanner(), test.getScanner()),
+                    () -> assertEquals(io.getPrintStream(), test.getPrintStream()),
+                    () -> assertFalse(test.getAnsiEnabled())
+            );
+        }
+
+        @Test
+        void testBuildRepeated() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            IOCapture io = new IOCapture();
+            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+
+            TUIContainerModule.Builder builder = new TUIContainerModule.Builder("test")
+                    .setApplication(app)
+                    .addChild(child)
+                    .setAnsi(ansi().bold())
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false);
+
+            TUIModule first = builder.build();
+            TUIModule second = builder.build();
+
+            io.close();
+
+            assertTrue(first.equals(second));
         }
     }
 }
