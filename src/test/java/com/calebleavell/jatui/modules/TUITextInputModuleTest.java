@@ -10,57 +10,245 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TUITextInputModuleTest {
-
-    // TODO
-
     @Test
     void testRun() {
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                .build();
+
+        String output;
+        try(IOCapture io = new IOCapture("test")) {
+            TUITextInputModule.Builder input = new TUITextInputModule.Builder("test-input", "input: ")
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .setApplication(app);
+
+            app.setHome(input);
+
+            input.build().run();
+
+            output = io.getOutput();
+        }
+
+        assertAll(
+                () -> assertEquals("input: ", output),
+                () -> assertEquals("test", app.getInput("test-input"))
+        );
     }
 
     @Test
     void testGetInput() {
+        TUITextInputModule input;
+
+        try(IOCapture io = new IOCapture("test")) {
+            input = new TUITextInputModule.Builder("test-input", "input: ")
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .build();
+
+
+            input.run();
+        }
+
+        assertEquals("test", input.getInput());
     }
 
     @Test
     void testEquals() {
+        TUITextInputModule input1 = new TUITextInputModule.Builder("input", "input: ")
+                .build();
+
+        TUITextInputModule input2 = new TUITextInputModule.Builder("input", "input: ")
+                .build();
+
+        TUITextInputModule input3 = new TUITextInputModule.Builder("input", "input: ")
+                .build();
+
+        TUITextInputModule input4 = new TUITextInputModule.Builder("other", "input: ")
+                .build();
+
+        TUITextInputModule input5 = new TUITextInputModule.Builder("input", "other: ")
+                .build();
+
+        assertAll(
+                () -> assertTrue(input1.equals(input2)),
+                () -> assertTrue(input2.equals(input1)),
+                () -> assertTrue(input2.equals(input3)),
+                () -> assertTrue(input1.equals(input3)),
+                () -> assertFalse(input1.equals(input4)),
+                () -> assertFalse(input1.equals(input5))
+        );
+
     }
 
     @Nested
     class BuilderTest {
 
         @Test
-        void testDeepCopy() {
+        void testCopy() {
+            TUITextInputModule.Builder original = new TUITextInputModule.Builder("input", "input: ")
+                    .addHandler("logic", s -> 5);
 
+            TUITextInputModule.Builder copy = original.getCopy();
+
+            assertAll(
+                    () -> assertTrue(copy.equals(original)),
+                    () -> assertTrue(copy.handlers.equals(original.handlers)),
+                    () -> assertTrue(copy.getDisplayText().equals(original.getDisplayText())));
         }
 
         @Test
         void testAddHandlerModule() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+
+            try(IOCapture io = new IOCapture("a")) {
+                TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5)
+                        .setApplication(app);
+                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                        .setScanner(io.getScanner())
+                        .addHandler(logic);
+
+                app.setHome(input);
+
+                app.run();
+            }
+
+            assertEquals(5, app.getInput("logic"));
 
         }
 
         @Test
         void testAddHandler() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
 
+            try(IOCapture io = new IOCapture("a")) {
+                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                        .setScanner(io.getScanner())
+                        .addHandler("logic", s -> 5);
+
+                app.setHome(input);
+
+                app.run();
+            }
+
+            assertEquals(5, app.getInput("logic"));
         }
 
         @Test
         void testAddSafeHandlerExceptionHandler() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
 
+            try(IOCapture io = new IOCapture("a")) {
+                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                        .setScanner(io.getScanner())
+                        .addSafeHandler("logic",
+                                s -> {throw new RuntimeException("force throw");},
+                                s -> {app.updateInput("logic", 5);});
+
+                app.setHome(input);
+
+                app.run();
+            }
+
+            assertEquals(5, app.getInput("logic"));
         }
 
         @Test
         void testAddSafeHandlerExceptionMessage() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                    .setOnExit(TUIModuleFactory.empty("do-nothing"))
+                    .build();
+
+            String output;
+            try(IOCapture io = new IOCapture("a\n5")) {
+                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                        .enableAnsi(false)
+                        .addSafeHandler("logic",
+                                Integer::parseInt,
+                                "Success!")
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream());
+
+                app.setHome(input);
+
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            assertAll(
+                    () -> assertEquals(5, app.getInput("logic")),
+                    () -> assertEquals(String.format("input: Success!%ninput: "), output)
+            );
 
         }
 
         @Test
         void testAddSafeHandler() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                    .setOnExit(TUIModuleFactory.empty("do-nothing"))
+                    .build();
 
+            String output;
+            try(IOCapture io = new IOCapture("a\n5")) {
+                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                        .enableAnsi(false)
+                        .addSafeHandler("logic", Integer::parseInt)
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream());
+
+                app.setHome(input);
+
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            assertAll(
+                    () -> assertEquals(5, app.getInput("logic")),
+                    () -> assertEquals(String.format("input: Error: Invalid Input%ninput: "), output)
+            );
         }
 
         @Test
         void testBuild() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                    .setOnExit(TUIModuleFactory.empty("empty"))
+                    .build();
 
+            TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5)
+                    .setApplication(app);
+
+            TUITextInputModule.Builder builder = new TUITextInputModule.Builder("input", "input: ")
+                    .addHandler(logic);
+
+
+            String first = runInputModule(builder);
+            int firstOutput = app.getInput("logic", Integer.class);
+            logic.setFunction(() -> 6);
+            String second = runInputModule(builder);
+            int secondOutput = app.getInput("logic", Integer.class);
+
+            assertAll(
+                    () -> assertTrue(builder.build().equals(builder.build())),
+                    () -> assertEquals(first, second),
+                    () -> assertEquals(5, firstOutput),
+                    () -> assertEquals(6, secondOutput)
+            );
+        }
+    }
+
+    private static String runInputModule(TUITextInputModule.Builder builder) {
+        try(IOCapture io = new IOCapture("input\ninput\ninput")) {
+            builder.unlockProperty(TUIModule.Property.SCANNER);
+            builder.unlockProperty(TUIModule.Property.PRINTSTREAM);
+            builder.setScanner(io.getScanner());
+            builder.setPrintStream(io.getPrintStream());
+
+            builder.build().run();
+
+            return io.getOutput();
         }
     }
 
@@ -306,9 +494,7 @@ class TUITextInputModuleTest {
                         () -> assertFalse(handler1.equalTo(handler1, handler5)),
                         () -> assertFalse(handler1.equalTo(handler1, handler6)),
                         () -> assertFalse(handler1.equalTo(handler1, handler7))
-
                 );
-
             }
 
             @Test

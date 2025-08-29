@@ -16,7 +16,6 @@ public class TUITextModule extends TUIModule {
 
     @Override
     public void run() {
-        this.terminated = false;
         if(getAnsiEnabled())
             getPrintStream().print(getAnsi());
 

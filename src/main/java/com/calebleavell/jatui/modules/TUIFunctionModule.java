@@ -8,7 +8,6 @@ public class TUIFunctionModule extends TUIModule {
 
     @Override
     public void run() {
-        this.terminated = false;
         Object output = function.get();
         if(getApplication() != null) getApplication().updateInput(this, output);
         super.run();

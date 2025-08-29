@@ -14,7 +14,6 @@ public class TUITextInputModule extends TUIModule {
 
     @Override
     public void run() {
-        this.terminated = false;
         displayText.build().run();
         input = getScanner().nextLine();
 
@@ -98,6 +97,18 @@ public class TUITextInputModule extends TUIModule {
             return this;
         }
 
+        public TUITextModule.Builder getDisplayText() {
+            return displayText;
+        }
+
+        /**
+         * Adds a function module to execute after input is collected. <br>
+         * <b>Note:</b> this module will not update application or other properties for {@code handler};
+         * this must be done manually.
+         *
+         * @param handler The Function Module builder to execute after input is collected
+         * @return self
+         */
         public Builder addHandler(TUIFunctionModule.Builder handler) {
             handlers.addHandler(handler);
             return self();
@@ -117,7 +128,7 @@ public class TUITextInputModule extends TUIModule {
             handlers.addSafeHandler(name, logic, o -> {
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) return;
-                System.out.println(exceptionMessage);
+                this.getPrintStream().println(exceptionMessage);
                 app.terminateChild(this.name);
                 app.runModuleAsChild(this);
             });
@@ -180,7 +191,14 @@ public class TUITextInputModule extends TUIModule {
             this.num = other.num;
         }
 
-
+        /**
+         * Adds a function module to execute after input is collected. <br>
+         * <b>Note:</b> this module will not update application or other properties for {@code handler};
+         * this must be done manually.
+         *
+         * @param handler The Function Module builder to execute after input is collected
+         * @return self
+         */
         public InputHandlers addHandler(TUIFunctionModule.Builder handler) {
             main.addChild(new InputHandler(this.name + "-" + num, inputModule).setHandler(handler));
             num ++;
@@ -204,7 +222,7 @@ public class TUITextInputModule extends TUIModule {
          *
          * <p>For InputHandlers, this includes: </p>
          * <ul>
-         *     <li><strong>inputModule</strong> <i>(Note: this checks reference equality, not structural equality.)</i></li>
+         *     <li><strong>inputModule</strong> <i>(Note: this checks shallow structural equality, and doesn't check children.)</i></li>
          *     <li><strong>num</strong></li>
          *     <li>name</li>
          *     <li>application</li>
@@ -227,8 +245,9 @@ public class TUITextInputModule extends TUIModule {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            return  Objects.equals(first.inputModule, second.inputModule) &&
-                    Objects.equals(first.num, second.num) &&
+            if(first.inputModule != second.inputModule && !first.inputModule.equalTo(first.inputModule, second.inputModule)) return false;
+
+            return  Objects.equals(first.num, second.num) &&
                     super.equalTo(first, second);
         }
 
@@ -320,6 +339,14 @@ public class TUITextInputModule extends TUIModule {
             return self();
         }
 
+        /**
+         * Adds a function module to execute after input is collected. <br>
+         * <b>Note:</b> this module will not update application or other properties for {@code handler};
+         * this must be done manually.
+         *
+         * @param handler The Function Module builder to execute after input is collected
+         * @return self
+         */
         private InputHandler addHandler(TUIFunctionModule.Builder handler) {
             main.addChild(handler);
             return self();
@@ -361,7 +388,7 @@ public class TUITextInputModule extends TUIModule {
          *
          * <p>For InputHandlers, this includes: </p>
          * <ul>
-         *     <li><strong>inputModule</strong> <i>(Note: this checks reference equality, not structural equality.)</i></li>
+         *     <li><strong>inputModule</strong> <i>(Note: this checks shallow structural equality, and doesn't check children.)</i></li>
          *     <li><strong>handlerType</strong>
          *     <li><strong>moduleName</strong>
          *     <li>name</li>
@@ -384,8 +411,9 @@ public class TUITextInputModule extends TUIModule {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            return  Objects.equals(first.inputModule, second.inputModule) &&
-                    Objects.equals(first.handlerType, second.handlerType) &&
+            if(first.inputModule != second.inputModule && !first.inputModule.equalTo(first.inputModule, second.inputModule)) return false;
+
+            return  Objects.equals(first.handlerType, second.handlerType) &&
                     Objects.equals(first.moduleName, second.moduleName) &&
                     super.equalTo(first, second);
         }

@@ -156,7 +156,9 @@ public class TUIApplicationModule extends TUIModule {
         }
 
         public Builder setOnExit(TUIModule.Builder<?> onExit) {
+            this.children.remove(this.onExit);
             this.onExit = onExit;
+            this.children.add(onExit);
             return self();
         }
 
