@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.logging.Handler;
 
 public class TUITextInputModule extends TUIModule {
     private String input;
@@ -204,6 +205,7 @@ public class TUITextInputModule extends TUIModule {
          * <p>For InputHandlers, this includes: </p>
          * <ul>
          *     <li><strong>inputModule</strong> <i>(Note: this checks reference equality, not structural equality.)</i></li>
+         *     <li><strong>num</strong></li>
          *     <li>name</li>
          *     <li>application</li>
          *     <li>children</li>
@@ -220,11 +222,14 @@ public class TUITextInputModule extends TUIModule {
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
          * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
          */
+        @Override
         public boolean equalTo(InputHandlers first, InputHandlers second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            return Objects.equals(first.inputModule, second.inputModule) && super.equalTo(first, second);
+            return  Objects.equals(first.inputModule, second.inputModule) &&
+                    Objects.equals(first.num, second.num) &&
+                    super.equalTo(first, second);
         }
 
 
@@ -240,7 +245,7 @@ public class TUITextInputModule extends TUIModule {
         private Consumer<String> exceptionHandler;
         private String moduleName;
 
-        enum HandlerType {
+        protected enum HandlerType {
             MODULE,
             HANDLER,
             SAFE_HANDLER
@@ -276,6 +281,24 @@ public class TUITextInputModule extends TUIModule {
             this.moduleName = other.moduleName;
         }
 
+        protected TUIFunctionModule.Builder getModule() {
+            return module;
+        }
+
+        protected Function<String, ?> getLogic() {
+            return logic;
+        }
+
+        protected Consumer<String> getExceptionHandler() {
+            return exceptionHandler;
+        }
+
+        protected String getModuleName() {
+            return moduleName;
+        }
+
+        // note that handler does not get added as a child until this module is built
+        // so property updates won't be propagated to it from this module
         public InputHandler setHandler(TUIFunctionModule.Builder handler) {
             this.handlerType = HandlerType.MODULE;
             this.module = handler;
