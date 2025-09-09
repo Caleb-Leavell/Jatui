@@ -2,6 +2,8 @@ package com.calebleavell.jatui;
 
 import com.calebleavell.jatui.modules.*;
 
+import java.util.Random;
+
 import static com.calebleavell.jatui.modules.TUITextModule.OutputType.*;
 
 
@@ -72,9 +74,10 @@ public class Main {
         // Set the application home and run
         app.setHome(randomNumberGenerator);
         app.run();
-
-        System.out.println(app.getInput("my-input"));
     }
+
+    // best practice to declare a single Random instance statically
+    static Random rand = new Random();
 
     // "back-end" logic
     public static int getRandomInt(String input) {
@@ -82,8 +85,8 @@ public class Main {
         // with the default exception handling of rerunning the input,
         // we don't have to worry about the case where "input" cannot
         // be parsed as an integer.
-        int max = Integer.parseInt(input);
-        return new java.util.Random().nextInt(max);
+        int max = Integer.parseInt(input.trim());
+        return rand.nextInt(max);
     }
 
     /**

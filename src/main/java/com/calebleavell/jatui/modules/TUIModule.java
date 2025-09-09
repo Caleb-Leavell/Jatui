@@ -301,6 +301,13 @@ public abstract class TUIModule {
             this.type = type;
         }
 
+        /*
+            Ideally, this complex copying logic could be abstracted into DirectedGraphNode.
+            But, due to the limitations of Java generics,
+            it becomes more difficult on the concrete implementations if we want to return copied
+            objects as type B.
+         */
+
         protected B deepCopy(B original, Map<Builder<?>, Builder<?>> visited) {
             if(visited.get(original) != null) return original.getType().cast(visited.get(original));
             visited.put(original, this);

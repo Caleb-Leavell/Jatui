@@ -3,61 +3,63 @@ package com.calebleavell.jatui;
 import com.calebleavell.jatui.modules.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {
+        Scanner scnr = new Scanner(System.in);
+        Random rand = new Random();
 
-            for(int i = 0; i < 122; i ++) {
-                System.out.print(ansi().bgRgb(255 - i * 2, 255 - (int) (i * 1.8), 255 - i * 2).a(" ").reset());
+        APP: while(true) {
+            System.out.print("Maximum Number (or -1 to exit): ");
+            String input = scnr.nextLine().trim();
+            int max = -1;
+            try {
+                max = Integer.parseInt(input);
             }
-            System.out.println();
+            catch(NumberFormatException ex) {
+                System.out.println("Error: Error: input integer (your input might be too large)");
+                continue;
+            }
 
+            if(max == -1) break;
+            if(max <= 0) {
+                System.out.println("Error: input integer must be greater than 0");
+                break;
+            }
 
-//        // this will be false, since you're technically passing in 2 different lambdas
-//        boolean one = TUIFunctionModule.Builder.equalTo(
-//                new TUIFunctionModule.Builder("one", () -> System.out.println("Hello, World!")),
-//                new TUIFunctionModule.Builder("one", () -> System.out.println("Hello, World!"))); // returns false
-//
-//        // this will also be false, since Java constructs a different method reference each time
-//        boolean two = TUIFunctionModule.Builder.equalTo(
-//                new TUIFunctionModule.Builder("two", Experimentation::myMethod),
-//                new TUIFunctionModule.Builder("two", Experimentation::myMethod)); // returns false
-//
-//        Runnable run = () -> System.out.println("Hello, World!");
-//
-//        // this will be false since TUIFunctionModule.Builder converts Runnable to Supplier under the hood
-//        boolean three = TUIFunctionModule.Builder.equalTo(
-//                new TUIFunctionModule.Builder("three", run),
-//                new TUIFunctionModule.Builder("three", run)); // returns false
-//
-//        Supplier<Object> sup = () -> "Hello, World!";
-//
-//        // this will be true since the same lambda is being referenced
-//        boolean four = TUIFunctionModule.Builder.equalTo(
-//                new TUIFunctionModule.Builder("four", sup),
-//                new TUIFunctionModule.Builder("four", sup)); // returns true
-//
-//        List.of(one, two, three, four).forEach(System.out::println);
+            int randomNum = rand.nextInt(max);
 
-//        byte[] bytes = "Hello, World!".getBytes();
-//        InputStream input = new FileInputStream("test.txt");
-//        Scanner scnr = new Scanner(input);
-//
-//        MyClass test;
-//
-//        try(PrintStream output = new PrintStream("test2.txt");) {
-//            test = new MyClass(output);
-//        }
-//
-//        test.output();
+            System.out.println("Generated Number: " + ansi().bold().fgRgb(220, 180, 0).a(randomNum).reset());
 
+            while(true) {
+                System.out.println(ansi().bold().a("[1]").reset() + " Generate another number");
+                System.out.println(ansi().bold().a("[2]").reset() + " Exit");
+                System.out.print("Your choice: ");
+
+                int choice = -1;
+
+                try {
+                    choice = Integer.parseInt(scnr.nextLine());
+                }
+                catch(NumberFormatException e) {
+                    System.out.println("Error: input must be integer");
+                    continue;
+                }
+
+                switch(choice) {
+                    case 1: continue APP;
+                    case 2: break APP;
+                    default: System.out.println("Error: input 1 or 2");
+                }
+            }
+        }
+
+        System.out.println(ansi().fgRgb(200, 100, 100).a("Exiting...").reset());
     }
 
     public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {
