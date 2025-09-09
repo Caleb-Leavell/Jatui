@@ -71,6 +71,7 @@ public class Main {
                                 // So here, it's terminating app.
                                 .addScene("Exit", TUIModuleFactory.terminate("terminate-app", app)));
 
+
         // Set the application home and run
         app.setHome(randomNumberGenerator);
         app.run();

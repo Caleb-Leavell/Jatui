@@ -399,7 +399,7 @@ class TUIApplicationModuleTest {
      * @param lines The strings to join into lines
      * @return A single string that has joined the inputted string into lines.
      */
-    static String lines(String... lines) {
+    public static String lines(String... lines) {
         return String.join(System.lineSeparator(), lines) + System.lineSeparator();
     }
 }

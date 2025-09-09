@@ -318,8 +318,6 @@ public class TUIModuleFactory {
                 if(!TUIModule.Builder.equals(firstModule, secondModule)) return false;
             }
 
-            if(!TUIModule.Builder.equals(first.list, second.list)) return false;
-
             return Objects.equals(first.app, second.app) &&
                     super.equalTo(first, second);
         }

@@ -403,38 +403,284 @@ class TUIModuleFactoryTest {
     class NumberedModuleSelectorTest {
 
         @Test
-        void testShallowCopy() {
+        void testCopy() {
+            TUIApplicationModule app1 = new TUIApplicationModule.Builder("app")
+                    .addChildren(
+                            new TUITextModule.Builder("text", "Hello, World!"),
+                            new TUITextInputModule.Builder("input", "input: ")
+                    )
+                    .build();
 
+            TUIContainerModule.Builder module = new TUIContainerModule.Builder("module");
+
+            TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+                    .addScene("text")
+                    .addScene(module)
+                    .addScene("the module", module);
+
+            TUIModuleFactory.NumberedModuleSelector copy = original.getCopy();
+
+            assertTrue(copy.equals(original));
         }
 
-        @Test
-        void testAddSceneNameOrModule() {
-
-        }
 
         @Test
         void testAddSceneDisplayTextName() {
 
+            String output;
+
+            try (IOCapture io = new IOCapture("1")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false)
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .build();
+
+                TUIApplicationModule otherApp = new TUIApplicationModule.Builder("app1")
+                        .addChildren(
+                                new TUITextModule.Builder("text", "Hello, World!"),
+                                new TUITextInputModule.Builder("input", "input: ")
+                        )
+                        .enableAnsi(false)
+                        .setPrintStream(io.getPrintStream())
+                        .build();
+
+                TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", otherApp)
+                        .addScene("goto text module", "text");
+
+                app.setHome(original);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            String expected = TUIApplicationModuleTest.lines(
+                    "[1] goto text module",
+                    "Your choice: Hello, World!"
+            );
+
+            assertEquals(expected, output);
         }
 
         @Test
         void testAddSceneDisplayTextModule() {
 
+            String output;
+
+            try (IOCapture io = new IOCapture("1")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false)
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .build();
+
+                TUITextModule.Builder text = new TUITextModule.Builder("text", "Hello, World!")
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app)
+                        .addScene("goto text module", text);
+
+                app.setHome(original);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            String expected = TUIApplicationModuleTest.lines(
+                    "[1] goto text module",
+                    "Your choice: Hello, World!"
+            );
+
+            assertEquals(expected, output);
         }
 
         @Test
         void testAddSceneName() {
 
+            String output;
+
+            try (IOCapture io = new IOCapture("1")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false)
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .build();
+
+                TUIApplicationModule otherApp = new TUIApplicationModule.Builder("app1")
+                        .addChildren(
+                                new TUITextModule.Builder("text", "Hello, World!"),
+                                new TUITextInputModule.Builder("input", "input: ")
+                        )
+                        .enableAnsi(false)
+                        .setPrintStream(io.getPrintStream())
+                        .build();
+
+                TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", otherApp)
+                        .addScene( "text");
+
+                app.setHome(original);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            String expected = TUIApplicationModuleTest.lines(
+                    "[1] text",
+                    "Your choice: Hello, World!"
+            );
+
+            assertEquals(expected, output);
         }
 
         @Test
         void testAddSceneModule() {
 
+            String output;
+
+            try (IOCapture io = new IOCapture("1")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false)
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .build();
+
+                TUITextModule.Builder text = new TUITextModule.Builder("text", "Hello, World!")
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app)
+                        .addScene(text);
+
+                app.setHome(original);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            String expected = TUIApplicationModuleTest.lines(
+                    "[1] text",
+                    "Your choice: Hello, World!"
+            );
+
+            assertEquals(expected, output);
+        }
+
+        @Test
+        void testCommonUseCase() {
+            String output;
+
+            try (IOCapture io = new IOCapture("1\n2\n3")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setScanner(io.getScanner())
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false)
+                        .build();
+
+                TUITextModule.Builder text = new TUITextModule.Builder("text", "Hello, World!")
+                        .addChild(TUIModuleFactory.run("run-home", app, "home"))
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                        .addChildren(
+                                new TUIModuleFactory.NumberedModuleSelector("list", app)
+                                        .addScene(text)
+                                        .addScene("restart", "home")
+                                        .addScene("exit", TUIModuleFactory.terminate("terminate-app", app))
+                        );
+
+                app.setHome(home);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            String expected = TUIApplicationModuleTest.lines(
+                    "[1] text",
+                    "[2] restart",
+                    "[3] exit",
+                    "Your choice: Hello, World!",
+                    "[1] text",
+                    "[2] restart",
+                    "[3] exit",
+                    "Your choice: [1] text",
+                    "[2] restart",
+                    "[3] exit",
+                    "Your choice: Exiting..."
+            );
+
+            assertEquals(expected, output);
         }
 
         @Test
         void testEqualTo() {
+            TUIApplicationModule app1 = new TUIApplicationModule.Builder("app")
+                    .addChildren(
+                            new TUITextModule.Builder("text", "Hello, World!"),
+                            new TUITextInputModule.Builder("input", "input: ")
+                    )
+                    .build();
 
+            TUIApplicationModule app2 = new TUIApplicationModule.Builder("app")
+                    .addChildren(
+                            new TUITextModule.Builder("text", "Hello, World!"),
+                            new TUITextInputModule.Builder("input", "input: ")
+                    )
+                    .build();
+
+            TUIContainerModule.Builder module = new TUIContainerModule.Builder("module");
+
+            TUIModuleFactory.NumberedModuleSelector list1 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+                    .addScene("text")
+                    .addScene(module)
+                    .addScene("the module", module);
+
+            TUIModuleFactory.NumberedModuleSelector list2 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+                    .addScene("text")
+                    .addScene(module)
+                    .addScene("the module", module);
+
+            TUIModuleFactory.NumberedModuleSelector list3 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+                    .addScene("text")
+                    .addScene(module)
+                    .addScene("the module", module);
+
+            TUIModuleFactory.NumberedModuleSelector list4 = new TUIModuleFactory.NumberedModuleSelector("list", app2)
+                    .addScene("text")
+                    .addScene(module)
+                    .addScene("the module", module);
+
+            TUIModuleFactory.NumberedModuleSelector list5 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+                    .addScene("input")
+                    .addScene(module)
+                    .addScene("the module", module);
+
+            TUIModuleFactory.NumberedModuleSelector list6 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+                    .addScene("text")
+                    .addScene(module)
+                    .addScene("other display text", module);
+
+            TUIModuleFactory.NumberedModuleSelector list7 = new TUIModuleFactory.NumberedModuleSelector("other name", app1)
+                    .addScene("text")
+                    .addScene(module)
+                    .addScene("the module", module);
+
+            assertAll(
+                    () -> assertTrue(list1.equals(list1)),
+                    () -> assertTrue(list1.equals(list2)),
+                    () -> assertTrue(list2.equals(list1)),
+                    () -> assertTrue(list2.equals(list3)),
+                    () -> assertTrue(list1.equals(list3)),
+                    () -> assertFalse(list1.equals(list4)),
+                    () -> assertFalse(list1.equals(list5)),
+                    () -> assertFalse(list1.equals(list6)),
+                    () -> assertFalse(list1.equals(list7))
+            );
         }
     }
 
