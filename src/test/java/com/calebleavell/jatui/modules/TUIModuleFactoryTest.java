@@ -266,33 +266,136 @@ class TUIModuleFactoryTest {
     class NumberedListTest {
 
         @Test
-        void testShallowCopy() {
+        void testCopy() {
+            TUIModuleFactory.NumberedList original = new TUIModuleFactory.NumberedList("list", "item1", "item2")
+                    .setStart(5)
+                    .setStep(3);
 
+            TUIModuleFactory.NumberedList copy = original.getCopy();
+
+            assertTrue(original.equals(copy));
         }
 
         @Test
         void testAddListText() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIModuleFactory.NumberedList list = new TUIModuleFactory.NumberedList("list", "item1")
+                        .addListText("item2")
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                list.build().run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("[1] item1%n[2] item2%n"), output);
         }
 
         @Test
         void testSetStart() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIModuleFactory.NumberedList list = new TUIModuleFactory.NumberedList("list")
+                        .setStart(5)
+                        .addListText("item1")
+                        .addListText("item2")
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                list.build().run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("[5] item1%n[6] item2%n"), output);
         }
 
         @Test
         void testSetStep() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIModuleFactory.NumberedList list = new TUIModuleFactory.NumberedList("list")
+                        .setStep(3)
+                        .addListText("item1")
+                        .addListText("item2")
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                list.build().run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("[1] item1%n[4] item2%n"), output);
         }
 
         @Test
-        void testCollectInputMessage() {
+        void testSetStartAndStep() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIModuleFactory.NumberedList list = new TUIModuleFactory.NumberedList("list")
+                        .setStart(5)
+                        .setStep(3)
+                        .addListText("item1")
+                        .addListText("item2")
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                list.build().run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("[5] item1%n[8] item2%n"), output);
         }
 
         @Test
-        void testCollectInputModule() {
+        void testEqualTo() {
+            TUIModuleFactory.NumberedList list1 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+                    .setStart(5)
+                    .setStep(2);
 
+            TUIModuleFactory.NumberedList list2 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+                    .setStart(5)
+                    .setStep(2);
+
+            TUIModuleFactory.NumberedList list3 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+                    .setStart(5)
+                    .setStep(2);
+
+            TUIModuleFactory.NumberedList list4 = new TUIModuleFactory.NumberedList("list", "text1", "text2", "text3")
+                    .setStart(5)
+                    .setStep(2);
+
+            TUIModuleFactory.NumberedList list5 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+                    .setStart(6)
+                    .setStep(2);
+
+            TUIModuleFactory.NumberedList list6 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+                    .setStart(5)
+                    .setStep(3);
+
+            TUIModuleFactory.NumberedList list7 = new TUIModuleFactory.NumberedList("rename-super-name", "text1", "text2")
+                    .setStart(5)
+                    .setStep(2);
+
+            assertAll(
+                    () -> assertTrue(list1.equals(list1)),
+                    () -> assertTrue(list1.equals(list2)),
+                    () -> assertTrue(list2.equals(list1)),
+                    () -> assertTrue(list2.equals(list3)),
+                    () -> assertTrue(list1.equals(list3)),
+                    () -> assertFalse(list1.equals(list4)),
+                    () -> assertFalse(list1.equals(list5)),
+                    () -> assertFalse(list1.equals(list6)),
+                    () -> assertFalse(list1.equals(list7))
+            );
         }
     }
 
@@ -328,6 +431,11 @@ class TUIModuleFactoryTest {
         void testAddSceneModule() {
 
         }
+
+        @Test
+        void testEqualTo() {
+
+        }
     }
 
     @Nested
@@ -360,6 +468,11 @@ class TUIModuleFactoryTest {
 
         @Test
         void testAddModuleOutput() {
+
+        }
+
+        @Test
+        void testEqualTo() {
 
         }
     }

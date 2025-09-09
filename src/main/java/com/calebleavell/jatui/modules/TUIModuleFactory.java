@@ -118,10 +118,13 @@ public class TUIModuleFactory {
         private int start = 1;
         private int step = 1;
         private int i = 0;
-        private String inputVariableName;
 
         public NumberedList(String name, String... listText) {
+
             super(NumberedList.class, name);
+            for(String text : listText) {
+                this.addListText(text);
+            }
         }
 
         protected NumberedList() {
@@ -143,14 +146,13 @@ public class TUIModuleFactory {
             this.start = original.start;
             this.step = original.step;
             this.i = original.i;
-            this.inputVariableName = original.inputVariableName;
             super.shallowCopy(original);
         }
 
         public NumberedList addListText(String listText) {
             int currentNum = (i * step) + start;
             main.addChild(
-                    new LineBuilder(name + currentNum)
+                    new LineBuilder(name + "-" + currentNum)
                             .addText("[" + currentNum + "] ", ansi().bold())
                             .addText(listText)
                             .newLine());
@@ -169,27 +171,38 @@ public class TUIModuleFactory {
         }
 
         /**
-         * <p>Collect input after the list is displayed (you can add more than 1).</p>
-         * <p>Note: you CAN collect input before displaying all list items.</p>
-         * @param inputMessage The input message displayed to the user
-         * @param inputIdentifier The variable name of the input used when calling TUIApplicationModule.getInput()
-         * @return self
+         * <p>Checks equality for properties given by the builder.</p>
+         *
+         * <p>For InputHandlers, this includes: </p>
+         * <ul>
+         *     <li><strong>start</strong>/li>
+         *     <li><strong>step</strong>
+         *     <li><strong>i</strong>
+         *     <li>name</li>
+         *     <li>application</li>
+         *     <li>children</li>
+         *     <li>ansi</li>
+         *     <li>scanner</li>
+         *     <li>printStream</li>
+         *     <li>enableAnsi</li>
+         * </ul>
+         *
+         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
+         *  but are considered in equals()
+         * @param first The first NumberedList to compare
+         * @param second The second NumberedList to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
          */
-        public NumberedList collectInput(String inputIdentifier, String inputMessage) {
-            TUITextInputModule.Builder input = new TUITextInputModule.Builder(inputIdentifier, inputMessage);
-            main.addChild(input);
-            return self();
-        }
+        public boolean equalTo(NumberedList first, NumberedList second) {
+            if(first == second) return true;
+            if(first == null || second == null) return false;
 
-        /**
-         * <p>Collect input after the list is displayed (you can add more than 1).</p>
-         * <p>Note: you CAN collect input before displaying all list items.</p>
-         * @param input The TUITextInputModule Builder that will be collecting the input.
-         * @return self
-         */
-        public NumberedList collectInput(TUITextInputModule.Builder input) {
-            main.addChild(input);
-            return self();
+
+            return  Objects.equals(first.start, second.start) &&
+                    Objects.equals(first.step, second.step) &&
+                    Objects.equals(first.i, second.i) &&
+                    super.equalTo(first, second);
         }
     }
 
@@ -259,6 +272,56 @@ public class TUIModuleFactory {
 
         public NumberedModuleSelector addScene(TUIModule.Builder<?> module) {
             return addScene(module.getName(), module);
+        }
+
+        /**
+         * <p>Checks equality for properties given by the builder.</p>
+         *
+         * <p>For InputHandlers, this includes: </p>
+         * <ul>
+         *     <li><strong>modules</strong> (the actual list of modules that are selected from) </li>
+         *     <li><strong>list</strong> (the NumberedList that displays the options and collects input) </li>
+         *     <li><strong>app</strong> (the app that the list of modules goes to, which may or may not be the same as the app for this module)</li>
+         *     <li>name</li>
+         *     <li>application</li>
+         *     <li>children</li>
+         *     <li>ansi</li>
+         *     <li>scanner</li>
+         *     <li>printStream</li>
+         *     <li>enableAnsi</li>
+         * </ul>
+         *
+         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
+         *  but are considered in equals()
+         * @param first The first NumberedList to compare
+         * @param second The second NumberedList to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         */
+        @Override
+        public boolean equalTo(NumberedModuleSelector first, NumberedModuleSelector second) {
+            if(first == second) return true;
+            if(first == null || second == null) return false;
+
+            if(first.modules.size() != second.modules.size()) return false;
+
+            for(int i = 0; i < first.modules.size(); i ++) {
+                TUIModule.NameOrModule firstNameOrModule = first.modules.get(i);
+                TUIModule.NameOrModule secondNameOrModule = second.modules.get(i);
+
+                if(firstNameOrModule == secondNameOrModule) continue;
+                else if(firstNameOrModule == null || secondNameOrModule == null) return false;
+
+                TUIModule.Builder<?> firstModule = firstNameOrModule.getModule(this.app);
+                TUIModule.Builder<?> secondModule = secondNameOrModule.getModule(this.app);
+
+                if(!TUIModule.Builder.equals(firstModule, secondModule)) return false;
+            }
+
+            if(!TUIModule.Builder.equals(first.list, second.list)) return false;
+
+            return Objects.equals(first.app, second.app) &&
+                    super.equalTo(first, second);
         }
     }
 
@@ -343,6 +406,41 @@ public class TUIModuleFactory {
 
         protected TUITextModule.Builder getCurrent() {
             return current;
+        }
+
+
+        /**
+         * <p>Checks equality for properties given by the builder.</p>
+         *
+         * <p>For InputHandlers, this includes: </p>
+         * <ul>
+         *     <li><strong>current</strong> (the most recent text module added) </li>
+         *     <li><strong>iterator</strong> (the number of text modules added so far) </li>
+         *     <li>name</li>
+         *     <li>application</li>
+         *     <li>children</li>
+         *     <li>ansi</li>
+         *     <li>scanner</li>
+         *     <li>printStream</li>
+         *     <li>enableAnsi</li>
+         * </ul>
+         *
+         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
+         *  but are considered in equals()
+         * @param first The first NumberedList to compare
+         * @param second The second NumberedList to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         */
+        @Override
+        public boolean equalTo(LineBuilder first, LineBuilder second) {
+            if(first == second) return true;
+            if(first == null || second == null) return false;
+
+            if(!TUIModule.Builder.equals(first.current, second.current)) return false;
+
+            return Objects.equals(first.iterator, second.iterator) &&
+                    super.equalTo(first, second);
         }
 
     }
