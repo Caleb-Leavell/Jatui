@@ -1118,13 +1118,50 @@ class TUIModuleTest {
         // TODO: NameOrModuleTest
 
         @Test
-        void testGetModule() {
+        void testGetModuleFromModule() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            TUIContainerModule.Builder container = new TUIContainerModule.Builder("module");
 
+            TUIModule.NameOrModule module = new TUIModule.NameOrModule(container);
+
+            assertEquals(container, module.getModule(app));
         }
 
         @Test
-        void testGetName() {
+        void testGetModuleFromName() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            TUIContainerModule.Builder container = new TUIContainerModule.Builder("module");
+            app.setHome(container);
 
+            TUIModule.NameOrModule module = new TUIModule.NameOrModule("module");
+
+            assertEquals(container, module.getModule(app));
+        }
+
+        @Test
+        void testGetCopyFromModule() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            TUIContainerModule.Builder container = new TUIContainerModule.Builder("module");
+
+            TUIModule.NameOrModule original = new TUIModule.NameOrModule(container);
+            TUIModule.NameOrModule copy = original.getCopy();
+
+            assertAll(
+                    () -> assertTrue(original.getModule(app).equals(copy.getModule(app))),
+                    () -> assertNotEquals(original.getModule(app), copy.getModule(app))
+            );
+        }
+
+        @Test
+        void testGetCopyFromName() {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            TUIContainerModule.Builder container = new TUIContainerModule.Builder("module");
+            app.setHome(container);
+
+            TUIModule.NameOrModule original = new TUIModule.NameOrModule("module");
+            TUIModule.NameOrModule copy = original.getCopy();
+
+             assertEquals(original.getModule(app), copy.getModule(app));
         }
     }
 }
