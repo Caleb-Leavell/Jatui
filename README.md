@@ -1,6 +1,13 @@
 # Jatui - A Java Text User Interface Library
 
-Jatui is a Java library that provides a framework for building TUIs that are meant to run in a cooked-terminal environment. Existing TUI libraries generally target *raw* terminals (handle user input every time a key is pressed). However, there are applications that are simple enough to live in the default *cooked* terminal (handle user input when the user presses enter).
+Existing TUI libraries generally target *raw* terminals (handle user input every time a key is pressed). However, there are many applications that are simple enough to live in the default *cooked* terminal (handle user input when the user presses enter). Examples of these applications are:
+- CLI Wizards (installation, configuration, etc.)
+- Scripts/Tools (applications that are more focused on running logic based on some simple user input)
+- Logic prototyping (e.g., testing algorithm functionality)
+- Simple REPLs
+- Text Adventures
+
+Jatui is a Java library that provides a framework for building TUIs that are meant to run in a cooked-terminal environment by implementing a modularized, declarative system that allows for resuable, customizable, and analyzable application units.
 
 Here's a simple "Hello, World!" app to get started:
 
