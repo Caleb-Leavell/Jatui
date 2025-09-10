@@ -148,11 +148,11 @@ public abstract class TUIModule {
     /**
      * @return {@link TUIModule#children}
      */
-    protected List<TUIModule.Builder<?>> getChildren() {
+    public List<TUIModule.Builder<?>> getChildren() {
         return children;
     }
 
-    protected TUIModule.Builder<?> getChild(String name) {
+    public TUIModule.Builder<?> getChild(String name) {
         for(TUIModule.Builder<?> child : children) {
             TUIModule.Builder<?> returned = child.getChild(name);
             if(returned != null) return returned;
@@ -161,7 +161,7 @@ public abstract class TUIModule {
         return null;
     }
 
-    protected <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
+    public <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
         TUIModule.Builder<?> child = getChild(name);
         if(child == null) return null;
         if(child.getClass() == type) {
