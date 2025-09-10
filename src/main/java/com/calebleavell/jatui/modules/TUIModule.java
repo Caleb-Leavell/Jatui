@@ -53,40 +53,40 @@ public abstract class TUIModule {
      * <p>The identifier for this module.</p>
      * <p>It is recommended to try and keep this unique in order to allow identification methods (e.g., via {@link TUIApplicationModule#getInput}) to function properly.</p>
      */
-    private String name;
+    private final String name;
 
     /**
      * The application the module is a child of.
      */
-    private TUIApplicationModule application;
+    private final TUIApplicationModule application;
 
     /**
      * Every child module that should be run.
      */
-    private List<TUIModule.Builder<?>> children;
+    private final List<TUIModule.Builder<?>> children;
 
     /**
      * <p>The ansi that may be displayed (Jansi object)</p>
      * <p>Currently, only TUITextModule displays the ansi</p>
      */
-    private Ansi ansi;
+    private final Ansi ansi;
 
     /**
      * <p>The Scanner that reads input from the user-defined source</p>
      * <p>Is set to System.in by default (defined as SYSTEM_IN in TUIModule) </p>
      */
-    private Scanner scanner;
+    private final Scanner scanner;
 
     /**
      * <p>The PrintStream that outputs data to the user-defined location</p>
      * <p>Is set to System.out by default</p>
      */
-    private PrintStream printStream;
+    private final PrintStream printStream;
 
     /**
      * <p>Whether ansi will be displayed or not.</p>
      */
-    private boolean enableAnsi;
+    private final boolean enableAnsi;
 
     /**
      * If there is a child currently running while {@link TUIModule#run() } is active, this will reference that child.
