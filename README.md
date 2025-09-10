@@ -77,7 +77,7 @@ In native Java, building a simple TUI can be very verbose. For example, here's h
         System.out.println(ansi().fgRgb(200, 100, 100).a("Exiting...").reset());
 ```
 
-While functional, this design is incredibly hard to maintain or scale. You could potentially abstract out pieces into their own methods, but if you wanted to resuse these components while customizing ansi styling, exact text, I/O locations, etc., verbosity incleases dramatically.
+While functional, this design is incredibly hard to maintain or scale. You could potentially abstract out pieces into their own methods, but if you wanted to resuse these components while customizing ansi styling, exact text, I/O locations, etc., verbosity increases dramatically.
 Jatui aims to solve this problem by providing a declarative modulurization framework. Here's how you would write the same program in Jatui:
 
 ```Java
