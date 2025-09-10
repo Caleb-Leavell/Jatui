@@ -7,8 +7,17 @@ import java.util.*;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
+// TODO - copyright info
 /**
- * <p>TUIContainerModule provides a basic implementation of this class.</p>
+ * The abstract class for all TUIModules. </br>
+ * A TUIModule is an immutable, analyzable runtime unit of a TUI that can have children and be run. </br>
+ * Use {@link TUIModule.Builder} to construct a TUIModule (note: all concrete subclasses will have their own builder). </br>
+ * </br>
+ * Use {@link TUIContainerModule} as the minimal implementation for this class. </br>
+ * </br>
+ * This class contains {@link TUIModule.Builder}, {@link TUIModule.Template}, and {@link TUIModule.NameOrModule} as subclasses </br>
+ *
+ *
  */
 public abstract class TUIModule {
 
@@ -18,6 +27,17 @@ public abstract class TUIModule {
     /** The standard message for when a module isn't named **/
     public static final String UNNAMED_ERROR = "[ERROR: This module was never named!]";
 
+    /**
+     * Fields that can be recursively updated in the Builder. </br>
+     * You can change the recursion flags for these fields (see {@link DirectedGraphNode.PropertyUpdateFlag}). </br>
+     * </br>
+     * To update the flag for a property on a builder, call {@link TUIModule.Builder#setPropertyUpdateFlag(Property, DirectedGraphNode.PropertyUpdateFlag)} </br>
+     * You can also call {@link TUIModule.Builder#lockProperty(Property)} or {@link TUIModule.Builder#unlockProperty(Property)}. </br>
+     *  </br>
+     * Note: setting the ansi, scanner, print stream, or enabling ansi will automatically lock those property flags,
+     * but setting application or merging ansi (appending/prepending) will not automatically lock the corresponding flags.
+     *
+     */
     public enum Property {
         APPLICATION,
         /** Deals with replacing the ansi completely with setAnsi() **/
@@ -31,7 +51,7 @@ public abstract class TUIModule {
 
     /**
      * <p>The identifier for this module.</p>
-     * <p>It is recommended to try and keep this unique in order to allow identification methods (e.g. TUIApplicationModule.getInput()) to function properly.</p>
+     * <p>It is recommended to try and keep this unique in order to allow identification methods (e.g., via {@link TUIApplicationModule#getInput}) to function properly.</p>
      */
     private String name;
 
@@ -69,14 +89,26 @@ public abstract class TUIModule {
     private boolean enableAnsi;
 
     /**
-     * If the for loop in {@link TUIModule#run() } is currently active, this will be the child that is currently running.
+     * If there is a child currently running while {@link TUIModule#run() } is active, this will reference that child.
      */
     private TUIModule currentRunningChild;
 
+    /**
+     * Whether this module is currently terminated. </br>
+     * If a module is terminated, it will stop running its children. </br>
+     * Running a module will automatically cause it to be no longer terminated.
+     */
     protected boolean terminated = false;
 
+    /**
+     * How deep in the recursion to go on toString()
+     */
     public int MAX_ITERATIONS_ON_TO_STRING = 6;
 
+    /**
+     * Sets terminated to false, then linearly runs children. </br>
+     * If there is a child currently running, you can access it via {@link TUIModule#getCurrentRunningChild()}. </br>
+     */
     public void run() {
         terminated = false;
 
@@ -89,7 +121,10 @@ public abstract class TUIModule {
         }
     }
 
-
+    /**
+     * Runs the module and updates {@link TUIModule#currentRunningChild} to be {@code module}.
+     * @param module The module to run as the child of this module.
+     */
     public void runModuleAsChild(TUIModule.Builder<?> module) {
         if(currentRunningChild == null) {
             TUIModule built = module.build();
@@ -103,11 +138,17 @@ public abstract class TUIModule {
         currentRunningModule.runModuleAsChild(module);
     }
 
+    /**
+     * @return {@link TUIModule#name}
+     */
     public String getName() {
         return name;
     }
 
-    public List<TUIModule.Builder<?>> getChildren() {
+    /**
+     * @return {@link TUIModule#children}
+     */
+    protected List<TUIModule.Builder<?>> getChildren() {
         return children;
     }
 
