@@ -171,7 +171,6 @@ class TUITextInputModuleTest {
                         .setPrintStream(io.getPrintStream());
 
                 app.setHome(input);
-
                 app.run();
 
                 output = io.getOutput();

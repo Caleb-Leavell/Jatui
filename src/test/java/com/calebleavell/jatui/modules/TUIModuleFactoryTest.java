@@ -4,6 +4,7 @@ import com.calebleavell.jatui.IOCapture;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TUIModuleFactoryTest {
@@ -688,38 +689,183 @@ class TUIModuleFactoryTest {
     class LineBuilderTest {
 
         @Test
-        void testShallowCopy() {
+        void testGetCopy() {
+            TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+                    .addText("text1")
+                    .addText("text2");
 
+            TUIModuleFactory.LineBuilder copy = original.getCopy();
+
+            assertTrue(copy.equals(original));
         }
 
         @Test
         void testAddTextModule() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+                        .addText(new TUITextModule.Builder("text", "Hello, World!"))
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                original.build().run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("Hello, World!%n"), output);
         }
 
         @Test
         void testAddTextWithAnsi() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+                        .addText("Hello, World!", ansi().bold())
+                        .setPrintStream(io.getPrintStream());
+
+                original.build().run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(ansi().bold().a("Hello, World!").reset().toString(), output);
         }
 
         @Test
         void testAddText() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+                        .addText("Hello, World!")
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                original.build().run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals("Hello, World!", output);
         }
 
         @Test
         void testAddModuleOutputWithAnsi() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setPrintStream(io.getPrintStream())
+                        .build();
+
+                TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                        .addChildren(
+                                new TUIFunctionModule.Builder("five", () -> 5),
+                                new TUIModuleFactory.LineBuilder("display-five")
+                                        .addText("Output: ")
+                                        .addModuleOutput("five", ansi().bold())
+                                        .newLine()
+                        );
+
+                app.setHome(home);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("%s%s%n", ansi().a("Output: ").reset(), ansi().bold().a("5").reset()), output);
         }
 
         @Test
         void testAddModuleOutput() {
+            String output;
 
+            try(IOCapture io = new IOCapture()) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false)
+                        .build();
+
+                TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                        .addChildren(
+                                new TUIFunctionModule.Builder("five", () -> 5),
+                                new TUIModuleFactory.LineBuilder("display-five")
+                                        .addText("Output: ")
+                                        .addModuleOutput("five")
+                                        .newLine()
+                        );
+
+                app.setHome(home);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("Output: 5%n"), output);
+        }
+
+        @Test
+        void testNewLine() {
+            String output;
+
+            try(IOCapture io = new IOCapture()) {
+                TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+                        .addText("Hello,")
+                        .newLine()
+                        .addText("World!")
+                        .newLine()
+                        .setPrintStream(io.getPrintStream())
+                        .enableAnsi(false);
+
+                original.build().run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("Hello,%nWorld!%n"), output);
         }
 
         @Test
         void testEqualTo() {
+            TUIModuleFactory.LineBuilder lines1 = new TUIModuleFactory.LineBuilder("lines")
+                    .addText("text1")
+                    .addText("text2");
 
+            TUIModuleFactory.LineBuilder lines2 = new TUIModuleFactory.LineBuilder("lines")
+                    .addText("text1")
+                    .addText("text2");
+
+            TUIModuleFactory.LineBuilder lines3 = new TUIModuleFactory.LineBuilder("lines")
+                    .addText("text1")
+                    .addText("text2");
+
+            TUIModuleFactory.LineBuilder lines4 = new TUIModuleFactory.LineBuilder("lines")
+                    .addText("text1_other")
+                    .addText("text2");
+
+            TUIModuleFactory.LineBuilder lines5 = new TUIModuleFactory.LineBuilder("lines")
+                    .addText("text1")
+                    .addText("text2")
+                    .addText("text3");
+
+            TUIModuleFactory.LineBuilder lines6 = new TUIModuleFactory.LineBuilder("other")
+                    .addText("text1")
+                    .addText("text2");
+
+            assertAll(
+                    () -> assertTrue(lines1.equals(lines1)),
+                    () -> assertTrue(lines1.equals(lines2)),
+                    () -> assertTrue(lines2.equals(lines3)),
+                    () -> assertTrue(lines1.equals(lines3)),
+                    () -> assertFalse(lines1.equals(lines4)),
+                    () -> assertFalse(lines1.equals(lines5)),
+                    () -> assertFalse(lines1.equals(lines6))
+            );
         }
     }
 }
