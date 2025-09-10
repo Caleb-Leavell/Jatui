@@ -1115,8 +1115,6 @@ class TUIModuleTest {
     @Nested
     class NameOrModuleTest {
 
-        // TODO: NameOrModuleTest
-
         @Test
         void testGetModuleFromModule() {
             TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
