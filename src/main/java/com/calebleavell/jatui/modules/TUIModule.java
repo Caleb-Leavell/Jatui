@@ -152,6 +152,12 @@ public abstract class TUIModule {
         return children;
     }
 
+    /**
+     * Recursively searches for a child and returns it if it exists.
+     *
+     * @param name The name of the child to search for.
+     * @return The child, if it exists.
+     */
     public TUIModule.Builder<?> getChild(String name) {
         for(TUIModule.Builder<?> child : children) {
             TUIModule.Builder<?> returned = child.getChild(name);
@@ -161,6 +167,14 @@ public abstract class TUIModule {
         return null;
     }
 
+    /**
+     * Recursively searches for a child and returns it as T, if it exists as type T.
+     *
+     * @param name The name of the child to search for.
+     * @param type The type of the child to search for <br> (e.g., {@code TUIContainerModule.Builder.class})
+     * @return The child as T, if it exists.
+     * @param <T> The type of the child
+     */
     public <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
         TUIModule.Builder<?> child = getChild(name);
         if(child == null) return null;
@@ -170,25 +184,49 @@ public abstract class TUIModule {
         else return null;
     }
 
+    /**
+     * Stop this module from running any more children. <br>
+     * Recursively propagates the termination to its children. <br>
+     * If a terminated module is run again, it will no longer be terminated.
+     */
     public void terminate() {
         this.terminated = true;
         if(this.currentRunningChild != null) currentRunningChild.terminate();
     }
 
+    /**
+     * Terminates a currently running child of this module (see {@link TUIModule#terminate}). <br>
+     * All children higher up in the running branch will not be terminated. <br>
+     *
+     * @param moduleName The name of the child to terminate.
+     */
     public void terminateChild(String moduleName) {
         getCurrentRunningBranch().forEach(m -> {
             if(m.getName().equals(moduleName)) m.terminate();
         });
     }
 
+    /**
+     * @return Whether this module is {@link TUIModule#terminated}
+     */
     public boolean isTerminated() {
         return terminated;
     }
 
+    /**
+     * @return The {@link TUIModule#currentRunningChild}. Will be null if there is no currently running child.
+     */
     public TUIModule getCurrentRunningChild() {
         return currentRunningChild;
     }
 
+    /**
+     * Searches for a child in the current running branch and returns it, if it exists. <br>
+     * (see {@link TUIModule#getCurrentRunningBranch()})
+     *
+     * @param name The name of the child to search for
+     * @return The matching child in the current running branch, or null if not found.
+     */
     public TUIModule getCurrentRunningChild(String name) {
         List<TUIModule> branch = getCurrentRunningBranch();
 
@@ -199,6 +237,15 @@ public abstract class TUIModule {
         return null;
     }
 
+    /**
+     * When a module is running it runs its children, and its currently running child
+     * runs its children, and that child's currently running child runs its children, etc. <br>
+     * This creates a "branch" of children that are currently running, stemming from this module
+     * to the leaf child at the very end. <br>
+     * Note: the leaf child may also have children but simply isn't running them yet.
+     *
+     * @return The current running branch of modules stemming from this module.
+     */
     public List<TUIModule> getCurrentRunningBranch() {
         List<TUIModule> currentRunningBranch = new ArrayList<>();
         currentRunningBranch.add(this);
@@ -210,6 +257,13 @@ public abstract class TUIModule {
         return currentRunningBranch;
     }
 
+    /**
+     * Some modules can do interesting things if it is tied to an application. <br>
+     * For example, you can set a {@link TUITextModule} to display the output of another module,
+     * and it will look for that output in the application's input map.
+     *
+     * @return The {@link TUIApplicationModule} that this module is tied to.
+     */
     public TUIApplicationModule getApplication() { return application; }
 
     public Ansi getAnsi() {
