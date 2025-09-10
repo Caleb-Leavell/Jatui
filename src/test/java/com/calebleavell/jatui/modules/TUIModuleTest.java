@@ -23,17 +23,13 @@ class TUIModuleTest {
 
     public static TUIFunctionModule.Builder checkRunning(String name, TUIModule parent) {
         TUIFunctionModule.Builder checkRunning = new TUIFunctionModule.Builder(name, () -> {});
-        checkRunning.setFunction(() -> {
-            return parent.getCurrentRunningBranch().getLast().equals(checkRunning.build());
-        });
+        checkRunning.setFunction(() -> parent.getCurrentRunningBranch().getLast().equals(checkRunning.build()));
         return checkRunning;
     }
 
     public static TUIFunctionModule.Builder checkShallowRunning (String name, TUIModule parent) {
         TUIFunctionModule.Builder checkRunning = new TUIFunctionModule.Builder(name, () -> {});
-        checkRunning.setFunction(() -> {
-            return parent.getCurrentRunningChild().equals(checkRunning.build());
-        });
+        checkRunning.setFunction(() -> parent.getCurrentRunningChild().equals(checkRunning.build()));
         return checkRunning;
     }
 
@@ -79,9 +75,7 @@ class TUIModuleTest {
         TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
                 .addChildren(
                         checkRunning("check-running-1", testApp),
-                        new TUIFunctionModule.Builder("run-other", () -> {
-                            testApp.runModuleAsChild(checkRunning);
-                        }),
+                        new TUIFunctionModule.Builder("run-other", () -> testApp.runModuleAsChild(checkRunning)),
                         checkRunning("check-running-3", testApp)
                 );
 

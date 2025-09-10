@@ -144,7 +144,7 @@ class TUITextInputModuleTest {
                         .setScanner(io.getScanner())
                         .addSafeHandler("logic",
                                 s -> {throw new RuntimeException("force throw");},
-                                s -> {app.updateInput("logic", 5);});
+                                s -> app.updateInput("logic", 5));
 
                 app.setHome(input);
 
@@ -257,7 +257,7 @@ class TUITextInputModuleTest {
         @Test
         void testCopy() {
             Function<String, String> logic = s -> s;
-            Consumer<String> exceptionHandler = s -> {System.out.print("");};
+            Consumer<String> exceptionHandler = s -> System.out.print("");
             TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
 
             TUITextInputModule.InputHandlers original = new TUITextInputModule.InputHandlers("handler", module)
@@ -390,7 +390,7 @@ class TUITextInputModuleTest {
             @Test
             void testCopy() {
                 Function<String, String> logic = s -> s;
-                Consumer<String> exceptionHandler = s -> {System.out.print("");};
+                Consumer<String> exceptionHandler = s -> System.out.print("");
                 TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
 
                 TUITextInputModule.InputHandler original = new TUITextInputModule.InputHandler("handler", module)
@@ -458,7 +458,7 @@ class TUITextInputModuleTest {
             @Test
             void testEqualTo() {
                 Function<String, String> logic = s -> s;
-                Consumer<String> exceptionHandler = s -> {System.out.print("");};
+                Consumer<String> exceptionHandler = s -> System.out.print("");
                 TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
 
                 TUITextInputModule.InputHandler handler1 = new TUITextInputModule.InputHandler("handler", module)
