@@ -9,6 +9,13 @@ Existing TUI libraries generally target *raw* terminals (handle user input every
 
 Jatui is a Java library that provides a framework for building TUIs that are meant to run in a cooked-terminal environment by implementing a modularized, declarative system that allows for resuable, customizable, and analyzable application units.
 
+
+## Get Started
+
+This library is currently in **beta**, and while it's stable and tested, it's missing some features (logging, warnings, a robust toString, a couple factory methods/classes) and thorough documentation. However, it is still usable and useful, so feel free to use it if you'd like! (note, this library will be added to Maven Central once it's fully released)
+
+**Note:** This libarary requires Jansi as a dependency
+
 Here's a simple "Hello, World!" app to get started:
 
 ```Java
@@ -22,6 +29,8 @@ TUITextModule helloWorld = new TUITextModule("hello-world", "Hello, World!");
 app.setHome(helloWorld);
 app.run();
 ```
+
+## Motivation
 
 In native Java, building a simple TUI can be very verbose. For example, here's how you would make a simple random number generator that collects a maximum number, generates and displays the number in gold (using Jansi to simplify Ansi), and prompts the user if they want to generate another number or exit:
 
@@ -136,11 +145,6 @@ Here's the output of the application:
 
 <img width="445" height="289" alt="image" src="https://github.com/user-attachments/assets/ea4afdfa-db5a-43fa-a1b2-67a6af5fcf5d" />
 
-
 For a fully commented version of this application that explains how everything works, visit the [Demo App](https://github.com/Caleb-Leavell/Jatui/blob/main/src/main/java/com/calebleavell/jatui/Main.java)
-
-This is a fairly early commit, and while it's stable and tested, it's missing some features (logging, warnings, a robust toString, a couple factory methods/classes) and thorough documentation. However, it is still usable and useful, so feel free to use it if you'd like!
-
-**Note:** This libarary uses Jansi as a dependency
 
 This library is an evolution of my previous [Java Text Interface Library](https://github.com/Caleb-Leavell/TextInterface). It's been rewritten from the ground up to be less verbose and more powerful.
