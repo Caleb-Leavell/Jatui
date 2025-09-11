@@ -7,14 +7,14 @@ Existing TUI libraries generally target *raw* terminals (handle user input every
 - Simple REPLs
 - Text Adventures
 
-Jatui is a Java library that provides a framework for building TUIs that are meant to run in a cooked-terminal environment by implementing a modularized, declarative system that allows for resuable, customizable, and analyzable application units.
+Jatui is a Java library that provides a framework for building TUIs that are meant to run in a cooked-terminal environment by implementing a modularized, declarative system that allows for reusable, customizable, and analyzable application units.
 
 
 ## Get Started
 
 This library is currently in **beta**, and while it's stable and tested, it's missing some features (logging, warnings, a robust toString, a couple factory methods/classes) and thorough documentation. However, it is still usable and useful, so feel free to use it if you'd like! (note, this library will be added to Maven Central once it's fully released)
 
-**Note:** This libarary requires Jansi as a dependency
+**Note:** This library requires Jansi as a dependency
 
 Here's a simple "Hello, World!" app to get started:
 
@@ -35,7 +35,7 @@ app.run();
 In native Java, building a simple TUI can be very verbose. For example, here's how you would make a simple random number generator that collects a maximum number, generates and displays the number in gold (using Jansi to simplify Ansi), and prompts the user if they want to generate another number or exit:
 
 ```Java
- Scanner scnr = new Scanner(System.in);
+        Scanner scnr = new Scanner(System.in);
         Random rand = new Random();
 
         APP: while(true) {
@@ -46,7 +46,7 @@ In native Java, building a simple TUI can be very verbose. For example, here's h
                 max = Integer.parseInt(input);
             }
             catch(NumberFormatException ex) {
-                System.out.println("Error: Error: input integer (your input might be too large)");
+                System.out.println("Error: input integer (your input might be too large)");
                 continue;
             }
 
@@ -86,8 +86,8 @@ In native Java, building a simple TUI can be very verbose. For example, here's h
         System.out.println(ansi().fgRgb(200, 100, 100).a("Exiting...").reset());
 ```
 
-While functional, this design is incredibly hard to maintain or scale. You could potentially abstract out pieces into their own methods, but if you wanted to resuse these components while customizing ansi styling, exact text, I/O locations, etc., verbosity increases dramatically.
-Jatui aims to solve this problem by providing a declarative modulurization framework. Here's how you would write the same program in Jatui:
+While functional, this approach becomes difficult to maintain or extend for larger projects. You could potentially abstract out pieces into their own methods, but if you wanted to resuse these components while customizing ansi styling, exact text, I/O locations, etc., verbosity increases dramatically.
+Jatui aims to solve this problem by providing a declarative modularization framework. Here's how you would write the same program in Jatui:
 
 ```Java
 public static void main(String[] args) {
