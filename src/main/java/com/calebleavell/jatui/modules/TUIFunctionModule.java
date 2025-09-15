@@ -40,11 +40,13 @@ public class TUIFunctionModule extends TUIModule {
         }
 
         public Builder setFunction(Supplier<?> function) {
+            logger.debug("setting function for {}", getName());
             this.function = function;
             return self();
         }
 
         public Builder setFunction(Runnable function) {
+            logger.debug("setting function for {}", getName());
             if(function == null) this.function = null;
             else {
                 this.function = () -> {

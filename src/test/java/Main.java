@@ -1,11 +1,8 @@
-package com.calebleavell.jatui;
-
 import com.calebleavell.jatui.modules.*;
 
 import java.util.Random;
 
 import static com.calebleavell.jatui.modules.TUITextModule.OutputType.*;
-
 
 import static org.fusesource.jansi.Ansi.*;
 

@@ -13,8 +13,11 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
+import ch.qos.logback.classic.Logger;
+
 import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
+
 
 /**
  * Using TUIContainerModule as the minimal implementation of this class for testing
@@ -351,6 +354,13 @@ class TUIModuleTest {
                 () -> assertTrue(enabledBefore),
                 () -> assertFalse(enabledAfter)
         );
+    }
+
+    @Test
+    void testLogger() {
+
+        TUIContainerModule module = new TUIContainerModule.Builder("module").build();
+        module.run();
     }
 
     @Test

@@ -4,18 +4,21 @@ import org.fusesource.jansi.Ansi;
 
 import java.io.PrintStream;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.NOPLogger;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
 // TODO - copyright info
 /**
- * The abstract class for all TUIModules. </br>
- * A TUIModule is an immutable, analyzable runtime unit of a TUI that can have children and be run. </br>
- * Use {@link TUIModule.Builder} to construct a TUIModule (note: all concrete subclasses will have their own builder). </br>
- * </br>
- * Use {@link TUIContainerModule} as the minimal implementation for this class. </br>
- * </br>
- * This class contains {@link TUIModule.Builder}, {@link TUIModule.Template}, and {@link TUIModule.NameOrModule} as subclasses </br>
+ * The abstract class for all TUIModules. <br>
+ * A TUIModule is an immutable, analyzable runtime unit of a TUI that can have children and be run. <br>
+ * Use {@link TUIModule.Builder} to construct a TUIModule (note: all concrete subclasses will have their own builder). <br>
+ * <br>
+ * Use {@link TUIContainerModule} as the minimal implementation for this class. <br>
+ * <br>
+ * This class contains {@link TUIModule.Builder}, {@link TUIModule.Template}, and {@link TUIModule.NameOrModule} as subclasses <br>
  *
  *
  */
@@ -28,12 +31,12 @@ public abstract class TUIModule {
     public static final String UNNAMED_ERROR = "[ERROR: This module was never named!]";
 
     /**
-     * Fields that can be recursively updated in the Builder. </br>
-     * You can change the recursion flags for these fields (see {@link DirectedGraphNode.PropertyUpdateFlag}). </br>
-     * </br>
-     * To update the flag for a property on a builder, call {@link TUIModule.Builder#setPropertyUpdateFlag(Property, DirectedGraphNode.PropertyUpdateFlag)} </br>
-     * You can also call {@link TUIModule.Builder#lockProperty(Property)} or {@link TUIModule.Builder#unlockProperty(Property)}. </br>
-     *  </br>
+     * Fields that can be recursively updated in the Builder. <br>
+     * You can change the recursion flags for these fields (see {@link DirectedGraphNode.PropertyUpdateFlag}). <br>
+     * <br>
+     * To update the flag for a property on a builder, call {@link TUIModule.Builder#setPropertyUpdateFlag(Property, DirectedGraphNode.PropertyUpdateFlag)} <br>
+     * You can also call {@link TUIModule.Builder#lockProperty(Property)} or {@link TUIModule.Builder#unlockProperty(Property)}. <br>
+     *  <br>
      * Note: setting the ansi, scanner, print stream, or enabling ansi will automatically lock those property flags,
      * but setting application or merging ansi (appending/prepending) will not automatically lock the corresponding flags.
      *
@@ -46,7 +49,8 @@ public abstract class TUIModule {
         MERGE_ANSI,
         SCANNER,
         PRINTSTREAM,
-        ENABLE_ANSI
+        ENABLE_ANSI,
+        LOGGER
     }
 
     /**
@@ -88,14 +92,17 @@ public abstract class TUIModule {
      */
     private final boolean enableAnsi;
 
+    /** The Logger for the module, provided by the slf4j facade **/
+    protected static final Logger logger = LoggerFactory.getLogger(TUIModule.class);
+
     /**
      * If there is a child currently running while {@link TUIModule#run() } is active, this will reference that child.
      */
     private TUIModule currentRunningChild;
 
     /**
-     * Whether this module is currently terminated. </br>
-     * If a module is terminated, it will stop running its children. </br>
+     * Whether this module is currently terminated. <br>
+     * If a module is terminated, it will stop running its children. <br>
      * Running a module will automatically cause it to be no longer terminated.
      */
     protected boolean terminated = false;
@@ -105,11 +112,13 @@ public abstract class TUIModule {
      */
     public int MAX_ITERATIONS_ON_TO_STRING = 6;
 
+
     /**
-     * Sets terminated to false, then linearly runs children. </br>
-     * If there is a child currently running, you can access it via {@link TUIModule#getCurrentRunningChild()}. </br>
+     * Sets terminated to false, then linearly runs children. <br>
+     * If there is a child currently running, you can access it via {@link TUIModule#getCurrentRunningChild()}. <br>
      */
     public void run() {
+        logger.info("Running {}", name);
         terminated = false;
 
         for(TUIModule.Builder<?> child : children) {
@@ -126,6 +135,7 @@ public abstract class TUIModule {
      * @param module The module to run as the child of this module.
      */
     public void runModuleAsChild(TUIModule.Builder<?> module) {
+        logger.debug("Running {} as child", module.name);
         if(currentRunningChild == null) {
             TUIModule built = module.build();
             currentRunningChild = built;
@@ -435,6 +445,7 @@ public abstract class TUIModule {
         public B getDeepCopy() {
             B copy = createInstance();
             copy.deepCopy(self());
+            logger.info("get a deep copy of {}", name);
             return copy;
         }
 
@@ -486,18 +497,21 @@ public abstract class TUIModule {
         }
 
         public B lockProperty(Property property) {
+            logger.debug("locking property {} for {}", property.name(), name);
             propertyUpdateFlags.put(property, PropertyUpdateFlag.HALT);
 
             return self();
         }
 
         public B unlockProperty(Property property) {
+            logger.debug("unlocking property {} for {}", property.name(), name);
             propertyUpdateFlags.put(property, PropertyUpdateFlag.UPDATE);
 
             return self();
         }
 
         public B updateProperties(TUIModule module) {
+            logger.debug("updating properties for {} based on {}", name, module.name);
             this.setApplication(module.getApplication());
             this.setAnsi(module.getAnsi());
             this.setScanner(module.getScanner());
@@ -518,16 +532,19 @@ public abstract class TUIModule {
         }
 
         public B addChild(TUIModule.Builder<?> child) {
+            logger.info("adding child {} to {}", child.name, name);
             this.children.add(child);
             return self();
         }
 
         public B addChild(int index, TUIModule.Builder<?> child) {
+            logger.debug("adding child {} to {} at index {}", child.name, name, index);
             this.children.add(index, child);
             return self();
         }
 
         public Builder<B> clearChildren() {
+            logger.debug("clearing children of {}", name);
             this.children.clear();
             return self();
         }
@@ -556,11 +573,13 @@ public abstract class TUIModule {
         }
 
         public B setName(String name) {
+            logger.debug("setting name for {} to {}", this.name, name);
             this.name = name;
             return self();
         }
 
         public void prependToName(String name) {
+            logger.debug("prepending {} to {} name to become {}", name, this.name, name + "-" + this.name);
             this.name = name + "-" + this.name;
         }
 
@@ -585,12 +604,14 @@ public abstract class TUIModule {
         }
 
         public B setApplication(TUIApplicationModule app) {
+            logger.debug("setting app for {} to {}", name, (app == null) ? "null" : app.getName());
             this.updateProperty(Property.APPLICATION, n -> n.setApplicationNonRecursive(app));
 
             return self();
         }
 
         private B setApplicationNonRecursive(TUIApplicationModule app) {
+            logger.trace("setting app for {} to {}", name, (app == null) ? "null" : app.getName());
             if(this.application != null && app == null) return self();
             this.application = app;
             return self();
@@ -603,7 +624,11 @@ public abstract class TUIModule {
          * @return self
          */
         public B setAnsi(Ansi ansi) {
-            this.updateProperty(Property.SET_ANSI, n -> n.ansi = ansi);
+            logger.debug("setting ansi for {}", name);
+            this.updateProperty(Property.SET_ANSI, n -> {
+                logger.trace("setting ansi for {}", n.name);
+                n.ansi = ansi;
+            });
             this.lockProperty(Property.SET_ANSI);
             return self();
         }
@@ -618,7 +643,11 @@ public abstract class TUIModule {
          * @return self
          */
         public B prependAnsi(Ansi ansi) {
-            this.updateProperty(Property.MERGE_ANSI, n -> n.ansi = ansi().a(ansi).a(n.ansi));
+            logger.debug("prepending ansi to {}", name);
+            this.updateProperty(Property.MERGE_ANSI, n -> {
+                logger.trace("prepending ansi to {}", n.name);
+                n.ansi = ansi().a(ansi).a(n.ansi);
+            });
 
             return self();
         }
@@ -632,27 +661,43 @@ public abstract class TUIModule {
          * @return self
          */
         public B appendAnsi(Ansi ansi) {
-            this.updateProperty(Property.MERGE_ANSI, n -> n.ansi = ansi().a(n.ansi).a(ansi));
+            logger.debug("appending ansi to {}", name);
+            this.updateProperty(Property.MERGE_ANSI, n -> {
+                logger.trace("appending ansi to {}", n.name);
+                n.ansi = ansi().a(n.ansi).a(ansi);
+            });
 
             return self();
         }
 
         public B setScanner(Scanner scanner) {
-            this.updateProperty(TUIModule.Property.SCANNER, n -> n.scanner = scanner);
+            logger.debug("setting scanner for {}", name);
+            this.updateProperty(TUIModule.Property.SCANNER, n -> {
+                logger.trace("setting scanner for {}", n.name);
+                n.scanner = scanner;
+            });
             this.lockProperty(Property.SCANNER);
 
             return self();
         }
 
         public B setPrintStream(PrintStream printStream) {
-            this.updateProperty(TUIModule.Property.PRINTSTREAM, n -> n.printStream = printStream);
+            logger.debug("setting print stream for {}", name);
+            this.updateProperty(TUIModule.Property.PRINTSTREAM, n -> {
+                logger.trace("setting print stream for {}", n.name);
+                n.printStream = printStream;
+            });
             this.lockProperty(Property.PRINTSTREAM);
 
             return self();
         }
 
         public B enableAnsi(boolean enable) {
-            this.updateProperty(Property.ENABLE_ANSI, n -> n.enableAnsi = enable);
+            logger.debug("setting ansi enabled for {} to {}", name, enable);
+            this.updateProperty(Property.ENABLE_ANSI, n -> {
+                logger.trace("setting ansi enabled for {} to {}", n.name, enable);
+                n.enableAnsi = enable;
+            });
             this.lockProperty(Property.ENABLE_ANSI);
             return self();
         }
