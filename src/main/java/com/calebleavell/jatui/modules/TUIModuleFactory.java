@@ -1,12 +1,16 @@
 package com.calebleavell.jatui.modules;
 
 import org.fusesource.jansi.Ansi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class TUIModuleFactory {
+
+    protected static Logger logger = LoggerFactory.getLogger(TUIModuleFactory.class);
 
     /**
      * Returns an empty ContainerModule - simply wraps <pre><code>new TUIContainerModule.Builder([name])</code></pre>
@@ -15,6 +19,7 @@ public class TUIModuleFactory {
      * @return The empty ContainerModule
      */
     public static TUIContainerModule.Builder empty(String name) {
+
         return new TUIContainerModule.Builder(name);
     }
 

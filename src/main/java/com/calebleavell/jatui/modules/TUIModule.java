@@ -118,7 +118,7 @@ public abstract class TUIModule {
      * If there is a child currently running, you can access it via {@link TUIModule#getCurrentRunningChild()}. <br>
      */
     public void run() {
-        logger.info("Running {}", name);
+        logger.debug("Running children for {}", name);
         terminated = false;
 
         for(TUIModule.Builder<?> child : children) {
@@ -393,6 +393,8 @@ public abstract class TUIModule {
         protected boolean enableAnsi = true;
 
         protected final Class<B> type;
+
+        protected static final Logger logger = LoggerFactory.getLogger(Builder.class);
 
         public Builder(Class<B> type, String name) {
             this.type = type;

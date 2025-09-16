@@ -102,6 +102,8 @@ public class Main {
 
             this.x = x;
             this.y = y;
+
+            main.addChild(new TUIFunctionModule.Builder("func", () -> logger.info("test")));
         }
 
         protected Rect() {

@@ -6,6 +6,12 @@ package com.calebleavell.jatui.modules;
  */
 public class TUIContainerModule extends TUIModule {
 
+    @Override
+    public void run() {
+        logger.info("Running TUIApplicationModule {}", getName());
+        super.run();
+    }
+
     public TUIContainerModule(TUIModule.Builder<?> builder) {
         super(builder);
     }
@@ -31,6 +37,7 @@ public class TUIContainerModule extends TUIModule {
 
         @Override
         public TUIContainerModule build() {
+            logger.trace("Building TUIContainerModule {}", getName());
             return new TUIContainerModule(self());
         }
     }

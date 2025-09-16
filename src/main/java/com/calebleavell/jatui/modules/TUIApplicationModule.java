@@ -12,6 +12,7 @@ public class TUIApplicationModule extends TUIModule {
 
     @Override
     public void run() {
+        logger.info("Running TUIApplicationModule {}", getName());
         super.run();
         onExit.build().run();
     }
@@ -174,6 +175,7 @@ public class TUIApplicationModule extends TUIModule {
 
         @Override
         public TUIApplicationModule build() {
+            logger.trace("Building TUIApplicationModule {}", getName());
             return new TUIApplicationModule(self());
         }
     }
