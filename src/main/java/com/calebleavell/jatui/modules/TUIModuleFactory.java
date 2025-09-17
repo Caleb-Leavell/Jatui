@@ -155,6 +155,7 @@ public class TUIModuleFactory {
         }
 
         public NumberedList addListText(String listText) {
+            logger.trace("adding list text \"{}\" to {}", listText, getName());
             int currentNum = (i * step) + start;
             main.addChild(
                     new LineBuilder(name + "-" + currentNum)
@@ -166,11 +167,13 @@ public class TUIModuleFactory {
         }
 
         public NumberedList setStart(int start) {
+            logger.trace("adding start of {} to {}", getName(), start);
             this.start = start;
             return this;
         }
 
         public NumberedList setStep(int step) {
+            logger.trace("adding step of {} to {}", getName(), step);
             this.step = step;
             return this;
         }
@@ -225,7 +228,8 @@ public class TUIModuleFactory {
                         int index = Integer.parseInt(input);
                         TUIModule.NameOrModule nameOrModule = modules.get(index - 1);
                         TUIModule.Builder<?> toRun = nameOrModule.getModule(app);
-                        app.runModuleAsChild(toRun);
+                        if(toRun == null) logger.error("nameOrModule returned null module for NumberedModuleSelector \"{}\"", getName());
+                        else app.runModuleAsChild(toRun);
                         return "Successfully ran selected module";
                     });
             main.addChild(list);
@@ -257,26 +261,27 @@ public class TUIModuleFactory {
             super.shallowCopy(original);
         }
 
-        private NumberedModuleSelector addScene(String displayText, TUIModule.NameOrModule module){
+        private NumberedModuleSelector addModule(String displayText, TUIModule.NameOrModule module){
+            logger.trace("adding module with displayText \"{}\" to NumberedModuleSelector \"{}\"", displayText, getName());
             this.modules.add(module);
             list.addListText(displayText);
             return self();
         }
 
-        public NumberedModuleSelector addScene(String displayText, String moduleName) {
-            return addScene(displayText, new TUIModule.NameOrModule(moduleName));
+        public NumberedModuleSelector addModule(String displayText, String moduleName) {
+            return addModule(displayText, new TUIModule.NameOrModule(moduleName));
         }
 
-        public NumberedModuleSelector addScene(String displayText, TUIModule.Builder<?> module) {
-            return addScene(displayText, new TUIModule.NameOrModule(module));
+        public NumberedModuleSelector addModule(String displayText, TUIModule.Builder<?> module) {
+            return addModule(displayText, new TUIModule.NameOrModule(module));
         }
 
-        public NumberedModuleSelector addScene(String moduleName) {
-            return addScene(moduleName, moduleName);
+        public NumberedModuleSelector addModule(String moduleName) {
+            return addModule(moduleName, moduleName);
         }
 
-        public NumberedModuleSelector addScene(TUIModule.Builder<?> module) {
-            return addScene(module.getName(), module);
+        public NumberedModuleSelector addModule(TUIModule.Builder<?> module) {
+            return addModule(module.getName(), module);
         }
 
         /**
@@ -373,6 +378,7 @@ public class TUIModuleFactory {
         }
 
         public LineBuilder addText(TUITextModule.Builder text) {
+            logger.trace("adding text to LineBuilder \"{}\" that displays \"{}\" (output type is \"{}\")", getName(), text.getText(), text.getOutputType());
             main.addChild(text);
             current = text;
             iterator ++;
@@ -403,6 +409,7 @@ public class TUIModuleFactory {
         }
 
         public LineBuilder newLine() {
+            logger.trace("adding newline to LineBuilder \"{}\"", getName());
             if(current != null) current.printNewLine(true);
             return self();
         }

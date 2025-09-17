@@ -12,7 +12,7 @@ public class TUIApplicationModule extends TUIModule {
 
     @Override
     public void run() {
-        logger.info("Running TUIApplicationModule {}", getName());
+        logger.info("Running TUIApplicationModule \"{}\"", getName());
         super.run();
         onExit.build().run();
     }
@@ -43,15 +43,15 @@ public class TUIApplicationModule extends TUIModule {
         logInput(moduleName, input);
         TUIModule.Builder<?> child = getChild(moduleName);
         if(child != null) updateInput(child.build(), input);
-        else logger.debug("no child found of name {}, so no input was updated", moduleName);
+        else logger.debug("no child found of name \"{}\", so no input was updated", moduleName);
     }
 
     private void logInput(String moduleName, Object input) {
-        logger.info("updating input in app {} for module {} to {}", getName(), moduleName, (input == null) ? "null" : input.toString());
+        logger.info("updating input in app \"{}\" for module \"{}\" to \"{}\"", getName(), moduleName, (input == null) ? "null" : input.toString());
     }
 
     public void setHome(TUIModule.Builder<?> home) {
-        logger.info("setting home of application {} to {}", getName(), home.getName());
+        logger.info("setting home of application \"{}\" to module \"{}\"", getName(), home.getName());
         this.getChildren().set(0, home);
 
         for(TUIModule.Builder<?> child : getChildren()) {
@@ -68,7 +68,7 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     public void setOnExit(TUIModule.Builder<?> onExit) {
-        logger.debug("setting onExit for application {} to {}", getName(), onExit.getName());
+        logger.debug("setting onExit for application \"{}\" to module \"{}\"", getName(), onExit.getName());
         this.onExit = onExit;
         onExit.setApplication(this);
         onExit.setPrintStream(this.getPrintStream());
@@ -160,13 +160,13 @@ public class TUIApplicationModule extends TUIModule {
         }
 
         public Builder setHome(TUIModule.Builder<?> home) {
-            logger.debug("setting home for application builder {} to {}", getName(), (home == null) ? "null" : home.getName());
+            logger.debug("setting home for application builder \"{}\" to module \"{}\"", getName(), (home == null) ? "null" : home.getName());
             this.children.set(0, home);
             return self();
         }
 
         public Builder setOnExit(TUIModule.Builder<?> onExit) {
-            logger.debug("setting onExit for application builder {} to {}", getName(), (onExit == null) ? "null" : onExit.getName());
+            logger.debug("setting onExit for application builder \"{}\" to \"{}\"", getName(), (onExit == null) ? "null" : onExit.getName());
             this.children.remove(this.onExit);
             this.onExit = onExit;
             this.children.add(onExit);
@@ -175,7 +175,7 @@ public class TUIApplicationModule extends TUIModule {
 
         @Override
         public TUIApplicationModule build() {
-            logger.trace("Building TUIApplicationModule {}", getName());
+            logger.trace("Building TUIApplicationModule \"{}\"", getName());
             return new TUIApplicationModule(self());
         }
     }

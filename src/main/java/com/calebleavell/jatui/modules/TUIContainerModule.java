@@ -8,7 +8,7 @@ public class TUIContainerModule extends TUIModule {
 
     @Override
     public void run() {
-        logger.info("Running TUIApplicationModule {}", getName());
+        logger.info("Running TUIContainerModule \"{}\"", getName());
         super.run();
     }
 
@@ -37,7 +37,7 @@ public class TUIContainerModule extends TUIModule {
 
         @Override
         public TUIContainerModule build() {
-            logger.trace("Building TUIContainerModule {}", getName());
+            logger.trace("Building TUIContainerModule \"{}\"", getName());
             return new TUIContainerModule(self());
         }
     }

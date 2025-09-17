@@ -8,13 +8,15 @@ public class TUIFunctionModule extends TUIModule {
 
     @Override
     public void run() {
+        logger.info("Running TUIFunctionModule \"{}\"", getName());
         Object output = function.get();
         if(getApplication() != null)
             getApplication().updateInput(this, output);
         else if(output != null)
-            logger.warn("Output \"{}\" produced by {} but no application exists to handle it", output, getName());
+            logger.warn("Output \"{}\" produced by TUIFunctionModule \"{}\" but no application exists to store it", output, getName());
         else
-            logger.debug("No output produced by {} and no application exists", getName());
+            logger.debug("No output produced by TUIFunctionModule \"{}\" and no application exists", getName());
+
         super.run();
     }
 
@@ -45,13 +47,13 @@ public class TUIFunctionModule extends TUIModule {
         }
 
         public Builder setFunction(Supplier<?> function) {
-            logger.debug("setting function for {}", getName());
+            logger.debug("setting function for TUIFUnctionModule builder \"{}\"", getName());
             this.function = function;
             return self();
         }
 
         public Builder setFunction(Runnable function) {
-            logger.debug("setting function for {} based on a Runnable", getName());
+            logger.debug("setting function for TUIFunctionModule builder \"{}\" based on a Runnable", getName());
             if(function == null) this.function = null;
             else {
                 this.function = () -> {
@@ -85,7 +87,7 @@ public class TUIFunctionModule extends TUIModule {
 
         @Override
         public TUIFunctionModule build() {
-            logger.trace("Building TUIFunctionModule {}", getName());
+            logger.trace("Building TUIFunctionModule \"{}\"", getName());
             return new TUIFunctionModule(self());
         }
     }

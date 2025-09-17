@@ -16,26 +16,41 @@ public class TUITextModule extends TUIModule {
 
     @Override
     public void run() {
-        if(getAnsiEnabled())
+        logger.info("Running TUITextModule {}", getName());
+        if(getAnsiEnabled()) {
+            logger.debug("printing ansi for {}", getName());
             getPrintStream().print(getAnsi());
+        }
+        else
+            logger.trace("ansi disabled for {}", getName());
 
         switch(outputType) {
             case DISPLAY_TEXT:
+                logger.info("displaying text for \"{}\": \"{}\"", getName(), text);
                 getPrintStream().print(text);
                 break;
             case DISPLAY_MODULE_OUTPUT:
-                if (getApplication() != null)
+                if (getApplication() != null) {
+                    logger.info("displaying output of module \"{}\" for \"{}\": \"{}\"", text, getName(), getApplication().getInput(text));
                     getPrintStream().print(getApplication().getInput(text));
+                }
+                else logger.warn("tried to display output of module \"{}\" but application was null", text);
                 break;
             default:
-                getPrintStream().println("ERROR: TUITextModule has not implemented functionality for outputType " + outputType);
+                logger.error("TUITextModule has not implemented functionality for outputType \"{}\"", outputType);
                 break;
         }
 
-        if(getAnsiEnabled())
+        if(getAnsiEnabled()) {
+            logger.trace("resetting ansi for {}", getName());
             getPrintStream().print(ansi().reset());
+        }
 
-        if(printNewLine) getPrintStream().println();
+        if(printNewLine) {
+            logger.trace("newline for {}", getName());
+            getPrintStream().println();
+        }
+
         super.run();
     }
 
@@ -185,6 +200,7 @@ public class TUITextModule extends TUIModule {
 
         @Override
         public TUITextModule build() {
+            logger.trace("Building TUITextModule {}", getName());
             return new TUITextModule(self());
         }
     }

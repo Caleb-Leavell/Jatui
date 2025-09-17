@@ -62,11 +62,11 @@ public class Main {
                         // text, asks for user input, and runs the module corresponding to the choice of the user.
                         new TUIModuleFactory.NumberedModuleSelector("selector", app)
                                 // Runs random-number-generator, which effectively restarts the app
-                                .addScene("Generate another number", "random-number-generator")
+                                .addModule("Generate another number", "random-number-generator")
                                 // TUIModuleFactory also provides Terminate, which returns a TUIFunctionModule builder
                                 // that, when run, simply terminates the module that was inputted into Terminate().
                                 // So here, it's terminating app.
-                                .addScene("Exit", TUIModuleFactory.terminate("terminate-app", app)));
+                                .addModule("Exit", TUIModuleFactory.terminate("terminate-app", app)));
 
 
         // Set the application home and run

@@ -14,8 +14,11 @@ public class TUITextInputModule extends TUIModule {
 
     @Override
     public void run() {
+        logger.info("Running TUITextInputModule {}", getName());
         displayText.build().run();
+        logger.info("collecting input...");
         input = getScanner().nextLine();
+        logger.info("input collected: \"{}\"", input);
 
         TUIApplicationModule app = getApplication();
         if(app != null) app.updateInput(this, input);
@@ -110,22 +113,26 @@ public class TUITextInputModule extends TUIModule {
          * @return self
          */
         public Builder addHandler(TUIFunctionModule.Builder handler) {
+            logger.trace("adding handler via TUIFunctionModule \"{}\"", handler.getName());
             handlers.addHandler(handler);
             return self();
         }
 
         public Builder addHandler(String name, Function<String, ?> logic) {
+            logger.trace("adding handler \"{}\" via inputted logic", name);
             handlers.addHandler(name, logic);
             return self();
         }
 
         public <T> Builder addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
+            logger.trace("adding safe handler \"{}\" via inputted logic and exception handler", name);
             handlers.addSafeHandler(name, logic, exceptionHandler);
             return self();
         }
 
         public Builder addSafeHandler(String name, Function<String, ?> logic, String exceptionMessage) {
             handlers.addSafeHandler(name, logic, o -> {
+                logger.trace("adding safe handler \"{}\" via inputted logic and exception message", name);
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) return;
                 this.getPrintStream().println(exceptionMessage);
@@ -137,12 +144,15 @@ public class TUITextInputModule extends TUIModule {
         }
 
         public Builder addSafeHandler(String name, Function<String, ?> logic) {
+            logger.trace("adding safe handler \"{}\" via inputted logic", name);
             this.addSafeHandler(name, logic, "Error: Invalid Input");
             return self();
         }
 
         @Override
         public TUITextInputModule build() {
+            logger.trace("Building TUITextInputModule {}", getName());
+
             // remove the display text from the children since we need it to run before the parent module
             // it's a child in the first place so that things like application() affect it as well
             this.children.remove(displayText);
@@ -355,31 +365,39 @@ public class TUITextInputModule extends TUIModule {
         private <T> InputHandler addHandler(String name, Function<String, T> logic) {
             main.addChild(new TUIFunctionModule.Builder(name, () -> {
                 TUIApplicationModule app = this.getApplication();
-                if(app == null) return null;
+                if(app == null) {
+                    logger.warn("tried to run logic for handler \"{}\" but app was null", name);
+                    return null;
+                }
                 String input = app.getInput(inputModule.getName(), String.class);
+                logger.info("running logic on handler \"{}\" with input \"{}\"", name, input);
                 T converted = logic.apply(input);
-                app.updateInput(name, converted);
                 return converted;
-            }));
+            }).setApplication(getApplication()));
             return self();
         }
 
         private <T> InputHandler addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
             main.addChild(new TUIFunctionModule.Builder(name, () -> {
                 TUIApplicationModule app = this.getApplication();
-                if(app == null) return null;
+                if(app == null) {
+                    logger.warn("tried to run logic for safe handler \"{}\" but app was null", name);
+                    return null;
+                }
                 String input = app.getInput(inputModule.getName(), String.class);
+                logger.info("running logic on safe handler \"{}\" with input \"{}\"", name, input);
                 T converted;
                 try {
                     converted = logic.apply(input);
                 }
                 catch(Exception e) {
+                    logger.info("caught exception \"{}\" for safe handler \"{}\": \"{}\"", e.getClass().getSimpleName(), name, e.getMessage());
+                    logger.info("running exception handler for safe handler \"{}\"", name);
                     exceptionHandler.accept(input);
                     return app.getInput(name);
                 }
-                app.updateInput(name, converted);
                 return converted;
-            }));
+            }).setApplication(getApplication()));
             return self();
         }
 

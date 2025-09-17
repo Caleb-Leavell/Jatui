@@ -118,7 +118,7 @@ public abstract class TUIModule {
      * If there is a child currently running, you can access it via {@link TUIModule#getCurrentRunningChild()}. <br>
      */
     public void run() {
-        logger.debug("Running children for {}", name);
+        logger.debug("Running children for module \"{}\"", name);
         terminated = false;
 
         for(TUIModule.Builder<?> child : children) {
@@ -135,7 +135,7 @@ public abstract class TUIModule {
      * @param module The module to run as the child of this module.
      */
     public void runModuleAsChild(TUIModule.Builder<?> module) {
-        logger.debug("Running {} as child", module.name);
+        logger.debug("Running module \"{}\" as child", module.name);
         if(currentRunningChild == null) {
             TUIModule built = module.build();
             currentRunningChild = built;
@@ -447,7 +447,7 @@ public abstract class TUIModule {
         public B getDeepCopy() {
             B copy = createInstance();
             copy.deepCopy(self());
-            logger.info("get a deep copy of {}", name);
+            logger.trace("get a deep copy of module \"{}\"", name);
             return copy;
         }
 
@@ -459,6 +459,8 @@ public abstract class TUIModule {
         protected abstract B createInstance();
 
         protected void shallowCopy(B original) {
+            logger.trace("get a shallow copy of module \"{}\"", name);
+
             this.name = original.name;
             for(Property key : original.propertyUpdateFlags.keySet()) {
                 this.propertyUpdateFlags.put(key, original.propertyUpdateFlags.get(key));
@@ -499,21 +501,21 @@ public abstract class TUIModule {
         }
 
         public B lockProperty(Property property) {
-            logger.debug("locking property {} for {}", property.name(), name);
+            logger.debug("locking property \"{}\" for \"{}\"", property.name(), name);
             propertyUpdateFlags.put(property, PropertyUpdateFlag.HALT);
 
             return self();
         }
 
         public B unlockProperty(Property property) {
-            logger.debug("unlocking property {} for {}", property.name(), name);
+            logger.debug("unlocking property \"{}\" for module \"{}\"", property.name(), name);
             propertyUpdateFlags.put(property, PropertyUpdateFlag.UPDATE);
 
             return self();
         }
 
         public B updateProperties(TUIModule module) {
-            logger.debug("updating properties for {} based on {}", name, module.name);
+            logger.debug("updating properties for module \"{}\" based on module \"{}\"", name, module.name);
             this.setApplication(module.getApplication());
             this.setAnsi(module.getAnsi());
             this.setScanner(module.getScanner());
@@ -534,19 +536,19 @@ public abstract class TUIModule {
         }
 
         public B addChild(TUIModule.Builder<?> child) {
-            logger.info("adding child {} to {}", child.name, name);
+            logger.debug("adding child \"{}\" to module \"{}\"", child.name, name);
             this.children.add(child);
             return self();
         }
 
         public B addChild(int index, TUIModule.Builder<?> child) {
-            logger.debug("adding child {} to {} at index {}", child.name, name, index);
+            logger.debug("adding child \"{}\" to module \"{}\" at index \"{}\"", child.name, name, index);
             this.children.add(index, child);
             return self();
         }
 
         public Builder<B> clearChildren() {
-            logger.debug("clearing children of {}", name);
+            logger.debug("clearing children of module \"{}\"", name);
             this.children.clear();
             return self();
         }
@@ -575,13 +577,13 @@ public abstract class TUIModule {
         }
 
         public B setName(String name) {
-            logger.debug("setting name for {} to {}", this.name, name);
+            logger.debug("setting name for module \"{}\" to \"{}\"", this.name, name);
             this.name = name;
             return self();
         }
 
         public void prependToName(String name) {
-            logger.debug("prepending {} to {} name to become {}", name, this.name, name + "-" + this.name);
+            logger.debug("prepending \"{}\" to the name of module \"{}\" to become \"{}\"", name, this.name, name + "-" + this.name);
             this.name = name + "-" + this.name;
         }
 
@@ -606,14 +608,14 @@ public abstract class TUIModule {
         }
 
         public B setApplication(TUIApplicationModule app) {
-            logger.debug("setting app for {} to {}", name, (app == null) ? "null" : app.getName());
+            logger.debug("setting app for module \"{}\" to \"{}\"", name, (app == null) ? "null" : app.getName());
             this.updateProperty(Property.APPLICATION, n -> n.setApplicationNonRecursive(app));
 
             return self();
         }
 
         private B setApplicationNonRecursive(TUIApplicationModule app) {
-            logger.trace("setting app for {} to {}", name, (app == null) ? "null" : app.getName());
+            logger.trace("setting app for module \"{}\" to \"{}\"", name, (app == null) ? "null" : app.getName());
             if(this.application != null && app == null) return self();
             this.application = app;
             return self();
@@ -626,9 +628,9 @@ public abstract class TUIModule {
          * @return self
          */
         public B setAnsi(Ansi ansi) {
-            logger.debug("setting ansi for {}", name);
+            logger.debug("setting ansi for \"{}\"", name);
             this.updateProperty(Property.SET_ANSI, n -> {
-                logger.trace("setting ansi for {}", n.name);
+                logger.trace("setting ansi for \"{}\"", n.name);
                 n.ansi = ansi;
             });
             this.lockProperty(Property.SET_ANSI);
@@ -645,9 +647,9 @@ public abstract class TUIModule {
          * @return self
          */
         public B prependAnsi(Ansi ansi) {
-            logger.debug("prepending ansi to {}", name);
+            logger.debug("prepending ansi to module \"{}\"", name);
             this.updateProperty(Property.MERGE_ANSI, n -> {
-                logger.trace("prepending ansi to {}", n.name);
+                logger.trace("prepending ansi to module \"{}\"", n.name);
                 n.ansi = ansi().a(ansi).a(n.ansi);
             });
 
@@ -663,9 +665,9 @@ public abstract class TUIModule {
          * @return self
          */
         public B appendAnsi(Ansi ansi) {
-            logger.debug("appending ansi to {}", name);
+            logger.debug("appending ansi to module \"{}\"", name);
             this.updateProperty(Property.MERGE_ANSI, n -> {
-                logger.trace("appending ansi to {}", n.name);
+                logger.trace("appending ansi to module \"{}\"", n.name);
                 n.ansi = ansi().a(n.ansi).a(ansi);
             });
 
@@ -673,9 +675,9 @@ public abstract class TUIModule {
         }
 
         public B setScanner(Scanner scanner) {
-            logger.debug("setting scanner for {}", name);
+            logger.debug("setting scanner for module \"{}\"", name);
             this.updateProperty(TUIModule.Property.SCANNER, n -> {
-                logger.trace("setting scanner for {}", n.name);
+                logger.trace("setting scanner for module \"{}\"", n.name);
                 n.scanner = scanner;
             });
             this.lockProperty(Property.SCANNER);
@@ -684,9 +686,9 @@ public abstract class TUIModule {
         }
 
         public B setPrintStream(PrintStream printStream) {
-            logger.debug("setting print stream for {}", name);
+            logger.debug("setting print stream for module \"{}\"", name);
             this.updateProperty(TUIModule.Property.PRINTSTREAM, n -> {
-                logger.trace("setting print stream for {}", n.name);
+                logger.trace("setting print stream for module \"{}\"", n.name);
                 n.printStream = printStream;
             });
             this.lockProperty(Property.PRINTSTREAM);
@@ -695,9 +697,9 @@ public abstract class TUIModule {
         }
 
         public B enableAnsi(boolean enable) {
-            logger.debug("setting ansi enabled for {} to {}", name, enable);
+            logger.debug("setting ansi enabled for module \"{}\" to {}", name, enable);
             this.updateProperty(Property.ENABLE_ANSI, n -> {
-                logger.trace("setting ansi enabled for {} to {}", n.name, enable);
+                logger.trace("setting ansi enabled for module \"{}\" to {}", n.name, enable);
                 n.enableAnsi = enable;
             });
             this.lockProperty(Property.ENABLE_ANSI);

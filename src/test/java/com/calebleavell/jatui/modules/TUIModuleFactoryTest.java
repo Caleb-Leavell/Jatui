@@ -415,9 +415,9 @@ class TUIModuleFactoryTest {
             TUIContainerModule.Builder module = new TUIContainerModule.Builder("module");
 
             TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app1)
-                    .addScene("text")
-                    .addScene(module)
-                    .addScene("the module", module);
+                    .addModule("text")
+                    .addModule(module)
+                    .addModule("the module", module);
 
             TUIModuleFactory.NumberedModuleSelector copy = original.getCopy();
 
@@ -448,7 +448,7 @@ class TUIModuleFactoryTest {
                         .build();
 
                 TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", otherApp)
-                        .addScene("goto text module", "text");
+                        .addModule("goto text module", "text");
 
                 app.setHome(original);
                 app.run();
@@ -482,7 +482,7 @@ class TUIModuleFactoryTest {
                         .enableAnsi(false);
 
                 TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app)
-                        .addScene("goto text module", text);
+                        .addModule("goto text module", text);
 
                 app.setHome(original);
                 app.run();
@@ -521,7 +521,7 @@ class TUIModuleFactoryTest {
                         .build();
 
                 TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", otherApp)
-                        .addScene( "text");
+                        .addModule( "text");
 
                 app.setHome(original);
                 app.run();
@@ -555,7 +555,7 @@ class TUIModuleFactoryTest {
                         .enableAnsi(false);
 
                 TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app)
-                        .addScene(text);
+                        .addModule(text);
 
                 app.setHome(original);
                 app.run();
@@ -590,9 +590,9 @@ class TUIModuleFactoryTest {
                 TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
                         .addChildren(
                                 new TUIModuleFactory.NumberedModuleSelector("list", app)
-                                        .addScene(text)
-                                        .addScene("restart", "home")
-                                        .addScene("exit", TUIModuleFactory.terminate("terminate-app", app))
+                                        .addModule(text)
+                                        .addModule("restart", "home")
+                                        .addModule("exit", TUIModuleFactory.terminate("terminate-app", app))
                         );
 
                 app.setHome(home);
@@ -637,39 +637,39 @@ class TUIModuleFactoryTest {
             TUIContainerModule.Builder module = new TUIContainerModule.Builder("module");
 
             TUIModuleFactory.NumberedModuleSelector list1 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
-                    .addScene("text")
-                    .addScene(module)
-                    .addScene("the module", module);
+                    .addModule("text")
+                    .addModule(module)
+                    .addModule("the module", module);
 
             TUIModuleFactory.NumberedModuleSelector list2 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
-                    .addScene("text")
-                    .addScene(module)
-                    .addScene("the module", module);
+                    .addModule("text")
+                    .addModule(module)
+                    .addModule("the module", module);
 
             TUIModuleFactory.NumberedModuleSelector list3 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
-                    .addScene("text")
-                    .addScene(module)
-                    .addScene("the module", module);
+                    .addModule("text")
+                    .addModule(module)
+                    .addModule("the module", module);
 
             TUIModuleFactory.NumberedModuleSelector list4 = new TUIModuleFactory.NumberedModuleSelector("list", app2)
-                    .addScene("text")
-                    .addScene(module)
-                    .addScene("the module", module);
+                    .addModule("text")
+                    .addModule(module)
+                    .addModule("the module", module);
 
             TUIModuleFactory.NumberedModuleSelector list5 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
-                    .addScene("input")
-                    .addScene(module)
-                    .addScene("the module", module);
+                    .addModule("input")
+                    .addModule(module)
+                    .addModule("the module", module);
 
             TUIModuleFactory.NumberedModuleSelector list6 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
-                    .addScene("text")
-                    .addScene(module)
-                    .addScene("other display text", module);
+                    .addModule("text")
+                    .addModule(module)
+                    .addModule("other display text", module);
 
             TUIModuleFactory.NumberedModuleSelector list7 = new TUIModuleFactory.NumberedModuleSelector("other name", app1)
-                    .addScene("text")
-                    .addScene(module)
-                    .addScene("the module", module);
+                    .addModule("text")
+                    .addModule(module)
+                    .addModule("the module", module);
 
             assertAll(
                     () -> assertTrue(list1.equals(list1)),
