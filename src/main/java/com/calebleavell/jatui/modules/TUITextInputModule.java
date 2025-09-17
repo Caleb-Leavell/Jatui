@@ -1,7 +1,9 @@
 package com.calebleavell.jatui.modules;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Handler;
@@ -70,7 +72,7 @@ public class TUITextInputModule extends TUIModule {
         public Builder(String name, String displayText) {
             super(Builder.class, name);
 
-            this.displayText = new TUITextModule.Builder(name+"display", displayText).printNewLine(false);
+            this.displayText = new TUITextModule.Builder(name+"-display", displayText).printNewLine(false);
             this.children.add(this.displayText);
 
             handlers = new InputHandlers(this.name + "-handlers", this);
@@ -274,6 +276,8 @@ public class TUITextInputModule extends TUIModule {
         private Consumer<String> exceptionHandler;
         private String moduleName;
 
+        private static Set<String> handlerNames = new HashSet<>();
+
         protected enum HandlerType {
             MODULE,
             HANDLER,
@@ -359,11 +363,12 @@ public class TUITextInputModule extends TUIModule {
          */
         private InputHandler addHandler(TUIFunctionModule.Builder handler) {
             main.addChild(handler);
+            checkForHandlerDuplicates(handler.getName(), handler);
             return self();
         }
 
         private <T> InputHandler addHandler(String name, Function<String, T> logic) {
-            main.addChild(new TUIFunctionModule.Builder(name, () -> {
+            TUIFunctionModule.Builder handler = new TUIFunctionModule.Builder(name, () -> {
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) {
                     logger.warn("tried to run logic for handler \"{}\" but app was null", name);
@@ -373,12 +378,14 @@ public class TUITextInputModule extends TUIModule {
                 logger.info("running logic on handler \"{}\" with input \"{}\"", name, input);
                 T converted = logic.apply(input);
                 return converted;
-            }).setApplication(getApplication()));
+            }).setApplication(getApplication());
+            main.addChild(handler);
+            checkForHandlerDuplicates(name, handler);
             return self();
         }
 
         private <T> InputHandler addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
-            main.addChild(new TUIFunctionModule.Builder(name, () -> {
+            TUIFunctionModule.Builder handler = new TUIFunctionModule.Builder(name, () -> {
                 TUIApplicationModule app = this.getApplication();
                 if(app == null) {
                     logger.warn("tried to run logic for safe handler \"{}\" but app was null", name);
@@ -397,8 +404,21 @@ public class TUITextInputModule extends TUIModule {
                     return app.getInput(name);
                 }
                 return converted;
-            }).setApplication(getApplication()));
+            }).setApplication(getApplication());
+            main.addChild(handler);
+            checkForHandlerDuplicates(name, handler);
             return self();
+        }
+
+        protected static void checkForHandlerDuplicates(String name, TUIModule.Builder<?> handler) {
+            if(handlerNames.contains(name))
+                logger.error("Duplicate names for built Input Handlers detected: \"{}\"", name);
+
+            if(TUIModule.Builder.usedNames.get(name) >= 2)
+                logger.error("Duplicate names detected: at least {} module builders have same name as built Input Handler \"{}\"",
+                        TUIModule.Builder.usedNames.get(name) - 1, name);
+
+            handlerNames.add(name);
         }
 
         /**

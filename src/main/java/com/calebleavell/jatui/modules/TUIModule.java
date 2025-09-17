@@ -6,7 +6,6 @@ import java.io.PrintStream;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.NOPLogger;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -396,9 +395,11 @@ public abstract class TUIModule {
 
         protected static final Logger logger = LoggerFactory.getLogger(Builder.class);
 
+        protected static final Map<String, Integer> usedNames = new HashMap<>();
+
         public Builder(Class<B> type, String name) {
             this.type = type;
-            this.name = name;
+            this.setName(name);
             for(Property property : Property.values()) {
                 propertyUpdateFlags.put(property, PropertyUpdateFlag.UPDATE);
             }
@@ -578,7 +579,13 @@ public abstract class TUIModule {
 
         public B setName(String name) {
             logger.debug("setting name for module \"{}\" to \"{}\"", this.name, name);
+
+            usedNames.putIfAbsent(name, 0);
+            if(usedNames.get(name) != 0 && !name.equals(this.name)) logger.warn("Builders with duplicate name detected: \"{}\"", name);
+            if(this.name != null) usedNames.put(this.name, usedNames.get(this.name) - 1);
             this.name = name;
+            usedNames.put(this.name, usedNames.get(this.name) + 1);
+
             return self();
         }
 

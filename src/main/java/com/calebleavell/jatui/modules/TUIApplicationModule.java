@@ -2,19 +2,34 @@ package com.calebleavell.jatui.modules;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 public class TUIApplicationModule extends TUIModule {
 
     private final Map<String, Object> inputMap; // maps module names to the input object
     private TUIModule.Builder<?> onExit;
+    private Map<String, Integer> nameFrequencyMap = new HashMap<>();
 
     @Override
     public void run() {
+        checkForNameDuplicates();
+
         logger.info("Running TUIApplicationModule \"{}\"", getName());
         super.run();
         onExit.build().run();
+    }
+
+    private void checkForNameDuplicates() {
+        for(TUIModule.Builder<?> child : getChildren()) {
+            child.forEach(c -> {
+                nameFrequencyMap.computeIfAbsent(c.getName(), k -> 0);
+                nameFrequencyMap.put(c.getName(), nameFrequencyMap.get(c.getName()) + 1);
+            });
+        }
+        for(Map.Entry<String, Integer> entry : nameFrequencyMap.entrySet()) {
+            if(entry.getValue() >= 2)
+                logger.error("Duplicate name detected: \"{}\" appears in {} modules", entry.getKey(), entry.getValue());
+        }
     }
 
     public Object getInput(String moduleName) {

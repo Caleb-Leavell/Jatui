@@ -31,7 +31,7 @@ public class Main {
         var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
                 .addChildren(
                         // Input Module that gets the maximum number
-                        new TUITextInputModule.Builder("input", "Maximum Number (or -1 to exit): ")
+                        new TUITextInputModule.Builder("generate-number", "Maximum Number (or -1 to exit): ")
                                 // We declare a safe handler to check for negative input.
                                 // Since it's a safe handler, the input will rerun if the handler throws an exception.
                                 // (we can define custom exception behavior if we wish in an overloaded method)
@@ -45,7 +45,7 @@ public class Main {
                                 }, "Error: input integer (your input might be too large)")
                                 // We add another safe handler that references the logic for generating a random integer
                                 // The input module will provide getRandomInt with the input it collected
-                                .addSafeHandler("generated-number", Main::getRandomInt),
+                                .addSafeHandler("generate-number", Main::getRandomInt),
                         // Text Modules that display the generated number
                         // This can be done with TUITextModule.Builder, but TextBuilder facilitates chaining text modules.
                         new TUIModuleFactory.LineBuilder("generated-number-display")
