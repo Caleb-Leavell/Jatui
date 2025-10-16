@@ -107,6 +107,13 @@ public abstract class TUIModule {
     protected boolean terminated = false;
 
     /**
+     * Whether this module is flagged to restart. <br>
+     * If restart is true while the module is running, it will run again.
+     * after completion
+     */
+    protected boolean restart = false;
+
+    /**
      * How deep in the recursion to go on toString()
      */
     public int MAX_ITERATIONS_ON_TO_STRING = 6;
@@ -119,6 +126,7 @@ public abstract class TUIModule {
     public void run() {
         logger.debug("Running children for module \"{}\"", name);
         terminated = false;
+        restart = false;
 
         for(TUIModule.Builder<?> child : children) {
             if(terminated) break;
@@ -127,6 +135,8 @@ public abstract class TUIModule {
             toRun.run();
             currentRunningChild = null;
         }
+
+        if(restart) this.run();
     }
 
     /**
@@ -212,6 +222,17 @@ public abstract class TUIModule {
     public void terminateChild(String moduleName) {
         getCurrentRunningBranch().forEach(m -> {
             if(m.getName().equals(moduleName)) m.terminate();
+        });
+    }
+
+    public void restart() {
+        this.terminate();
+        this.restart = true;
+    }
+
+    public void restartChild(String moduleName) {
+        getCurrentRunningBranch().forEach(m -> {
+            if(m.getName().equals(moduleName)) m.restart();
         });
     }
 
@@ -395,7 +416,7 @@ public abstract class TUIModule {
 
         protected static final Logger logger = LoggerFactory.getLogger(Builder.class);
 
-        protected static final Map<String, Integer> usedNames = new HashMap<>();
+        protected static final Map<String, Integer> usedNames = new WeakHashMap<>();
 
         public Builder(Class<B> type, String name) {
             this.type = type;
@@ -581,7 +602,7 @@ public abstract class TUIModule {
             logger.debug("setting name for module \"{}\" to \"{}\"", this.name, name);
 
             usedNames.putIfAbsent(name, 0);
-            if(usedNames.get(name) != 0 && !name.equals(this.name)) logger.warn("Builders with duplicate name detected: \"{}\"", name);
+            if(usedNames.get(name) != 0 && !name.equals(this.name) && !name.isEmpty()) logger.warn("Builders with duplicate name detected: \"{}\"", name);
             if(this.name != null) usedNames.put(this.name, usedNames.get(this.name) - 1);
             this.name = name;
             usedNames.put(this.name, usedNames.get(this.name) + 1);

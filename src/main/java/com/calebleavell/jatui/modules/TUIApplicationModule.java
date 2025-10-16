@@ -6,20 +6,27 @@ import java.util.*;
 
 public class TUIApplicationModule extends TUIModule {
 
+    public static final TUIModule.Builder<?> DEFAULT_EXIT = new TUITextModule.Builder("exit", "Exiting...")
+            .setAnsi(ansi().fgRgb(125, 100, 100));
+
     private final Map<String, Object> inputMap; // maps module names to the input object
     private TUIModule.Builder<?> onExit;
     private Map<String, Integer> nameFrequencyMap = new HashMap<>();
 
     @Override
     public void run() {
+        boolean doExit = !this.restart; // copy restart into local variable because super.run will set it to false
         checkForNameDuplicates();
 
         logger.info("Running TUIApplicationModule \"{}\"", getName());
         super.run();
-        onExit.build().run();
+
+        if(doExit) onExit.build().run();
     }
 
     private void checkForNameDuplicates() {
+        nameFrequencyMap.clear();
+
         for(TUIModule.Builder<?> child : getChildren()) {
             child.forEach(c -> {
                 nameFrequencyMap.computeIfAbsent(c.getName(), k -> 0);
@@ -143,8 +150,7 @@ public class TUIApplicationModule extends TUIModule {
 
     public static class Builder extends TUIModule.Builder<Builder> {
         private final Map<String, Object> inputMap = new HashMap<>();
-        private TUIModule.Builder<?> onExit = new TUITextModule.Builder("exit", "Exiting...")
-                .setAnsi(ansi().fgRgb(125, 100, 100));
+        private TUIModule.Builder<?> onExit = DEFAULT_EXIT.getCopy();
 
         public Builder(String name) {
             super(Builder.class, name);

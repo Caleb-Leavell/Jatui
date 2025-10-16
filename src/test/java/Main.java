@@ -26,47 +26,56 @@ public class Main {
                 // but you can unlock it with .unlockProperty(SET_ANSI)
                 .setAnsi(ansi().bold().fgRgb(220, 180, 0));
 
-        // Front-end
+        // This is a module that confirms if the user wants to exit.
+        // It will be called later in the actual app.
+        // If the user confirms they want to exit, the app terminates;
+        // otherwise, the app restarts
+        var confirmExit = new TUIModuleFactory.ConfirmationPrompt("confirm-exit",
+                "Are you sure you want to exit (y/n)? ")
+                .setApplication(app)
+                .addOnConfirm(app::terminate)
+                .addOnDeny(app::restart);
+
         // We declare the "scene" in a ContainerModule so that it's nicely compartmentalized and reusable if needed.
-        var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
-                .addChildren(
-                        // Input Module that gets the maximum number
-                        new TUITextInputModule.Builder("generate-number", "Maximum Number (or -1 to exit): ")
-                                // We declare a safe handler to check for negative input.
-                                // Since it's a safe handler, the input will rerun if the handler throws an exception.
-                                // (we can define custom exception behavior if we wish in an overloaded method)
-                                // If we want to only catch certain exceptions, that must be done in a try-catch in a regular handler.
-                                .addSafeHandler("exit-if-negative", s -> {
-                                    // If it's negative we exit.
-                                    if(Integer.parseInt(s) < 0) {
-                                        app.terminate();
-                                    }
-                                    return null;
-                                }, "Error: input integer (your input might be too large)")
-                                // We add another safe handler that references the logic for generating a random integer
-                                // The input module will provide getRandomInt with the input it collected
-                                .addSafeHandler("generate-number", Main::getRandomInt),
-                        // Text Modules that display the generated number
-                        // This can be done with TUITextModule.Builder, but TextBuilder facilitates chaining text modules.
-                        new TUIModuleFactory.LineBuilder("generated-number-display")
-                                .addText("Generated Number: ")
-                                // We create a copy of moduleOutput, declared above
-                                // We update the name and set the text as the name of module "generated-number",
-                                // which was also declared above.
-                                // So this module will display whatever "generated-number" outputs.
-                                .addText(moduleOutput.getCopy()
-                                        .setName("display-generated-number")
-                                        .setText("generated-number"))
-                                .newLine(),
-                        // TUIModuleFactory provides NumberedModuleSelector, which displays a numbered list of
-                        // text, asks for user input, and runs the module corresponding to the choice of the user.
-                        new TUIModuleFactory.NumberedModuleSelector("selector", app)
-                                // Runs random-number-generator, which effectively restarts the app
-                                .addModule("Generate another number", "random-number-generator")
-                                // TUIModuleFactory also provides Terminate, which returns a TUIFunctionModule builder
-                                // that, when run, simply terminates the module that was inputted into Terminate().
-                                // So here, it's terminating app.
-                                .addModule("Exit", TUIModuleFactory.terminate("terminate-app", app)));
+        var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator");
+        randomNumberGenerator.addChildren(
+            // Input Module that gets the maximum number
+            new TUITextInputModule.Builder("get-random-number", "Maximum Number (or -1 to exit): ")
+                    // We declare a safe handler to check for negative input.
+                    // Since it's a safe handler, the input will rerun if the handler throws an exception.
+                    // (we can define custom exception behavior if we wish in an overloaded method)
+                    // If we want to only catch certain exceptions, that must be done in a try-catch in a regular handler.
+                    .addSafeHandler("exit-if-negative", s -> {
+                        // If it's negative we exit.
+                        if(Integer.parseInt(s) < 0) {
+                            confirmExit.build().run();
+                        }
+                        return null;
+                    }, "Error: input integer (your input might be too large)")
+                    // We add another safe handler that references the logic for generating a random integer
+                    // The input module will provide getRandomInt with the input it collected
+                    .addSafeHandler("generated-number", Main::getRandomInt),
+            // Text Modules that display the generated number
+            // This can be done with TUITextModule.Builder, but TextBuilder facilitates chaining text modules.
+            new TUIModuleFactory.LineBuilder("generated-number-display")
+                    .addText("Generated Number: ")
+                    // We create a copy of moduleOutput, declared above
+                    // We update the name and set the text as the name of module "generated-number",
+                    // which was also declared above.
+                    // So this module will display whatever "generated-number" outputs.
+                    .addText(moduleOutput.getCopy()
+                            .setName("display-generated-number")
+                            .setText("generated-number"))
+                    .newLine(),
+            // TUIModuleFactory provides NumberedModuleSelector, which displays a numbered list of
+            // text, asks for user input, and runs the module corresponding to the choice of the user.
+            new TUIModuleFactory.NumberedModuleSelector("selector", app)
+                    // This choice restarts the app
+                    .addModule("Generate another number", TUIModuleFactory.restart("restart", app))
+                    // TUIModuleFactory also provides Terminate, which returns a TUIFunctionModule builder
+                    // that, when run, simply terminates the module that was inputted into Terminate().
+                    // So here, it's terminating app.
+                    .addModule("Exit", confirmExit));
 
 
         // Set the application home and run
@@ -84,7 +93,7 @@ public class Main {
         // we don't have to worry about the case where "input" cannot
         // be parsed as an integer.
         int max = Integer.parseInt(input.trim());
-        return rand.nextInt(max);
+        return rand.nextInt(max) + 1;
     }
 
     /**

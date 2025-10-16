@@ -7,6 +7,11 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {
+        var myModule = new TUITextInputModule.Builder("a", "a: ")
+                .addSafeHandler("b", s -> 0);
+
+        myModule.build().run();
+        myModule.build().run();
 
     }
 

@@ -376,8 +376,7 @@ public class TUITextInputModule extends TUIModule {
                 }
                 String input = app.getInput(inputModule.getName(), String.class);
                 logger.info("running logic on handler \"{}\" with input \"{}\"", name, input);
-                T converted = logic.apply(input);
-                return converted;
+                return logic.apply(input);
             }).setApplication(getApplication());
             main.addChild(handler);
             checkForHandlerDuplicates(name, handler);
@@ -411,9 +410,6 @@ public class TUITextInputModule extends TUIModule {
         }
 
         protected static void checkForHandlerDuplicates(String name, TUIModule.Builder<?> handler) {
-            if(handlerNames.contains(name))
-                logger.error("Duplicate names for built Input Handlers detected: \"{}\"", name);
-
             if(TUIModule.Builder.usedNames.get(name) >= 2)
                 logger.error("Duplicate names detected: at least {} module builders have same name as built Input Handler \"{}\"",
                         TUIModule.Builder.usedNames.get(name) - 1, name);
@@ -457,6 +453,12 @@ public class TUITextInputModule extends TUIModule {
         }
 
         public TUIContainerModule build() {
+            if(handlerType == HandlerType.HANDLER || handlerType == HandlerType.SAFE_HANDLER) {
+                for(TUIModule.Builder<?> child : main.children) {
+                    child.setName(""); //prevent duplicate name warning
+                }
+            }
+
             main.clearChildren();
 
             switch(handlerType) {
