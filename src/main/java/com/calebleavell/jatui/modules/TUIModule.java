@@ -225,11 +225,19 @@ public abstract class TUIModule {
         });
     }
 
+    /**
+     * Terminates the running module and flags it to run again. <br>
+     * Note: restarting a module that isn't running does nothing.
+     */
     public void restart() {
         this.terminate();
         this.restart = true;
     }
 
+    /**
+     * Terminates the running child of this module and flags it to run again. <br>
+     * Note: restarting a module that isn't running does nothing.
+     */
     public void restartChild(String moduleName) {
         getCurrentRunningBranch().forEach(m -> {
             if(m.getName().equals(moduleName)) m.restart();

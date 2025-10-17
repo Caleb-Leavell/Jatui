@@ -91,6 +91,77 @@ class TUIModuleFactoryTest {
     }
 
     @Test
+    void testRestartModule() {
+        String output;
+
+        try(IOCapture io = new IOCapture("a\nb\nc\nd")) {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                    .setOnExit(TUIModuleFactory.empty("exit"))
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .build();
+
+            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                    .addChildren(
+                            new TUITextModule.Builder("text-1", "first"),
+                            new TUITextInputModule.Builder("get-input", "input: ")
+                                    .addSafeHandler("exit-if-d", s -> {
+                                        if(s.equals("d")) app.terminate();
+                                        return null;
+                                    }),
+                            TUIModuleFactory.restart("restart-app", app),
+                            new TUITextModule.Builder("text-2", "second")
+                    );
+
+            app.setHome(home);
+            app.run();
+
+            output = io.getOutput();
+        }
+
+        assertEquals(String.format("first%ninput: first%ninput: first%ninput: first%ninput: "), output);
+    }
+
+    @Test
+    void testRestartNameParent() {
+        String output;
+
+        try(IOCapture io = new IOCapture("a\nb\nc\nd")) {
+            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                    .setOnExit(TUIModuleFactory.empty("exit"))
+                    .setScanner(io.getScanner())
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false)
+                    .build();
+
+            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                    .addChildren(
+                            new TUITextModule.Builder("text-1", "first"),
+                            new TUIContainerModule.Builder("group")
+                                    .addChildren(
+                                            new TUITextModule.Builder("text-2", "second"),
+                                            new TUITextInputModule.Builder("get-input", "input: ")
+                                                    .addSafeHandler("exit-if-d", s -> {
+                                                        if(s.equals("d")) app.terminate();
+                                                        return null;
+                                                    }),
+                                            TUIModuleFactory.restart("restart-group", app, "group"),
+                                            new TUITextInputModule.Builder("test-3", "third")
+                                    ),
+                            new TUITextModule.Builder("text-4", "fourth")
+                    );
+
+            app.setHome(home);
+            app.run();
+
+            output = io.getOutput();
+        }
+
+        assertEquals(String.format("first%nsecond%ninput: second%ninput: second%ninput: second%ninput: "), output);
+    }
+
+    @Test
     void testRunBuilder() {
         String output;
 
@@ -867,5 +938,10 @@ class TUIModuleFactoryTest {
                     () -> assertFalse(lines1.equals(lines6))
             );
         }
+    }
+
+    @Nested
+    class ConfirmationPromptTest {
+        // TODO
     }
 }

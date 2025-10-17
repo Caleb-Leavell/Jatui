@@ -183,14 +183,12 @@ class TUIModuleTest {
     void testTerminate() {
         TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
 
-
         TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
                 .addChildren(
                         new TUIFunctionModule.Builder("is-run-1", () -> true),
                         new TUIFunctionModule.Builder("terminate", testApp::terminate),
                         new TUIFunctionModule.Builder("is-run-2", () -> true)
                 );
-
 
         testApp.setHome(home);
         testApp.run();
@@ -253,6 +251,123 @@ class TUIModuleTest {
                 () -> assertNull(testApp.getInput("is-run-2")),
                 () -> assertTrue(testApp.getInput("is-run-3", Boolean.class)),
                 () -> assertNull(testApp.getCurrentRunningChild())
+        );
+    }
+
+    @Test
+    void testRestart() {
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+
+        int[] count = {0, 0};
+
+        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                .addChildren(
+                        new TUIFunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
+                        new TUIFunctionModule.Builder("restart", () -> {
+                            if(count[0] == 1) app.restart();
+                        }),
+                        new TUIFunctionModule.Builder("count-2", () -> count[1] = count[1] + 1)
+                );
+
+        app.setHome(home);
+        app.run();
+
+        assertAll(
+                () -> assertEquals(2, count[0]),
+                () -> assertEquals(1, count[1])
+        );
+    }
+
+    @Test
+    void testRestartNested() {
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+
+        int[] count = {0, 0, 0, 0};
+
+        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                .addChildren(
+                        new TUIFunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
+                        new TUIContainerModule.Builder("container")
+                                .addChildren(
+                                        new TUIFunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
+                                        new TUIFunctionModule.Builder("restart", () -> {
+                                            if(count[0] == 1) app.restart();
+                                        }),
+                                        new TUIFunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
+                                ),
+                        new TUIFunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
+                );
+
+        app.setHome(home);
+        app.run();
+
+        assertAll(
+                () -> assertEquals(2, count[0]),
+                () -> assertEquals(2, count[1]),
+                () -> assertEquals(1, count[2]),
+                () -> assertEquals(1, count[3])
+        );
+    }
+
+    @Test
+    void testRestartMultipleTimes() {
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+
+        int[] count = {0, 0, 0, 0};
+
+        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                .addChildren(
+                        new TUIFunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
+                        new TUIContainerModule.Builder("container")
+                                .addChildren(
+                                        new TUIFunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
+                                        new TUIFunctionModule.Builder("restart", () -> {
+                                            if(count[0] < 5) app.restart();
+                                        }),
+                                        new TUIFunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
+                                ),
+                        new TUIFunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
+                );
+
+        app.setHome(home);
+        app.run();
+
+        assertAll(
+                () -> assertEquals(5, count[0]),
+                () -> assertEquals(5, count[1]),
+                () -> assertEquals(1, count[2]),
+                () -> assertEquals(1, count[3])
+        );
+    }
+
+    @Test
+    void testRestartChild() {
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+
+        int[] count = {0, 0, 0, 0};
+
+        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                .addChildren(
+                        new TUIFunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
+                        new TUIContainerModule.Builder("container")
+                                .addChildren(
+                                        new TUIFunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
+                                        new TUIFunctionModule.Builder("restart", () -> {
+                                            if(count[1] == 1) app.restartChild("container");
+                                        }),
+                                        new TUIFunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
+                                ),
+                        new TUIFunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
+                );
+
+        app.setHome(home);
+        app.run();
+
+        assertAll(
+                () -> assertEquals(1, count[0]),
+                () -> assertEquals(2, count[1]),
+                () -> assertEquals(1, count[2]),
+                () -> assertEquals(1, count[3])
         );
     }
 
