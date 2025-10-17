@@ -436,7 +436,7 @@ public class TUIModuleFactory {
         /**
          * <p>Checks equality for properties given by the builder.</p>
          *
-         * <p>For InputHandlers, this includes: </p>
+         * <p>For LineBuilder, this includes: </p>
          * <ul>
          *     <li><strong>current</strong> (the most recent text module added) </li>
          *     <li><strong>iterator</strong> (the number of text modules added so far) </li>
@@ -507,6 +507,10 @@ public class TUIModuleFactory {
             return self();
         }
 
+        public Set<String> getValidConfirm() {
+            return confirm;
+        }
+
         /**
          * Sets the strings that will count as a denial. Note, this clears the current default denial strings <br>
          * Note: spaces are stripped from both these strings and the input,
@@ -520,6 +524,10 @@ public class TUIModuleFactory {
             deny.addAll(Arrays.asList(denyStrings));
 
             return self();
+        }
+
+        public Set<String> getValidDeny() {
+            return deny;
         }
 
         public ConfirmationPrompt addOnConfirm(Runnable logic) {
@@ -579,7 +587,7 @@ public class TUIModuleFactory {
         /**
          * <p>Checks equality for properties given by the builder.</p>
          *
-         * <p>For InputHandlers, this includes: </p>
+         * <p>For ConfirmationPrompt, this includes: </p>
          * <ul>
          *     <li><strong>confirm (set)</strong></li>
          *     <li><strong>deny (set)</strong></li>

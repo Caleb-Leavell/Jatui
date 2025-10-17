@@ -4,6 +4,9 @@ import com.calebleavell.jatui.IOCapture;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Set;
+
 import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -942,6 +945,287 @@ class TUIModuleFactoryTest {
 
     @Nested
     class ConfirmationPromptTest {
-        // TODO
+
+        @Test
+        void testSetValidConfirm() {
+            TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("name", "Are you sure? ")
+                    .setValidConfirm("1", "2", "3");
+
+            assertEquals(Set.of("1", "2", "3"), confirm.getValidConfirm());
+        }
+
+        @Test
+        void testSetValidDeny() {
+            TUIModuleFactory.ConfirmationPrompt deny = new TUIModuleFactory.ConfirmationPrompt("name", "Are you sure? ")
+                    .setValidConfirm("1", "2", "3");
+
+            assertEquals(Set.of("1", "2", "3"), deny.getValidConfirm());
+        }
+
+        @Test
+        void testAddOnConfirmRunnable() {
+            String output;
+
+            try(IOCapture io = new IOCapture("yes")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setPrintStream(io.getPrintStream())
+                        .setScanner(io.getScanner())
+                        .enableAnsi(false)
+                        .build();
+
+                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                        .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
+
+                app.setHome(confirm);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals("Are you sure? confirmed", output);
+        }
+
+        @Test
+        void testAddOnConfirmRunnableWithDifferentConfirm() {
+            String output;
+
+            try(IOCapture io = new IOCapture("yes\nyeah")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setPrintStream(io.getPrintStream())
+                        .setScanner(io.getScanner())
+                        .enableAnsi(false)
+                        .build();
+
+                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                        .setValidConfirm("yeah")
+                        .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
+
+                app.setHome(confirm);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("Are you sure? Error: Invalid Input%nAre you sure? confirmed"), output);
+        }
+
+        @Test
+        void testAddOnConfirmMultipleRunnableWithDifferentConfirm() {
+            String output;
+
+            try(IOCapture io = new IOCapture("yes\nyeah")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setPrintStream(io.getPrintStream())
+                        .setScanner(io.getScanner())
+                        .enableAnsi(false)
+                        .build();
+
+                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                        .setValidConfirm("yeah")
+                        .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
+
+                app.setHome(confirm);
+                app.run();
+
+                output = io.getOutput();
+            }
+
+            assertEquals(String.format("Are you sure? Error: Invalid Input%nAre you sure? confirmed"), output);
+        }
+
+        @Test
+        void testAddOnConfirmMultipleSupplierWithDifferentConfirm() {
+            String output;
+
+            try(IOCapture io = new IOCapture("yes\nyeah")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setPrintStream(io.getPrintStream())
+                        .setScanner(io.getScanner())
+                        .enableAnsi(false)
+                        .build();
+
+                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                        .setValidConfirm("yeah")
+                        .addOnConfirm("on-confirm", () -> "confirmed");
+
+                app.setHome(confirm);
+                app.run();
+
+                output = app.getInput("on-confirm").toString();
+            }
+
+            assertEquals(String.format("confirmed"), output);
+        }
+
+        @Test
+        void testAddOnConfirmMultipleSuppliersAndRunnables() {
+            String output;
+            String confirmed1;
+            String confirmed2;
+
+            try(IOCapture io = new IOCapture("yes\nyeah")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setPrintStream(io.getPrintStream())
+                        .setScanner(io.getScanner())
+                        .enableAnsi(false)
+                        .build();
+
+                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                        .setValidConfirm("yeah")
+                        .addOnConfirm("on-confirm-1", () -> "confirmed")
+                        .addOnConfirm(() -> io.getPrintStream().print("confirmed"))
+                        .addOnConfirm("on-confirm-2", () -> "confirmed-2");
+
+                app.setHome(confirm);
+                app.run();
+
+                output = io.getOutput();
+                confirmed1 = app.getInput("on-confirm-1").toString();
+                confirmed2 = app.getInput("on-confirm-2").toString();
+            }
+
+            assertAll(
+                    () -> assertEquals(String.format("Are you sure? Error: Invalid Input%nAre you sure? confirmed"), output),
+                    () -> assertEquals("confirmed", confirmed1),
+                    () -> assertEquals("confirmed-2", confirmed2)
+            );
+        }
+
+        @Test
+        void testAddOnDenyMultipleSuppliersAndRunnables() {
+            String output;
+            String denied1;
+            String denied2;
+
+            try(IOCapture io = new IOCapture("no\nnah")) {
+                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setPrintStream(io.getPrintStream())
+                        .setScanner(io.getScanner())
+                        .enableAnsi(false)
+                        .build();
+
+                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                        .setValidDeny("nah")
+                        .addOnDeny("on-deny-1", () -> "denied")
+                        .addOnDeny(() -> io.getPrintStream().print("denied"))
+                        .addOnDeny("on-deny-2", () -> "denied-2");
+
+                app.setHome(confirm);
+                app.run();
+
+                output = io.getOutput();
+                denied1 = app.getInput("on-deny-1").toString();
+                denied2 = app.getInput("on-deny-2").toString();
+            }
+
+            assertAll(
+                    () -> assertEquals(String.format("Are you sure? Error: Invalid Input%nAre you sure? denied"), output),
+                    () -> assertEquals("denied", denied1),
+                    () -> assertEquals("denied-2", denied2)
+            );
+        }
+
+        @Test
+        void testSetName() {
+            TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setName("new-confirm-name");
+
+            assertAll(
+                    () -> assertEquals("new-confirm-name", confirm.getName()),
+                    () -> assertNotNull(confirm.getChild("new-confirm-name-input")),
+                    () -> assertNull(confirm.getChild("confirm-input"))
+            );
+
+        }
+
+        @Test
+        void testEqualTo() {
+            TUIModuleFactory.ConfirmationPrompt prompt1 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny(() -> System.out.println("text"));
+
+            TUIModuleFactory.ConfirmationPrompt prompt2 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny(() -> System.out.println("text"));
+
+            TUIModuleFactory.ConfirmationPrompt prompt3 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny(() -> System.out.println("text"));
+
+            TUIModuleFactory.ConfirmationPrompt prompt4 = new TUIModuleFactory.ConfirmationPrompt("confirm", "other text")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny(() -> System.out.println("text"));
+
+            TUIModuleFactory.ConfirmationPrompt prompt5 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps", "new valid confirm")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny(() -> System.out.println("text"));
+
+            TUIModuleFactory.ConfirmationPrompt prompt6 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not", "new valid deny")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny(() -> System.out.println("text"));
+
+            TUIModuleFactory.ConfirmationPrompt prompt7 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm("different-on-confirm", () -> 0)
+                    .addOnDeny(() -> System.out.println("text"));
+
+            TUIModuleFactory.ConfirmationPrompt prompt8 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny("different-on-deny", () -> 0);
+
+            TUIModuleFactory.ConfirmationPrompt prompt9 = new TUIModuleFactory.ConfirmationPrompt("other-name", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny(() -> System.out.println("text"));
+
+            assertAll(
+                    () -> assertTrue(prompt1.equals(prompt1)),
+                    () -> assertTrue(prompt1.equals(prompt2)),
+                    () -> assertTrue(prompt2.equals(prompt1)),
+                    () -> assertTrue(prompt2.equals(prompt3)),
+                    () -> assertTrue(prompt1.equals(prompt3)),
+                    () -> assertFalse(prompt1.equals(prompt4)),
+                    () -> assertFalse(prompt1.equals(prompt5)),
+                    () -> assertFalse(prompt1.equals(prompt6)),
+                    () -> assertFalse(prompt1.equals(prompt7)),
+                    () -> assertFalse(prompt1.equals(prompt8)),
+                    () -> assertFalse(prompt1.equals(prompt9))
+            );
+        }
+
+        @Test
+        void testGetCopy() {
+            TUIModuleFactory.ConfirmationPrompt original = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                    .setValidConfirm("mhm", "perhaps")
+                    .setValidDeny("not sure", "probably not")
+                    .addOnConfirm(() -> System.out.println("text"))
+                    .addOnDeny(() -> System.out.println("text"));
+
+            TUIModuleFactory.ConfirmationPrompt copy = original.getCopy();
+
+            assertTrue(original.equals(copy));
+        }
     }
 }
