@@ -30,7 +30,7 @@ public class TUIFunctionModule extends TUIModule {
     }
 
     public static class Builder extends TUIModule.Builder<Builder> {
-        Supplier<?> function; // this isn't checked in a .equalTo so structural equality can actually return true ;)
+        Supplier<?> function; // this isn't checked in a .equalTo so structural equality can actually return true
 
         public Builder(String name, Supplier<?> function) {
             super(Builder.class, name);

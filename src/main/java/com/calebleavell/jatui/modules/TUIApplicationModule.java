@@ -22,6 +22,9 @@ public class TUIApplicationModule extends TUIModule {
         super.run();
 
         if(doExit) onExit.build().run();
+
+        // zeroes out char arrays and clears memory for safety
+        resetMemory();
     }
 
     private void checkForNameDuplicates() {
@@ -37,6 +40,18 @@ public class TUIApplicationModule extends TUIModule {
             if(entry.getValue() >= 2)
                 logger.error("Duplicate name detected: \"{}\" appears in {} modules", entry.getKey(), entry.getValue());
         }
+    }
+
+    private void resetMemory() {
+        // zero out all char arrays as they are most likely to be sensitive information (like a Password)
+        for(Map.Entry<String, Object> obj : inputMap.entrySet()) {
+            Object val = obj.getValue();
+            if(val instanceof char[]) {
+                Arrays.fill((char[]) val, ' ');
+            }
+        }
+
+        inputMap.clear();
     }
 
     public Object getInput(String moduleName) {
@@ -66,6 +81,10 @@ public class TUIApplicationModule extends TUIModule {
         TUIModule.Builder<?> child = getChild(moduleName);
         if(child != null) updateInput(child.build(), input);
         else logger.debug("no child found of name \"{}\", so no input was updated", moduleName);
+    }
+
+    public void forceUpdateInput(String identifier, Object input) {
+        inputMap.put(identifier, input);
     }
 
     private void logInput(String moduleName, Object input) {

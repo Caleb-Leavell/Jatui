@@ -7,11 +7,15 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {
-        var myModule = new TUITextInputModule.Builder("a", "a: ")
-                .addSafeHandler("b", s -> 0);
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        var getPassword = new TUIModuleFactory.PasswordInput("get-password", "Your password: ");
 
-        myModule.build().run();
-        myModule.build().run();
+        app.setHome(getPassword);
+        app.run();
+
+        System.out.println("before clearing: " + new String(app.getInput("get-password-input", char[].class)));
+        getPassword.clearPassword();
+        System.out.println("after clearing: " + new String(app.getInput("get-password-input", char[].class)));
 
     }
 

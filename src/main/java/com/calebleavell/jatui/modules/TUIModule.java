@@ -596,6 +596,7 @@ public abstract class TUIModule {
 
         public <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
             TUIModule.Builder<?> child = getChild(name);
+            if(child == null) return null;
             if(child.getClass() == type) {
                 return type.cast(child);
             }
