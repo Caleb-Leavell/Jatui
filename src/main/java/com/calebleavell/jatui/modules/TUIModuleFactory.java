@@ -638,14 +638,15 @@ public class TUIModuleFactory {
         String displayText;
         private Supplier<char[]> passwordSupplier;
 
-        List<TUIFunctionModule.Builder> onValidPassword = new ArrayList<>();
-        List<TUIFunctionModule.Builder> onInvalidPassword = new ArrayList<>();
+        final List<TUIFunctionModule.Builder> onValidPassword = new ArrayList<>();
+        final List<TUIFunctionModule.Builder> onInvalidPassword = new ArrayList<>();
         private boolean storeInput = false;
         private boolean storeMatch = false;
 
         public PasswordInput(String name, String displayText, Supplier<char[]> passwordSupplier) {
             super(PasswordInput.class, name);
             this.displayText = displayText;
+            this.passwordSupplier = passwordSupplier;
             main.addChild(new TUIFunctionModule.Builder(name+"-input", createPasswordInput()));
         }
 
@@ -656,6 +657,13 @@ public class TUIModuleFactory {
         @Override
         protected PasswordInput createInstance() {return new PasswordInput();}
 
+        /**
+         * Cleans any memory that may have been stored from this password input
+         * (including the input and whether the password was a match). <br>
+         * Note: Memory is automatically cleaned unless you explicitly set this
+         * module to store it via {@link PasswordInput#storeInput()}, {@link PasswordInput#storeIfMatched()},
+         * or {@link PasswordInput#storeInputAndMatch()}.
+         */
         public void cleanMemory() {
             char[] password = application.getInput(this.name+"-input", char[].class);
             if(password != null) Arrays.fill(password, ' ');
@@ -723,7 +731,7 @@ public class TUIModuleFactory {
             return self();
         }
 
-        public PasswordInput storePassword() {
+        public PasswordInput storeInput() {
             this.storeInput = true;
             this.storeMatch = false;
             return self();
@@ -806,12 +814,79 @@ public class TUIModuleFactory {
                     return null;
                 }
                 else {
-                    if(this.storeMatch) this.application.forceUpdateInput(this.name+"is-matched", match);
+                    if(this.storeMatch) this.application.forceUpdateInput(this.name+"-is-matched", match);
                     match = false;
                     if(this.storeInput) return input != null ? input : new char[0];
                     else return null;
                 }
             };
+        }
+
+        /**
+         * <p>Checks equality for properties given by the builder.</p>
+         *
+         * <p>For ConfirmationPrompt, this includes: </p>
+         * <ul>
+         *     <li><strong>diaplayText</strong></li>
+         *     <li><strong>onValidPassword</strong></li>
+         *     <li><strong>onInvalidPassword</strong></li>
+         *     <li><strong>storeInput</strong></li>
+         *     <li><strong>storeMatch</strong></li>
+         *     <li>name</li>
+         *     <li>application</li>
+         *     <li>children</li>
+         *     <li>ansi</li>
+         *     <li>scanner</li>
+         *     <li>printStream</li>
+         *     <li>enableAnsi</li>
+         * </ul>
+         *
+         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
+         *  but are considered in equals()
+         * @param first The first NumberedList to compare
+         * @param second The second NumberedList to compare
+         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         */
+        @Override
+        public boolean equalTo(PasswordInput first, PasswordInput second) {
+            if(first == second) return true;
+            if(first.getClass() != second.getClass()) return false;
+
+            // note: these fields are guaranteed to be non-null
+            if(first.onValidPassword.size() != second.onValidPassword.size()) return false;
+            if(first.onInvalidPassword.size() != second.onInvalidPassword.size()) return false;
+            for(int i = 0; i < first.onInvalidPassword.size(); i ++) {
+                if(!TUIModule.Builder.equals(first.onInvalidPassword.get(i), second.onInvalidPassword.get(i))) {
+                    return false;
+                }
+            }
+            for(int i = 0; i < first.onInvalidPassword.size(); i ++) {
+                if(!TUIModule.Builder.equals(first.onInvalidPassword.get(i), second.onInvalidPassword.get(i))) {
+                    return false;
+                }
+            }
+
+            return  Objects.equals(first.displayText, second.displayText)
+                    && Objects.equals(first.storeInput, second.storeInput)
+                    && Objects.equals(first.storeMatch, second.storeMatch)
+                    && super.equalTo(first, second);
+        }
+
+        @Override
+        public void shallowCopy(PasswordInput original) {
+            this.displayText = original.displayText;
+            this.onValidPassword.clear();
+            this.onInvalidPassword.clear();
+            for(TUIFunctionModule.Builder module: original.onValidPassword) {
+                this.onValidPassword.add(module.getCopy());
+            }
+            for(TUIFunctionModule.Builder module: original.onInvalidPassword) {
+                this.onInvalidPassword.add(module.getCopy());
+            }
+            this.storeInput = original.storeInput;
+            this.storeMatch = original.storeMatch;
+            super.shallowCopy(original);
         }
     }
 

@@ -2,21 +2,21 @@ import com.calebleavell.jatui.modules.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {
         TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-        var getPassword = new TUIModuleFactory.PasswordInput("get-password", "Your password: ");
+        final char[] correct = {'a', 'e', 'i', 'o', 'u'};
+        Supplier<char[]> supplyCorrect = () -> correct;
+        var getPassword = new TUIModuleFactory.PasswordInput("get-password", "Your password: ", supplyCorrect)
+                .addOnValidPassword(() -> System.out.println("You were correct."))
+                .addOnInvalidPassword(() -> System.out.println("You were incorrect."));
 
         app.setHome(getPassword);
         app.run();
-
-        System.out.println("before clearing: " + new String(app.getInput("get-password-input", char[].class)));
-        getPassword.clearPassword();
-        System.out.println("after clearing: " + new String(app.getInput("get-password-input", char[].class)));
-
     }
 
     public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {
