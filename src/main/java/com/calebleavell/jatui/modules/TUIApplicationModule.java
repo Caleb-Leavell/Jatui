@@ -22,9 +22,6 @@ public class TUIApplicationModule extends TUIModule {
         super.run();
 
         if(doExit) onExit.build().run();
-
-        // zeroes out char arrays and clears memory for safety
-        resetMemory();
     }
 
     private void checkForNameDuplicates() {
