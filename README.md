@@ -23,7 +23,7 @@ Here's a simple "Hello, World!" app to get started:
 TUIApplicationModule app = new TUIApplicationModule("app").build();
 
 // define the actual application structure
-TUITextModule helloWorld = new TUITextModule("hello-world", "Hello, World!");
+TUITextModule.Builder helloWorld = new TUITextModule.Builder("hello-world", "Hello, World!");
 
 // set the app home and run
 app.setHome(helloWorld);
