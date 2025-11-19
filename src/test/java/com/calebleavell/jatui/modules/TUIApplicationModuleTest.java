@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TUIApplicationModuleTest {
 
-
     @Test
     void testRun_default_exit() {
         String expected = lines("Exiting...");
@@ -89,6 +88,24 @@ class TUIApplicationModuleTest {
         }
     }
 
+    @Test
+    void testResetMemory() {
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+
+        app.forceUpdateInput("input-1", 5);
+        app.forceUpdateInput("input-2", "input");
+        app.forceUpdateInput("input-3", "1234567".toCharArray());
+        char[] arrInput = app.getInput("input-3", char[].class);
+
+        app.resetMemory();
+
+        assertAll(
+                () -> assertNull(app.getInput("input-1")),
+                () -> assertNull(app.getInput("input-2")),
+                () -> assertNull(app.getInput("input-3")),
+                () -> assertArrayEquals("       ".toCharArray(), arrInput)
+        );
+    }
 
     @Test
     void testGetInput_input_module() {
@@ -136,6 +153,20 @@ class TUIApplicationModuleTest {
 
         }
     }
+
+    @Test
+    void getInputOrDefault() {
+        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+
+        app.forceUpdateInput("input", 5);
+
+        assertAll(
+                () -> assertEquals(5, app.getInputOrDefault("input", Integer.class, 5)),
+                () -> assertEquals(2, app.getInputOrDefault("nothing", Integer.class, 2)),
+                () -> assertEquals("default", app.getInputOrDefault("input", String.class, "default"))
+        );
+    }
+
 
     @Test
     void testUpdateInput_no_module() {

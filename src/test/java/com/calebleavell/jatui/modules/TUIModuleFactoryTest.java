@@ -1234,7 +1234,6 @@ class TUIModuleFactoryTest {
 
     @Nested
     class PasswordInputTest {
-        // TODO
         @Test
         void testCleanMemory() {
             final char[] correct = "correct-password".toCharArray();

@@ -39,7 +39,6 @@ public class TUIApplicationModule extends TUIModule {
         }
     }
 
-    // TODO test this
     public void resetMemory() {
         // zero out all char arrays as they are most likely to be sensitive information (like a Password)
         for(Map.Entry<String, Object> obj : inputMap.entrySet()) {
@@ -56,6 +55,7 @@ public class TUIApplicationModule extends TUIModule {
         return inputMap.get(moduleName);
     }
 
+    // TODO - test this
     /**
      * Returns the input for the given module only if 1. it exists 2. it is of the correct type.
      * @param moduleName The name of the module that collected the input
