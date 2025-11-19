@@ -13,10 +13,15 @@ public class Experimentation {
         Supplier<char[]> supplyCorrect = () -> correct;
         var getPassword = new TUIModuleFactory.PasswordInput("get-password", "Your password: ", supplyCorrect)
                 .addOnValidPassword(() -> System.out.println("You were correct."))
-                .addOnInvalidPassword(() -> System.out.println("You were incorrect."));
+                .addOnInvalidPassword(() -> System.out.println("You were incorrect."))
+                .storeInputAndMatch();
 
         app.setHome(getPassword);
         app.run();
+
+        getPassword.cleanMemory();
+
+        System.out.println(app.getInput("get-password-is-matched"));
     }
 
     public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {

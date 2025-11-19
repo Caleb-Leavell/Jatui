@@ -39,7 +39,8 @@ public class TUIApplicationModule extends TUIModule {
         }
     }
 
-    private void resetMemory() {
+    // TODO test this
+    public void resetMemory() {
         // zero out all char arrays as they are most likely to be sensitive information (like a Password)
         for(Map.Entry<String, Object> obj : inputMap.entrySet()) {
             Object val = obj.getValue();
@@ -66,6 +67,13 @@ public class TUIApplicationModule extends TUIModule {
         if(inputMap.get(moduleName) == null) return null;
         if(inputMap.get(moduleName).getClass().equals(type)) return type.cast(inputMap.get(moduleName));
         else return null;
+    }
+
+    // TODO test this
+    public <T> T getInputOrDefault(String moduleName, Class<T> type, T defaultValue) {
+        if(inputMap.get(moduleName) == null) return defaultValue;
+        if(inputMap.get(moduleName).getClass().equals(type)) return type.cast(inputMap.get(moduleName));
+        else return defaultValue;
     }
 
     public void updateInput(TUIModule module, Object input) {

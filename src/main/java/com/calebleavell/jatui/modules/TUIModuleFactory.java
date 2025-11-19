@@ -669,7 +669,7 @@ public class TUIModuleFactory {
             if(password != null) Arrays.fill(password, ' ');
             password = null;
 
-            application.forceUpdateInput(this.name+"-match", null);
+            application.forceUpdateInput(this.name+"-is-matched", null);
         }
 
         /**
@@ -687,10 +687,6 @@ public class TUIModuleFactory {
             }
 
             return true;
-        }
-
-        public TUIFunctionModule.Builder createMemoryCleaner(String clearerName) {
-            return new TUIFunctionModule.Builder(clearerName, this::cleanMemory);
         }
 
         public PasswordInput addOnValidPassword(Runnable onValidPassword) {
@@ -748,8 +744,7 @@ public class TUIModuleFactory {
             if(this.name == null) return super.setName(name);
             TUIFunctionModule.Builder input = main.getChild(this.name+"-input", TUIFunctionModule.Builder.class);
             input.setName(name + "-input");
-            super.setName(name);
-            return self();
+            return super.setName(name);
         }
 
         public PasswordInput setDisplayText(String displayText) {
@@ -827,7 +822,7 @@ public class TUIModuleFactory {
          *
          * <p>For ConfirmationPrompt, this includes: </p>
          * <ul>
-         *     <li><strong>diaplayText</strong></li>
+         *     <li><strong>displayText</strong></li>
          *     <li><strong>onValidPassword</strong></li>
          *     <li><strong>onInvalidPassword</strong></li>
          *     <li><strong>storeInput</strong></li>
