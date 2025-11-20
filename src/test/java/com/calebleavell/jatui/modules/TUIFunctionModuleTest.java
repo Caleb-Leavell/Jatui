@@ -96,7 +96,7 @@ class TUIFunctionModuleTest {
 
             assertAll(
                     () -> assertEquals(func, copy.getFunction()),
-                    () -> assertTrue(copy.equals(original))
+                    () -> assertTrue(copy.equalTo(original))
             );
         }
 

@@ -23,7 +23,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Handler;
 
 public class TUITextInputModule extends TUIModule {
     private String input;
@@ -267,7 +266,7 @@ public class TUITextInputModule extends TUIModule {
          * @param first The first InputHandlers to compare
          * @param second The second InputHandlers to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         @Override
         public boolean equalTo(InputHandlers first, InputHandlers second) {
@@ -456,7 +455,7 @@ public class TUITextInputModule extends TUIModule {
          * @param first The first InputHandlers to compare
          * @param second The second InputHandlers to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         public boolean equalTo(InputHandler first, InputHandler second) {
             if(first == second) return true;

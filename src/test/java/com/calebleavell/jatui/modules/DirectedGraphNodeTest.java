@@ -17,12 +17,8 @@
 
 package com.calebleavell.jatui.modules;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import java.awt.desktop.AppReopenedEvent;
-import java.io.File;
-import java.sql.Array;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -586,13 +582,13 @@ class DirectedGraphNodeTest {
         node2.getPropertyUpdateFlags().put(TestNode.Property.DATA, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
         assertAll(
-                () -> assertTrue(node1.equals(node1)),
-                () -> assertTrue(node1.equals(node1Copy)),
-                () -> assertFalse(node1.equals(node2))
+                () -> assertTrue(node1.equalTo(node1)),
+                () -> assertTrue(node1.equalTo(node1Copy)),
+                () -> assertFalse(node1.equalTo(node2))
         );
 
         node1Copy.setData(5);
 
-        assertFalse(node1.equals(node1Copy));
+        assertFalse(node1.equalTo(node1Copy));
     }
 }

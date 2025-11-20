@@ -202,7 +202,7 @@ public class TUITextModule extends TUIModule {
          * @param first The first TUITextModule.Builder to compare
          * @param second The second TUITextModule.Builder to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         public boolean equalTo(TUITextModule.Builder first, TUITextModule.Builder second) {
             if(first == second) return true;

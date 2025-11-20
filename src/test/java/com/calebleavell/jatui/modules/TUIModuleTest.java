@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
-import ch.qos.logback.classic.Logger;
-
 import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1062,7 +1060,7 @@ class TUIModuleTest {
 
             io.close();
 
-            assertTrue(copied.equals(original));
+            assertTrue(copied.equalTo(original));
         }
 
         // equality more thoroughly tested in DirectedGraphNodeTest
@@ -1192,10 +1190,10 @@ class TUIModuleTest {
                     () -> assertTrue(TUIModule.Builder.equals(second, first)),
                     () -> assertFalse(TUIModule.Builder.equals(first, third)),
 
-                    () -> assertTrue(first.equals(first)),
-                    () -> assertTrue(first.equals(second)),
-                    () -> assertTrue(second.equals(first)),
-                    () -> assertFalse(first.equals(third))
+                    () -> assertTrue(first.equalTo(first)),
+                    () -> assertTrue(first.equalTo(second)),
+                    () -> assertTrue(second.equalTo(first)),
+                    () -> assertFalse(first.equalTo(third))
             );
         }
 
@@ -1282,7 +1280,7 @@ class TUIModuleTest {
             TUIModule.NameOrModule copy = original.getCopy();
 
             assertAll(
-                    () -> assertTrue(original.getModule(app).equals(copy.getModule(app))),
+                    () -> assertTrue(original.getModule(app).equalTo(copy.getModule(app))),
                     () -> assertNotEquals(original.getModule(app), copy.getModule(app))
             );
         }

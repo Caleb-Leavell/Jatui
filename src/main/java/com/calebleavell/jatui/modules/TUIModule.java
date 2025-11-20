@@ -407,7 +407,7 @@ public abstract class TUIModule {
             if(children.get(i) == null && otherChildren.get(i) == null) continue;
             if(children.get(i) == null || otherChildren.get(i) == null) return false;
 
-            if(!children.get(i).equals(otherChildren.get(i))) return false;
+            if(!children.get(i).equalTo(otherChildren.get(i))) return false;
         }
 
         return (Objects.equals(name, other.name) &&
@@ -785,7 +785,7 @@ public abstract class TUIModule {
          * @param first The first TUIModule to compare
          * @param second The second TUIModule to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         @Override
         public boolean equalTo(B first, B second) {
@@ -821,7 +821,7 @@ public abstract class TUIModule {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            return first.equals(second);
+            return first.equalTo(second);
         }
 
         public abstract TUIModule build();

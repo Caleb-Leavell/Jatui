@@ -144,6 +144,7 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
     /**
      * Traverses through every node accessible from this node and returns true if
      * one of the nodes is null. Cycles are supported.
+     *
      * @return Whether a null node is accessible (directly or indirectly) from this node.
      */
     default boolean containsNullNode() {
@@ -219,8 +220,11 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
         updateProperty(property, updater, visited);
     }
 
+    /**
+     *  @return Structural equality between {@code first} and {@code second}, as defined by<br>
+     *  {@link DirectedGraphNode#equalTo(DirectedGraphNode)} and concrete implementations.
+     */
     public boolean equalTo(T first, T second);
-
 
     /**
      * <p>Checks for equality with another node based on equalTo. The children are also checked recursively.</p>
@@ -228,7 +232,7 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
      * @param visited The list of visited nodes (prevents infinite recursion).
      * @return Whether this node equals other based on equalityCriteria.
      */
-    default boolean equals(A other, Set<A> visited) {
+    default boolean equalTo(A other, Set<A> visited) {
         if(other == null) return false;
         if(this == other) return true;
 
@@ -254,7 +258,7 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
             if(children.get(i) == null && otherChildren.get(i) == null) continue;
             if(children.get(i) == null || otherChildren.get(i) == null) return false;
 
-            if(!children.get(i).equals(otherChildren.get(i), visited)) return false;
+            if(!children.get(i).equalTo(otherChildren.get(i), visited)) return false;
 
         }
 
@@ -262,12 +266,12 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
     }
 
     /**
-     * <p>Checks for equality with another node based on equalityCriteria. The children are also checked recursively.</p>
+     * <p>Checks for structural equality with another node based on equalityCriteria. The children are also checked recursively.</p>
      * @param other The other node to check. <strong>Must be the same type as this node to return true.</strong>
      * @return Whether this node equals other based on equalityCriteria.
      */
-    default boolean equals(A other) {
-        return equals(other, new HashSet<>());
+    default boolean equalTo(A other) {
+        return equalTo(other, new HashSet<>());
     }
 
     @SuppressWarnings("unchecked") // safe to suppress since "this" will always be an instance of T

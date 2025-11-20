@@ -18,7 +18,6 @@
 package com.calebleavell.jatui.modules;
 
 import com.calebleavell.jatui.IOCapture;
-import com.sun.jdi.JDIPermission;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -162,7 +161,7 @@ class TUITextModuleTest {
             TUITextModule.Builder copy = original.createInstance();
             copy.shallowCopy(original);
 
-            assertTrue(original.equals(copy));
+            assertTrue(original.equalTo(copy));
         }
 
         @Test

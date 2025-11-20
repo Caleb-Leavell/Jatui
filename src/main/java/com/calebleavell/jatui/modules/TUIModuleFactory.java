@@ -18,8 +18,6 @@
 package com.calebleavell.jatui.modules;
 
 import org.fusesource.jansi.Ansi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Console;
 import java.util.*;
@@ -226,7 +224,7 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         public boolean equalTo(NumberedList first, NumberedList second) {
             if(first == second) return true;
@@ -332,7 +330,7 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         @Override
         public boolean equalTo(NumberedModuleSelector first, NumberedModuleSelector second) {
@@ -465,7 +463,7 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         @Override
         public boolean equalTo(LineBuilder first, LineBuilder second) {
@@ -618,7 +616,7 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         @Override
         public boolean equalTo(ConfirmationPrompt first, ConfirmationPrompt second) {
@@ -851,7 +849,7 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equals(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
          */
         @Override
         public boolean equalTo(PasswordInput first, PasswordInput second) {

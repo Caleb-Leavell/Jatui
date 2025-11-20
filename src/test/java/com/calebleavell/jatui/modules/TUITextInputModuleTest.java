@@ -110,9 +110,9 @@ class TUITextInputModuleTest {
             TUITextInputModule.Builder copy = original.getCopy();
 
             assertAll(
-                    () -> assertTrue(copy.equals(original)),
-                    () -> assertTrue(copy.handlers.equals(original.handlers)),
-                    () -> assertTrue(copy.getDisplayText().equals(original.getDisplayText())));
+                    () -> assertTrue(copy.equalTo(original)),
+                    () -> assertTrue(copy.handlers.equalTo(original.handlers)),
+                    () -> assertTrue(copy.getDisplayText().equalTo(original.getDisplayText())));
         }
 
         @Test
@@ -282,7 +282,7 @@ class TUITextInputModuleTest {
 
             TUITextInputModule.InputHandlers copy = original.getCopy();
 
-            assertTrue(copy.equals(original));
+            assertTrue(copy.equalTo(original));
         }
 
         @Test
@@ -415,8 +415,8 @@ class TUITextInputModuleTest {
 
                 TUITextInputModule.InputHandler copy = original.getCopy();
                 assertAll(
-                        () -> assertTrue(copy.equals(original)),
-                        () -> assertTrue(copy.getModule() == original.getModule() || copy.getModule().equals(original.getModule())),
+                        () -> assertTrue(copy.equalTo(original)),
+                        () -> assertTrue(copy.getModule() == original.getModule() || copy.getModule().equalTo(original.getModule())),
                         () -> assertEquals(copy.getLogic(), original.getLogic()),
                         () -> assertEquals(copy.getExceptionHandler(), original.getExceptionHandler())
                 );

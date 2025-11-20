@@ -367,7 +367,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.NumberedList copy = original.getCopy();
 
-            assertTrue(original.equals(copy));
+            assertTrue(original.equalTo(copy));
         }
 
         @Test
@@ -480,15 +480,15 @@ class TUIModuleFactoryTest {
                     .setStep(2);
 
             assertAll(
-                    () -> assertTrue(list1.equals(list1)),
-                    () -> assertTrue(list1.equals(list2)),
-                    () -> assertTrue(list2.equals(list1)),
-                    () -> assertTrue(list2.equals(list3)),
-                    () -> assertTrue(list1.equals(list3)),
-                    () -> assertFalse(list1.equals(list4)),
-                    () -> assertFalse(list1.equals(list5)),
-                    () -> assertFalse(list1.equals(list6)),
-                    () -> assertFalse(list1.equals(list7))
+                    () -> assertTrue(list1.equalTo(list1)),
+                    () -> assertTrue(list1.equalTo(list2)),
+                    () -> assertTrue(list2.equalTo(list1)),
+                    () -> assertTrue(list2.equalTo(list3)),
+                    () -> assertTrue(list1.equalTo(list3)),
+                    () -> assertFalse(list1.equalTo(list4)),
+                    () -> assertFalse(list1.equalTo(list5)),
+                    () -> assertFalse(list1.equalTo(list6)),
+                    () -> assertFalse(list1.equalTo(list7))
             );
         }
     }
@@ -514,7 +514,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.NumberedModuleSelector copy = original.getCopy();
 
-            assertTrue(copy.equals(original));
+            assertTrue(copy.equalTo(original));
         }
 
 
@@ -765,15 +765,15 @@ class TUIModuleFactoryTest {
                     .addModule("the module", module);
 
             assertAll(
-                    () -> assertTrue(list1.equals(list1)),
-                    () -> assertTrue(list1.equals(list2)),
-                    () -> assertTrue(list2.equals(list1)),
-                    () -> assertTrue(list2.equals(list3)),
-                    () -> assertTrue(list1.equals(list3)),
-                    () -> assertFalse(list1.equals(list4)),
-                    () -> assertFalse(list1.equals(list5)),
-                    () -> assertFalse(list1.equals(list6)),
-                    () -> assertFalse(list1.equals(list7))
+                    () -> assertTrue(list1.equalTo(list1)),
+                    () -> assertTrue(list1.equalTo(list2)),
+                    () -> assertTrue(list2.equalTo(list1)),
+                    () -> assertTrue(list2.equalTo(list3)),
+                    () -> assertTrue(list1.equalTo(list3)),
+                    () -> assertFalse(list1.equalTo(list4)),
+                    () -> assertFalse(list1.equalTo(list5)),
+                    () -> assertFalse(list1.equalTo(list6)),
+                    () -> assertFalse(list1.equalTo(list7))
             );
         }
     }
@@ -789,7 +789,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.LineBuilder copy = original.getCopy();
 
-            assertTrue(copy.equals(original));
+            assertTrue(copy.equalTo(original));
         }
 
         @Test
@@ -951,13 +951,13 @@ class TUIModuleFactoryTest {
                     .addText("text2");
 
             assertAll(
-                    () -> assertTrue(lines1.equals(lines1)),
-                    () -> assertTrue(lines1.equals(lines2)),
-                    () -> assertTrue(lines2.equals(lines3)),
-                    () -> assertTrue(lines1.equals(lines3)),
-                    () -> assertFalse(lines1.equals(lines4)),
-                    () -> assertFalse(lines1.equals(lines5)),
-                    () -> assertFalse(lines1.equals(lines6))
+                    () -> assertTrue(lines1.equalTo(lines1)),
+                    () -> assertTrue(lines1.equalTo(lines2)),
+                    () -> assertTrue(lines2.equalTo(lines3)),
+                    () -> assertTrue(lines1.equalTo(lines3)),
+                    () -> assertFalse(lines1.equalTo(lines4)),
+                    () -> assertFalse(lines1.equalTo(lines5)),
+                    () -> assertFalse(lines1.equalTo(lines6))
             );
         }
     }
@@ -1220,17 +1220,17 @@ class TUIModuleFactoryTest {
                     .addOnDeny(() -> System.out.println("text"));
 
             assertAll(
-                    () -> assertTrue(prompt1.equals(prompt1)),
-                    () -> assertTrue(prompt1.equals(prompt2)),
-                    () -> assertTrue(prompt2.equals(prompt1)),
-                    () -> assertTrue(prompt2.equals(prompt3)),
-                    () -> assertTrue(prompt1.equals(prompt3)),
-                    () -> assertFalse(prompt1.equals(prompt4)),
-                    () -> assertFalse(prompt1.equals(prompt5)),
-                    () -> assertFalse(prompt1.equals(prompt6)),
-                    () -> assertFalse(prompt1.equals(prompt7)),
-                    () -> assertFalse(prompt1.equals(prompt8)),
-                    () -> assertFalse(prompt1.equals(prompt9))
+                    () -> assertTrue(prompt1.equalTo(prompt1)),
+                    () -> assertTrue(prompt1.equalTo(prompt2)),
+                    () -> assertTrue(prompt2.equalTo(prompt1)),
+                    () -> assertTrue(prompt2.equalTo(prompt3)),
+                    () -> assertTrue(prompt1.equalTo(prompt3)),
+                    () -> assertFalse(prompt1.equalTo(prompt4)),
+                    () -> assertFalse(prompt1.equalTo(prompt5)),
+                    () -> assertFalse(prompt1.equalTo(prompt6)),
+                    () -> assertFalse(prompt1.equalTo(prompt7)),
+                    () -> assertFalse(prompt1.equalTo(prompt8)),
+                    () -> assertFalse(prompt1.equalTo(prompt9))
             );
         }
 
@@ -1244,7 +1244,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.ConfirmationPrompt copy = original.getCopy();
 
-            assertTrue(original.equals(copy));
+            assertTrue(original.equalTo(copy));
         }
     }
 
@@ -1623,18 +1623,18 @@ class TUIModuleFactoryTest {
                     .storeInputAndMatch();
 
             assertAll(
-                    () -> assertTrue(input1.equals(input1)),
-                    () -> assertTrue(input1.equals(input2)),
-                    () -> assertTrue(input2.equals(input1)),
-                    () -> assertTrue(input2.equals(input3)),
-                    () -> assertTrue(input1.equals(input3)),
-                    () -> assertFalse(input1.equals(input4)),
-                    () -> assertFalse(input1.equals(input5)),
-                    () -> assertFalse(input1.equals(input6)),
-                    () -> assertTrue(input1.equals(input7)),
-                    () -> assertTrue(input1.equals(input8)),
-                    () -> assertTrue(input1.equals(input9)),
-                    () -> assertFalse(input1.equals(input10))
+                    () -> assertTrue(input1.equalTo(input1)),
+                    () -> assertTrue(input1.equalTo(input2)),
+                    () -> assertTrue(input2.equalTo(input1)),
+                    () -> assertTrue(input2.equalTo(input3)),
+                    () -> assertTrue(input1.equalTo(input3)),
+                    () -> assertFalse(input1.equalTo(input4)),
+                    () -> assertFalse(input1.equalTo(input5)),
+                    () -> assertFalse(input1.equalTo(input6)),
+                    () -> assertTrue(input1.equalTo(input7)),
+                    () -> assertTrue(input1.equalTo(input8)),
+                    () -> assertTrue(input1.equalTo(input9)),
+                    () -> assertFalse(input1.equalTo(input10))
             );
 
         }
@@ -1651,7 +1651,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.PasswordInput copy = original.getCopy();
 
-            assertTrue(original.equals(copy));
+            assertTrue(original.equalTo(copy));
         }
     }
 }

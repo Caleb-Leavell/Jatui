@@ -359,7 +359,7 @@ class TUIApplicationModuleTest {
             TUIApplicationModule.Builder copy = app.getCopy();
 
             assertAll(
-                    () -> assertTrue(app.equals(copy)),
+                    () -> assertTrue(app.equalTo(copy)),
                     () -> assertFalse(app.build().equals(copy.build())) // should be false since their respective applications will not have the same reference
             );
 
