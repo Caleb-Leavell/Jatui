@@ -12,9 +12,9 @@ Jatui is a Java library that provides a framework for building TUIs that are mea
 
 ## Get Started
 
-This library is currently in **beta**, and while it's stable and tested, it's missing some features (logging, warnings, a robust toString, a couple factory methods/classes) and thorough documentation. However, it is still usable and useful, so feel free to use it if you'd like! (note, this library will be added to Maven Central once it's fully released)
+This library is currently in **beta**, and while it's stable and tested, it's missing the last few features (Password Input, toString cleanup, thorough documentation). However, it is still usable and useful, so feel free to use it if you'd like! (note, this library will be added to Maven Central once it's fully released)
 
-**Note:** This library requires Jansi as a dependency
+**Note:** This library requires both Jansi and slf4j as a dependency
 
 Here's a simple "Hello, World!" app to get started:
 
@@ -23,7 +23,7 @@ Here's a simple "Hello, World!" app to get started:
 TUIApplicationModule app = new TUIApplicationModule("app").build();
 
 // define the actual application structure
-TUITextModule helloWorld = new TUITextModule("hello-world", "Hello, World!");
+TUITextModule.Builder helloWorld = new TUITextModule.Builder("hello-world", "Hello, World!");
 
 // set the app home and run
 app.setHome(helloWorld);
