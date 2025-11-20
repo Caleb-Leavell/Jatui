@@ -12,9 +12,11 @@ Jatui is a Java library that provides a framework for building TUIs that are mea
 
 ## Get Started
 
-This library is now **feature complete** for full release, and while it's stable and tested, it's missing thorough documentation. However, it is still usable and useful, so feel free to use it if you'd like! (note, this library will be added to Maven Central once it's moved out of pre-release)
+**This library is currently in v1.0 Pre-Release 1 and will be added to Maven Central when it's fully released.** There is a jar available to use [here](https://github.com/Caleb-Leavell/Jatui/releases/tag/v1.0-pre1)
 
-**Note:** This library requires both Jansi and slf4j as a dependency
+This library is now **feature complete** for full release, and while it's stable and tested, it's missing thorough documentation. However, it is still usable and useful, so feel free to use it if you'd like! 
+
+**Note:** This library requires both Jansi and slf4j as a dependency.
 
 Here's a simple "Hello, World!" app to get started:
 
