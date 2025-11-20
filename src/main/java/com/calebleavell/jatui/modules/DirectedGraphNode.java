@@ -71,10 +71,12 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
      */
     Map<P, PropertyUpdateFlag> getPropertyUpdateFlags();
 
+    /** Get the {@code Class<T>} type of the current Node **/
     Class<T> getType();
 
     /**
      * Executes a DFS on self and all accessible children of the graph. Cycles are supported.
+     * Null Nodes are skipped.
      *
      * @param criteria A function that checks whether a child should be returned
      * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found
@@ -100,6 +102,8 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
         if(criteria.apply(self)) return self;
 
         for(A child : getChildren()) {
+            if(child == null) continue;
+
             A found = child.dfs(criteria, visited);
 
             if(found != null) return found;
@@ -110,7 +114,7 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
 
     /**
      * Executes the Consumer on self and every accessible node of the graph.
-     * Cycles are supported.
+     * Cycles are supported. Null Nodes are skipped.
      *
      * @param function The Consumer that accepts every accessible node.
      */
@@ -137,14 +141,35 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
         });
     }
 
+    /**
+     * Traverses through every node accessible from this node and returns true if
+     * one of the nodes is null. Cycles are supported.
+     * @return Whether a null node is accessible (directly or indirectly) from this node.
+     */
     default boolean containsNullNode() {
-        final boolean[] nullNode = new boolean[1];
+        Set<A> visited = new HashSet<>();
+        return containsNullNode(visited);
+    }
 
-        forEach(n -> {
-            nullNode[0] = (n == null);
-        });
+    /**
+     * Traverses through every node accessible from this node and returns true if
+     * one of the nodes is null. Cycles are supported.
+     *
+     * @param visited used so we can keep track of the modules we've visited and thus support cycles
+     * @return Whether a null node is accessible (directly or indirectly) from this node.
+     */
+    default boolean containsNullNode(Set<A> visited) {
+        A self = abstractSelf();
 
-        return nullNode[0];
+        if(visited.contains(self)) return false;
+        visited.add(self);
+
+        for(A child : getChildren()) {
+            if(child == null) return true;
+            else if (child.containsNullNode(visited)) return true;
+        }
+
+        return false;
     }
 
     /**

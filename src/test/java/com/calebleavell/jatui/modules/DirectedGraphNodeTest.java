@@ -329,6 +329,67 @@ class DirectedGraphNodeTest {
     }
 
 
+    @Test
+    void testContainsNullNode_empty() {
+        TestNode node = new TestNode("node", 1);
+
+        assertFalse(node.containsNullNode());
+    }
+
+    @Test
+    void testContainsNullNode_self_loop() {
+        TestNode node = new TestNode("node", 1);
+        node.getChildren().add(node);
+
+        assertFalse(node.containsNullNode());
+    }
+
+    @Test
+    void testContainsNullNode_with_child() {
+        TestNode root = new TestNode("root", 1);
+        TestNode child = new TestNode("child", 2);
+
+        root.getChildren().add(child);
+
+        boolean hasNull1 = root.containsNullNode();
+
+        root.getChildren().add(null);
+
+        boolean hasNull2 = root.containsNullNode();
+
+        assertAll(
+                () -> assertFalse(hasNull1),
+                () -> assertTrue(hasNull2)
+        );
+    }
+
+    @Test
+    void testContainsNullNode_branching() {
+        TestNode node1 = new TestNode("one", 1);
+        TestNode node2 = new TestNode("two", 2);
+        TestNode node3 = new TestNode("three", 3);
+        TestNode node4 = new TestNode("four", 4);
+        TestNode node5 = new TestNode("five", 5);
+        TestNode node6 = new TestNode("six", 6);
+        TestNode node3Alternate = new TestNode("three-alternate", 3);
+
+        node1.getChildren().add(node3);
+        node3.getChildren().addAll(List.of(node4, node3Alternate));
+        node4.getChildren().addAll(List.of(node1, node2));
+        node5.getChildren().add(node1);
+
+        boolean hasNull1 = node1.containsNullNode();
+        node2.getChildren().add(null);
+        boolean hasNull2 = node1.containsNullNode();
+        node4.getChildren().add(null);
+        boolean hasNull3 = node1.containsNullNode();
+
+        assertAll(
+                () -> assertFalse(hasNull1),
+                () -> assertTrue(hasNull2),
+                () -> assertTrue(hasNull3)
+        );
+    }
 
     @Test
     void testForEachChild_empty() {
@@ -390,6 +451,7 @@ class DirectedGraphNodeTest {
                 () -> assertEquals(6, node6.getData())
         );
     }
+
 
     @Test
     void testUpdateProperty_Update() {
