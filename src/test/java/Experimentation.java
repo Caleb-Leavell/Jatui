@@ -4,8 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static org.fusesource.jansi.Ansi.ansi;
-
 public class Experimentation {
     public static void main(String[] args) throws IOException {
         TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();

@@ -6,15 +6,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Console;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class TUIModuleFactory {
-
-    protected static Logger logger = LoggerFactory.getLogger(TUIModuleFactory.class);
-
     /**
      * Returns an empty ContainerModule - simply wraps <pre><code>new TUIContainerModule.Builder([name])</code></pre>
      * to allow for code that consistently uses TUIModuleFactory if desired.
@@ -95,9 +91,7 @@ public class TUIModuleFactory {
     }
 
     public static TUIFunctionModule.Builder restart(String name, TUIModule parent, String moduleToRestart) {
-        return new TUIFunctionModule.Builder(name, () -> {
-            parent.restartChild(moduleToRestart);
-        });
+        return new TUIFunctionModule.Builder(name, () -> parent.restartChild(moduleToRestart));
     }
 
     /**
@@ -433,7 +427,6 @@ public class TUIModuleFactory {
             return current;
         }
 
-
         /**
          * <p>Checks equality for properties given by the builder.</p>
          *
@@ -552,7 +545,7 @@ public class TUIModuleFactory {
             });
 
             return self();
-        };
+        }
 
         public ConfirmationPrompt addOnDeny(Runnable logic) {
             return this.addOnDeny(this.name + "-onDeny-" + denyIter++,() -> {
@@ -576,7 +569,7 @@ public class TUIModuleFactory {
             });
 
             return self();
-        };
+        }
 
         @Override
         public ConfirmationPrompt setName(String name) {
@@ -675,8 +668,8 @@ public class TUIModuleFactory {
         /**
          * Validates a password that's been stored in memory. <br>
          * Note: this will always return false if the behavior hasn't been set to store the password.
-         * @param correct
-         * @return
+         * @param correct The actual password
+         * @return Whether the inputted password matches the correct password, if it exists and was saved
          */
         public boolean validatePassword(char[] correct) {
             char[] inputtedPassword = application.getInput(this.name+"-input", char[].class);
@@ -752,7 +745,7 @@ public class TUIModuleFactory {
             return self();
         }
 
-        public String getDisplayText() {return displayText;};
+        public String getDisplayText() {return displayText;}
 
         @Override
         public TUIContainerModule build() {

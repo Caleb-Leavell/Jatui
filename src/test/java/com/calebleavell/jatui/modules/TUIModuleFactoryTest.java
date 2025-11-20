@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -1061,7 +1060,7 @@ class TUIModuleFactoryTest {
                 output = app.getInput("on-confirm").toString();
             }
 
-            assertEquals(String.format("confirmed"), output);
+            assertEquals("confirmed", output);
         }
 
         @Test
@@ -1592,18 +1591,18 @@ class TUIModuleFactoryTest {
                     .storeInputAndMatch();
 
             TUIModuleFactory.PasswordInput input8 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
-                    .addOnInvalidPassword(() -> {System.out.println("different");})
+                    .addOnInvalidPassword(() -> System.out.println("different"))
                     .addOnValidPassword(() -> {})
                     .storeInputAndMatch();
 
             TUIModuleFactory.PasswordInput input9 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
                     .addOnInvalidPassword(() -> {})
-                    .addOnValidPassword(() -> {System.out.println("other");})
+                    .addOnValidPassword(() -> System.out.println("other"))
                     .storeInputAndMatch();
 
             TUIModuleFactory.PasswordInput input10 = new TUIModuleFactory.PasswordInput("other-name", "password: ", first)
                     .addOnInvalidPassword(() -> {})
-                    .addOnValidPassword(() -> {System.out.println("other");})
+                    .addOnValidPassword(() -> System.out.println("other"))
                     .storeInputAndMatch();
 
             assertAll(

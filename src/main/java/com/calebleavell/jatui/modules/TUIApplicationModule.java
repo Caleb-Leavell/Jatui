@@ -11,7 +11,7 @@ public class TUIApplicationModule extends TUIModule {
 
     private final Map<String, Object> inputMap; // maps module names to the input object
     private TUIModule.Builder<?> onExit;
-    private Map<String, Integer> nameFrequencyMap = new HashMap<>();
+    private final Map<String, Integer> nameFrequencyMap = new HashMap<>();
 
     @Override
     public void run() {
@@ -29,7 +29,7 @@ public class TUIApplicationModule extends TUIModule {
 
         for(TUIModule.Builder<?> child : getChildren()) {
             child.forEach(c -> {
-                nameFrequencyMap.computeIfAbsent(c.getName(), k -> 0);
+                nameFrequencyMap.computeIfAbsent(c.getName(), _ -> 0);
                 nameFrequencyMap.put(c.getName(), nameFrequencyMap.get(c.getName()) + 1);
             });
         }
