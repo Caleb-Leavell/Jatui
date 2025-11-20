@@ -12,7 +12,7 @@ Jatui is a Java library that provides a framework for building TUIs that are mea
 
 ## Get Started
 
-This library is currently in **beta**, and while it's stable and tested, it's missing the last few features (Password Input, toString cleanup, thorough documentation). However, it is still usable and useful, so feel free to use it if you'd like! (note, this library will be added to Maven Central once it's fully released)
+This library is now **feature complete** for full release, and while it's stable and tested, it's missing thorough documentation. However, it is still usable and useful, so feel free to use it if you'd like! (note, this library will be added to Maven Central once it's moved out of pre-release)
 
 **Note:** This library requires both Jansi and slf4j as a dependency
 
