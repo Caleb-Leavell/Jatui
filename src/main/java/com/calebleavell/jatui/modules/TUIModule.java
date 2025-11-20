@@ -116,7 +116,7 @@ public abstract class TUIModule {
     /**
      * How deep in the recursion to go on toString()
      */
-    public int MAX_ITERATIONS_ON_TO_STRING = 6;
+    public int MAX_TREE_STRING_DEPTH = 6;
 
 
     /**
@@ -318,33 +318,37 @@ public abstract class TUIModule {
 
     public boolean getAnsiEnabled() {return this.enableAnsi; }
 
-    /**
-     * Recursively generates toString with info for this scene and all children.
-     * Will only go as deep as MAX_ITERATIONS_ON_TOSTRING
-     *
-     * @return formatted string
-     */
     @Override
     public String toString() {
-        return toString(0, true);
+        return this.name;
     }
 
     /**
-     * recursive helper method for toString()
+     * Recursively generates toString with info for this scene and all children.
+     * Will only go as deep as MAX_ITERATIONS_ON_TO_STRING
+     *
+     * @return formatted string
      */
-    public String toString(int indent, boolean displayChildren) {
-        if(indent > MAX_ITERATIONS_ON_TO_STRING) {
+    public String toTreeString() {
+        return toTreeString(0, true);
+    }
+
+    /**
+     * recursive helper method for toTreeString()
+     */
+    public String toTreeString(int indent, boolean displayChildren) {
+        if(indent > MAX_TREE_STRING_DEPTH) {
             return "";
         }
 
         StringBuilder output = new StringBuilder();
         output.append("\t".repeat(Math.max(0, indent)));
 
-        output.append(this.name).append(" -- ").append(this.getClass().getSimpleName());
+        output.append(this.name).append(" -- ").append(this.getClass().getSimpleName()).append(String.format("%n"));
 
         if (displayChildren) {
             for (TUIModule.Builder<?> child : children) {
-                output.append("\n").append(child.build().toString(indent + 1, true));
+                output.append(child.build().toTreeString(indent + 1, true));
             }
         }
 
@@ -824,6 +828,11 @@ public abstract class TUIModule {
             super.deepCopy(original, visited);
             main = (TUIContainerModule.Builder) visited.get(original.main);
             return self();
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
         }
 
         /**

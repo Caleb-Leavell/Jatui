@@ -80,7 +80,8 @@ public class Main {
 
         // Set the application home and run
         app.setHome(randomNumberGenerator);
-        app.run();
+        System.out.println(app.toTreeString());
+        //app.run();
     }
 
     // best practice to declare a single Random instance statically

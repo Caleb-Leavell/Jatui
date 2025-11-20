@@ -55,7 +55,6 @@ public class TUIApplicationModule extends TUIModule {
         return inputMap.get(moduleName);
     }
 
-    // TODO - test this
     /**
      * Returns the input for the given module only if 1. it exists 2. it is of the correct type.
      * @param moduleName The name of the module that collected the input
@@ -69,7 +68,6 @@ public class TUIApplicationModule extends TUIModule {
         else return null;
     }
 
-    // TODO test this
     public <T> T getInputOrDefault(String moduleName, Class<T> type, T defaultValue) {
         if(inputMap.get(moduleName) == null) return defaultValue;
         if(inputMap.get(moduleName).getClass().equals(type)) return type.cast(inputMap.get(moduleName));
