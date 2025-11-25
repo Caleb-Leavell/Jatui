@@ -22,6 +22,9 @@ import java.util.function.*;
 
 /**
  * Provides a mechanism for working with nodes in a directed graph. Uses a recursive structure to simplify attaching nodes as "children."
+ * <br><br>
+ * <strong>This class is not Thread-Safe.</strong>
+ *
  * @param <P> Property Type
  * @param <A> Abstract Type that all nodes will have
  * @param <T> Specific Type of this node

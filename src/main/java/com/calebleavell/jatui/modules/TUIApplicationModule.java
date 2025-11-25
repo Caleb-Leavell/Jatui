@@ -21,15 +21,47 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 import java.util.*;
 
+/**
+ * The root TUIModule of an application. This class handles:
+ * <ul>
+ *     <li>Arbitrary Input storage</li>
+ *     <li>Entering/Exiting the TUI (via Home and onExit)</li>
+ *     <li>Name collision enforcement (logging)</li>
+ * </ul>
+ */
 public class TUIApplicationModule extends TUIModule {
 
+    /** The module that runs by default when the application finishes running **/
     public static final TUIModule.Builder<?> DEFAULT_EXIT = new TUITextModule.Builder("exit", "Exiting...")
             .setAnsi(ansi().fgRgb(125, 100, 100));
 
+    /**
+     * Where input collected during the application's lifecycle is stored. <br>
+     * It maps a String to an Object, where the String is generally the
+     * name of the module that supplied the input (it may also just be the
+     * provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     * is used), and the Object is the input itself.
+     */
     private final Map<String, Object> inputMap; // maps module names to the input object
+
+    /**
+     * The module that runs when the application finishes running. <br>
+     * Displays "Exiting..." in gray by default.
+     */
     private TUIModule.Builder<?> onExit;
+
+    /**
+     * The frequency of names of all children of this application. <br>
+     * This is used to support {@link TUIApplicationModule#checkForNameDuplicates()}.
+     * An error is logged if there are name collisions.
+     */
     private final Map<String, Integer> nameFrequencyMap = new HashMap<>();
 
+    /**
+     * Overrides {@link TUIModule#run}. <br>
+     * Checks and logs name duplicates, runs children (where "home" is the first child),
+     * and then runs {@link TUIApplicationModule#onExit} if not disabled.
+     */
     @Override
     public void run() {
         boolean doExit = !this.restart; // copy restart into local variable because super.run will set it to false
@@ -41,6 +73,10 @@ public class TUIApplicationModule extends TUIModule {
         if(doExit) onExit.build().run();
     }
 
+    /**
+     * Checks every child attached to this application and logs an error
+     * for every name collision found.
+     */
     private void checkForNameDuplicates() {
         nameFrequencyMap.clear();
 
@@ -56,6 +92,10 @@ public class TUIApplicationModule extends TUIModule {
         }
     }
 
+    /**
+     * Clears the hashmap of inputs for reuse.
+     * Fills all char arrays with spaces for security.
+     */
     public void resetMemory() {
         // zero out all char arrays as they are most likely to be sensitive information (like a Password)
         for(Map.Entry<String, Object> obj : inputMap.entrySet()) {
@@ -68,29 +108,59 @@ public class TUIApplicationModule extends TUIModule {
         inputMap.clear();
     }
 
-    public Object getInput(String moduleName) {
-        return inputMap.get(moduleName);
+    /**
+     * Return the input corresponding to a given name.
+     * @param inputName The name that corresponds to the requested input. In general, this is the
+     *  name of the module that supplied the input (it may also just be the
+     *  provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     *  is used.
+     * @return The input corresponding to {@code inputName}, or null if it doesn't exist.
+     */
+    public Object getInput(String inputName) {
+        return inputMap.get(inputName);
     }
 
     /**
      * Returns the input for the given module only if 1. it exists 2. it is of the correct type.
-     * @param moduleName The name of the module that collected the input
+     * @param inputName The name that corresponds to the requested input. In general, this is the
+     *      *  name of the module that supplied the input (it may also just be the
+     *      *  provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     *      *  is used.
      * @param type The class type of the input
-     * @return The input, which will be the same type as the "type" parameter, or null if it cannot be returned correctly.
+     * @return The input, which will be the same type as the "type" parameter, or null if it
+     *  either doesn't exist in general or doesn't exist of the provided type.
      * @param <T> The type to safely cast to.
+     *
      */
-    public <T> T getInput(String moduleName, Class<T> type) {
-        if(inputMap.get(moduleName) == null) return null;
-        if(inputMap.get(moduleName).getClass().equals(type)) return type.cast(inputMap.get(moduleName));
+    public <T> T getInput(String inputName, Class<T> type) {
+        if(inputMap.get(inputName) == null) return null;
+        if(inputMap.get(inputName).getClass().equals(type)) return type.cast(inputMap.get(inputName));
         else return null;
     }
 
-    public <T> T getInputOrDefault(String moduleName, Class<T> type, T defaultValue) {
-        if(inputMap.get(moduleName) == null) return defaultValue;
-        if(inputMap.get(moduleName).getClass().equals(type)) return type.cast(inputMap.get(moduleName));
+    /**
+     * Returns the input for the given module only if 1. it exists 2. it is of the correct type.
+     * @param inputName The name that corresponds to the requested input. In general, this is the
+     *      *  name of the module that supplied the input (it may also just be the
+     *      *  provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     *      *  is used.
+     * @param type The class type of the input
+     * @param defaultValue The value to return if the requested value doesn't exist.
+     * @return The input, which will be the same type as the "type" parameter, or {@code defaultValue} if it
+     *  either doesn't exist in general or doesn't exist of the provided type.
+     * @param <T> The type to safely cast to.
+     */
+    public <T> T getInputOrDefault(String inputName, Class<T> type, T defaultValue) {
+        if(inputMap.get(inputName) == null) return defaultValue;
+        if(inputMap.get(inputName).getClass().equals(type)) return type.cast(inputMap.get(inputName));
         else return defaultValue;
     }
 
+    /**
+     *
+     * @param module
+     * @param input
+     */
     public void updateInput(TUIModule module, Object input) {
         logInput(module.getName(), input);
         inputMap.put(module.getName(), input);
