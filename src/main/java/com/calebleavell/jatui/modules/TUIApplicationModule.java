@@ -216,7 +216,13 @@ public class TUIApplicationModule extends TUIModule {
      */
     public void setHome(TUIModule.Builder<?> home) {
         logger.info("setting home of application \"{}\" to module \"{}\"", getName(), home.getName());
-        this.getChildren().set(0, home);
+
+        if (getChildren().isEmpty()) {
+            getChildren().add(home);
+        } else {
+            getChildren().set(0, home);
+        }
+
 
         for(TUIModule.Builder<?> child : getChildren()) {
             child.setApplication(this);
@@ -365,7 +371,13 @@ public class TUIApplicationModule extends TUIModule {
          */
         public Builder setHome(TUIModule.Builder<?> home) {
             logger.debug("setting home for application builder \"{}\" to module \"{}\"", getName(), (home == null) ? "null" : home.getName());
-            this.children.set(0, home);
+
+            if (getChildren().isEmpty()) {
+                getChildren().add(home);
+            } else {
+                getChildren().set(0, home);
+            }
+
             return self();
         }
 
