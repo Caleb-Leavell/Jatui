@@ -20,9 +20,16 @@ package com.calebleavell.jatui.modules;
 import java.util.function.Supplier;
 
 public class TUIFunctionModule extends TUIModule {
+
+    /**
+     * The logic that this module will execute when it is run.
+     */
     private final Supplier<?> function;
 
 
+    /**
+     *
+     */
     @Override
     public void run() {
         logger.info("Running TUIFunctionModule \"{}\"", getName());
