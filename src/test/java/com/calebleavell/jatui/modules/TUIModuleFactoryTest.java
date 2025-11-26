@@ -367,7 +367,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.NumberedList copy = original.getCopy();
 
-            assertTrue(original.equalTo(copy));
+            assertTrue(original.structuralEquals(copy));
         }
 
         @Test
@@ -450,7 +450,7 @@ class TUIModuleFactoryTest {
         }
 
         @Test
-        void testEqualTo() {
+        void testShallowShallowStructuralEquals() {
             TUIModuleFactory.NumberedList list1 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
                     .setStart(5)
                     .setStep(2);
@@ -480,15 +480,15 @@ class TUIModuleFactoryTest {
                     .setStep(2);
 
             assertAll(
-                    () -> assertTrue(list1.equalTo(list1)),
-                    () -> assertTrue(list1.equalTo(list2)),
-                    () -> assertTrue(list2.equalTo(list1)),
-                    () -> assertTrue(list2.equalTo(list3)),
-                    () -> assertTrue(list1.equalTo(list3)),
-                    () -> assertFalse(list1.equalTo(list4)),
-                    () -> assertFalse(list1.equalTo(list5)),
-                    () -> assertFalse(list1.equalTo(list6)),
-                    () -> assertFalse(list1.equalTo(list7))
+                    () -> assertTrue(list1.structuralEquals(list1)),
+                    () -> assertTrue(list1.structuralEquals(list2)),
+                    () -> assertTrue(list2.structuralEquals(list1)),
+                    () -> assertTrue(list2.structuralEquals(list3)),
+                    () -> assertTrue(list1.structuralEquals(list3)),
+                    () -> assertFalse(list1.structuralEquals(list4)),
+                    () -> assertFalse(list1.structuralEquals(list5)),
+                    () -> assertFalse(list1.structuralEquals(list6)),
+                    () -> assertFalse(list1.structuralEquals(list7))
             );
         }
     }
@@ -514,7 +514,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.NumberedModuleSelector copy = original.getCopy();
 
-            assertTrue(copy.equalTo(original));
+            assertTrue(copy.structuralEquals(original));
         }
 
 
@@ -712,7 +712,7 @@ class TUIModuleFactoryTest {
         }
 
         @Test
-        void testEqualTo() {
+        void testShallowShallowStructuralEquals() {
             TUIApplicationModule app1 = new TUIApplicationModule.Builder("app")
                     .addChildren(
                             new TUITextModule.Builder("text", "Hello, World!"),
@@ -765,15 +765,15 @@ class TUIModuleFactoryTest {
                     .addModule("the module", module);
 
             assertAll(
-                    () -> assertTrue(list1.equalTo(list1)),
-                    () -> assertTrue(list1.equalTo(list2)),
-                    () -> assertTrue(list2.equalTo(list1)),
-                    () -> assertTrue(list2.equalTo(list3)),
-                    () -> assertTrue(list1.equalTo(list3)),
-                    () -> assertFalse(list1.equalTo(list4)),
-                    () -> assertFalse(list1.equalTo(list5)),
-                    () -> assertFalse(list1.equalTo(list6)),
-                    () -> assertFalse(list1.equalTo(list7))
+                    () -> assertTrue(list1.structuralEquals(list1)),
+                    () -> assertTrue(list1.structuralEquals(list2)),
+                    () -> assertTrue(list2.structuralEquals(list1)),
+                    () -> assertTrue(list2.structuralEquals(list3)),
+                    () -> assertTrue(list1.structuralEquals(list3)),
+                    () -> assertFalse(list1.structuralEquals(list4)),
+                    () -> assertFalse(list1.structuralEquals(list5)),
+                    () -> assertFalse(list1.structuralEquals(list6)),
+                    () -> assertFalse(list1.structuralEquals(list7))
             );
         }
     }
@@ -789,7 +789,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.LineBuilder copy = original.getCopy();
 
-            assertTrue(copy.equalTo(original));
+            assertTrue(copy.structuralEquals(original));
         }
 
         @Test
@@ -924,7 +924,7 @@ class TUIModuleFactoryTest {
         }
 
         @Test
-        void testEqualTo() {
+        void testShallowStructuralStructuralEquals() {
             TUIModuleFactory.LineBuilder lines1 = new TUIModuleFactory.LineBuilder("lines")
                     .addText("text1")
                     .addText("text2");
@@ -951,13 +951,13 @@ class TUIModuleFactoryTest {
                     .addText("text2");
 
             assertAll(
-                    () -> assertTrue(lines1.equalTo(lines1)),
-                    () -> assertTrue(lines1.equalTo(lines2)),
-                    () -> assertTrue(lines2.equalTo(lines3)),
-                    () -> assertTrue(lines1.equalTo(lines3)),
-                    () -> assertFalse(lines1.equalTo(lines4)),
-                    () -> assertFalse(lines1.equalTo(lines5)),
-                    () -> assertFalse(lines1.equalTo(lines6))
+                    () -> assertTrue(lines1.structuralEquals(lines1)),
+                    () -> assertTrue(lines1.structuralEquals(lines2)),
+                    () -> assertTrue(lines2.structuralEquals(lines3)),
+                    () -> assertTrue(lines1.structuralEquals(lines3)),
+                    () -> assertFalse(lines1.structuralEquals(lines4)),
+                    () -> assertFalse(lines1.structuralEquals(lines5)),
+                    () -> assertFalse(lines1.structuralEquals(lines6))
             );
         }
     }
@@ -1164,7 +1164,7 @@ class TUIModuleFactoryTest {
         }
 
         @Test
-        void testEqualTo() {
+        void testShallowShallowStructuralEquals() {
             TUIModuleFactory.ConfirmationPrompt prompt1 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
@@ -1220,17 +1220,17 @@ class TUIModuleFactoryTest {
                     .addOnDeny(() -> System.out.println("text"));
 
             assertAll(
-                    () -> assertTrue(prompt1.equalTo(prompt1)),
-                    () -> assertTrue(prompt1.equalTo(prompt2)),
-                    () -> assertTrue(prompt2.equalTo(prompt1)),
-                    () -> assertTrue(prompt2.equalTo(prompt3)),
-                    () -> assertTrue(prompt1.equalTo(prompt3)),
-                    () -> assertFalse(prompt1.equalTo(prompt4)),
-                    () -> assertFalse(prompt1.equalTo(prompt5)),
-                    () -> assertFalse(prompt1.equalTo(prompt6)),
-                    () -> assertFalse(prompt1.equalTo(prompt7)),
-                    () -> assertFalse(prompt1.equalTo(prompt8)),
-                    () -> assertFalse(prompt1.equalTo(prompt9))
+                    () -> assertTrue(prompt1.structuralEquals(prompt1)),
+                    () -> assertTrue(prompt1.structuralEquals(prompt2)),
+                    () -> assertTrue(prompt2.structuralEquals(prompt1)),
+                    () -> assertTrue(prompt2.structuralEquals(prompt3)),
+                    () -> assertTrue(prompt1.structuralEquals(prompt3)),
+                    () -> assertFalse(prompt1.structuralEquals(prompt4)),
+                    () -> assertFalse(prompt1.structuralEquals(prompt5)),
+                    () -> assertFalse(prompt1.structuralEquals(prompt6)),
+                    () -> assertFalse(prompt1.structuralEquals(prompt7)),
+                    () -> assertFalse(prompt1.structuralEquals(prompt8)),
+                    () -> assertFalse(prompt1.structuralEquals(prompt9))
             );
         }
 
@@ -1244,7 +1244,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.ConfirmationPrompt copy = original.getCopy();
 
-            assertTrue(original.equalTo(copy));
+            assertTrue(original.structuralEquals(copy));
         }
     }
 
@@ -1566,7 +1566,7 @@ class TUIModuleFactoryTest {
         }
 
         @Test
-        void testEqualTo() {
+        void testShallowShallowStructuralEquals() {
             char[] pw = {'a'};
             Supplier<char[]> first = () -> pw;
             Supplier<char[]> second = () -> pw;
@@ -1623,18 +1623,18 @@ class TUIModuleFactoryTest {
                     .storeInputAndMatch();
 
             assertAll(
-                    () -> assertTrue(input1.equalTo(input1)),
-                    () -> assertTrue(input1.equalTo(input2)),
-                    () -> assertTrue(input2.equalTo(input1)),
-                    () -> assertTrue(input2.equalTo(input3)),
-                    () -> assertTrue(input1.equalTo(input3)),
-                    () -> assertFalse(input1.equalTo(input4)),
-                    () -> assertFalse(input1.equalTo(input5)),
-                    () -> assertFalse(input1.equalTo(input6)),
-                    () -> assertTrue(input1.equalTo(input7)),
-                    () -> assertTrue(input1.equalTo(input8)),
-                    () -> assertTrue(input1.equalTo(input9)),
-                    () -> assertFalse(input1.equalTo(input10))
+                    () -> assertTrue(input1.structuralEquals(input1)),
+                    () -> assertTrue(input1.structuralEquals(input2)),
+                    () -> assertTrue(input2.structuralEquals(input1)),
+                    () -> assertTrue(input2.structuralEquals(input3)),
+                    () -> assertTrue(input1.structuralEquals(input3)),
+                    () -> assertFalse(input1.structuralEquals(input4)),
+                    () -> assertFalse(input1.structuralEquals(input5)),
+                    () -> assertFalse(input1.structuralEquals(input6)),
+                    () -> assertTrue(input1.structuralEquals(input7)),
+                    () -> assertTrue(input1.structuralEquals(input8)),
+                    () -> assertTrue(input1.structuralEquals(input9)),
+                    () -> assertFalse(input1.structuralEquals(input10))
             );
 
         }
@@ -1651,7 +1651,7 @@ class TUIModuleFactoryTest {
 
             TUIModuleFactory.PasswordInput copy = original.getCopy();
 
-            assertTrue(original.equalTo(copy));
+            assertTrue(original.structuralEquals(copy));
         }
     }
 }

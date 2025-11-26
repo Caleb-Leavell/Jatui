@@ -96,7 +96,7 @@ class TUIFunctionModuleTest {
 
             assertAll(
                     () -> assertEquals(func, copy.getFunction()),
-                    () -> assertTrue(copy.equalTo(original))
+                    () -> assertTrue(copy.structuralEquals(original))
             );
         }
 
@@ -112,7 +112,7 @@ class TUIFunctionModuleTest {
             assertAll(
                     () -> assertEquals(func, first.getFunction()),
                     () -> assertEquals(func, second.getFunction()),
-                    () -> assertTrue(first.equals(second))
+                    () -> assertTrue(first.structuralEquals(second))
             );
 
         }

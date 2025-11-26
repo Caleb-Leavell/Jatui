@@ -392,7 +392,7 @@ public abstract class TUIModule {
      * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
      *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
      */
-    public boolean equals(TUIModule other) {
+    public boolean structuralEquals(TUIModule other) {
         if(this == other) return true;
         if(other == null) return false;
 
@@ -407,7 +407,7 @@ public abstract class TUIModule {
             if(children.get(i) == null && otherChildren.get(i) == null) continue;
             if(children.get(i) == null || otherChildren.get(i) == null) return false;
 
-            if(!children.get(i).equalTo(otherChildren.get(i))) return false;
+            if(!children.get(i).structuralEquals(otherChildren.get(i))) return false;
         }
 
         return (Objects.equals(name, other.name) &&
@@ -785,10 +785,9 @@ public abstract class TUIModule {
          * @param first The first TUIModule to compare
          * @param second The second TUIModule to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
-        @Override
-        public boolean equalTo(B first, B second) {
+        public boolean shallowStructuralEquals(B first, B second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
@@ -810,18 +809,18 @@ public abstract class TUIModule {
 //        }
 
         /**
-         * This is the same as equalTo, but it's static and does include a recursive children check.
+         * This is the same as shallowStructuralEquals, but it's static and does include a recursive children check.
          *
          * @param first The first TUIModule to compare
          * @param second The second TUIModule to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
          * @implNote Polymorphism is automatic here and thus this method does not generally need to be overloaded.
          */
-        public static boolean equals(TUIModule.Builder<?> first, TUIModule.Builder<?> second) {
+        public static boolean structuralEquals(TUIModule.Builder<?> first, TUIModule.Builder<?> second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            return first.equalTo(second);
+            return first.structuralEquals(second);
         }
 
         public abstract TUIModule build();

@@ -306,7 +306,7 @@ class TUIApplicationModuleTest {
     }
 
     @Test
-    void equalsTest() {
+    void structuralEqualsTest() {
         TUIContainerModule.Builder exit = new TUIContainerModule.Builder("exit");
         TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
 
@@ -334,13 +334,13 @@ class TUIApplicationModuleTest {
                 .build();
 
         assertAll(
-            () -> assertTrue(app1.equals(app1)),
-            () -> assertFalse(app1.equals(null)),
-            () -> assertTrue(app1.equals(app2)),
-            () -> assertTrue(app2.equals(app3)),
-            () -> assertTrue(app1.equals(app3)),
-            () -> assertFalse(app1.equals(app4)),
-            () -> assertFalse(app1.equals(app5))
+            () -> assertTrue(app1.structuralEquals(app1)),
+            () -> assertFalse(app1.structuralEquals(null)),
+            () -> assertTrue(app1.structuralEquals(app2)),
+            () -> assertTrue(app2.structuralEquals(app3)),
+            () -> assertTrue(app1.structuralEquals(app3)),
+            () -> assertFalse(app1.structuralEquals(app4)),
+            () -> assertFalse(app1.structuralEquals(app5))
 
         );
     }
@@ -359,8 +359,8 @@ class TUIApplicationModuleTest {
             TUIApplicationModule.Builder copy = app.getCopy();
 
             assertAll(
-                    () -> assertTrue(app.equalTo(copy)),
-                    () -> assertFalse(app.build().equals(copy.build())) // should be false since their respective applications will not have the same reference
+                    () -> assertTrue(app.structuralEquals(copy)),
+                    () -> assertFalse(app.build().structuralEquals(copy.build())) // should be false since their respective applications will not have the same reference
             );
 
         }
@@ -432,7 +432,7 @@ class TUIApplicationModuleTest {
                 TUIApplicationModule app1 = appBuilder.build();
                 TUIApplicationModule app2 = appBuilder.build();
 
-                assertTrue(app1.equals(app2));
+                assertTrue(app1.structuralEquals(app2));
             }
         }
     }

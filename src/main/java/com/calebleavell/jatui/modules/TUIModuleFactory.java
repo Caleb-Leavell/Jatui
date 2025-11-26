@@ -224,9 +224,9 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
-        public boolean equalTo(NumberedList first, NumberedList second) {
+        public boolean shallowStructuralEquals(NumberedList first, NumberedList second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
@@ -234,7 +234,7 @@ public class TUIModuleFactory {
             return  Objects.equals(first.start, second.start) &&
                     Objects.equals(first.step, second.step) &&
                     Objects.equals(first.i, second.i) &&
-                    super.equalTo(first, second);
+                    super.shallowStructuralEquals(first, second);
         }
     }
 
@@ -330,10 +330,10 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
-        public boolean equalTo(NumberedModuleSelector first, NumberedModuleSelector second) {
+        public boolean shallowStructuralEquals(NumberedModuleSelector first, NumberedModuleSelector second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
@@ -349,11 +349,11 @@ public class TUIModuleFactory {
                 TUIModule.Builder<?> firstModule = firstNameOrModule.getModule(this.app);
                 TUIModule.Builder<?> secondModule = secondNameOrModule.getModule(this.app);
 
-                if(!TUIModule.Builder.equals(firstModule, secondModule)) return false;
+                if(!TUIModule.Builder.structuralEquals(firstModule, secondModule)) return false;
             }
 
             return Objects.equals(first.app, second.app) &&
-                    super.equalTo(first, second);
+                    super.shallowStructuralEquals(first, second);
         }
     }
 
@@ -463,17 +463,17 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
-        public boolean equalTo(LineBuilder first, LineBuilder second) {
+        public boolean shallowStructuralEquals(LineBuilder first, LineBuilder second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            if(!TUIModule.Builder.equals(first.current, second.current)) return false;
+            if(!TUIModule.Builder.structuralEquals(first.current, second.current)) return false;
 
             return Objects.equals(first.iterator, second.iterator) &&
-                    super.equalTo(first, second);
+                    super.shallowStructuralEquals(first, second);
         }
     }
 
@@ -616,10 +616,10 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
-        public boolean equalTo(ConfirmationPrompt first, ConfirmationPrompt second) {
+        public boolean shallowStructuralEquals(ConfirmationPrompt first, ConfirmationPrompt second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
@@ -627,7 +627,7 @@ public class TUIModuleFactory {
                     Objects.equals(first.deny, second.deny) &&
                     Objects.equals(first.confirmIter, second.confirmIter) &&
                     Objects.equals(first.denyIter, second.denyIter) &&
-                    super.equalTo(first, second);
+                    super.shallowStructuralEquals(first, second);
         }
 
         @Override
@@ -849,10 +849,10 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
-        public boolean equalTo(PasswordInput first, PasswordInput second) {
+        public boolean shallowStructuralEquals(PasswordInput first, PasswordInput second) {
             if(first == second) return true;
             if(first.getClass() != second.getClass()) return false;
 
@@ -860,12 +860,12 @@ public class TUIModuleFactory {
             if(first.onValidPassword.size() != second.onValidPassword.size()) return false;
             if(first.onInvalidPassword.size() != second.onInvalidPassword.size()) return false;
             for(int i = 0; i < first.onInvalidPassword.size(); i ++) {
-                if(!TUIModule.Builder.equals(first.onInvalidPassword.get(i), second.onInvalidPassword.get(i))) {
+                if(!TUIModule.Builder.structuralEquals(first.onInvalidPassword.get(i), second.onInvalidPassword.get(i))) {
                     return false;
                 }
             }
             for(int i = 0; i < first.onInvalidPassword.size(); i ++) {
-                if(!TUIModule.Builder.equals(first.onInvalidPassword.get(i), second.onInvalidPassword.get(i))) {
+                if(!TUIModule.Builder.structuralEquals(first.onInvalidPassword.get(i), second.onInvalidPassword.get(i))) {
                     return false;
                 }
             }
@@ -873,7 +873,7 @@ public class TUIModuleFactory {
             return  Objects.equals(first.displayText, second.displayText)
                     && Objects.equals(first.storeInput, second.storeInput)
                     && Objects.equals(first.storeMatch, second.storeMatch)
-                    && super.equalTo(first, second);
+                    && super.shallowStructuralEquals(first, second);
         }
 
         @Override

@@ -72,7 +72,7 @@ class TUITextInputModuleTest {
     }
 
     @Test
-    void testEquals() {
+    void testStructuralEquals() {
         TUITextInputModule input1 = new TUITextInputModule.Builder("input", "input: ")
                 .build();
 
@@ -89,12 +89,12 @@ class TUITextInputModuleTest {
                 .build();
 
         assertAll(
-                () -> assertTrue(input1.equals(input2)),
-                () -> assertTrue(input2.equals(input1)),
-                () -> assertTrue(input2.equals(input3)),
-                () -> assertTrue(input1.equals(input3)),
-                () -> assertFalse(input1.equals(input4)),
-                () -> assertFalse(input1.equals(input5))
+                () -> assertTrue(input1.structuralEquals(input2)),
+                () -> assertTrue(input2.structuralEquals(input1)),
+                () -> assertTrue(input2.structuralEquals(input3)),
+                () -> assertTrue(input1.structuralEquals(input3)),
+                () -> assertFalse(input1.structuralEquals(input4)),
+                () -> assertFalse(input1.structuralEquals(input5))
         );
 
     }
@@ -110,9 +110,9 @@ class TUITextInputModuleTest {
             TUITextInputModule.Builder copy = original.getCopy();
 
             assertAll(
-                    () -> assertTrue(copy.equalTo(original)),
-                    () -> assertTrue(copy.handlers.equalTo(original.handlers)),
-                    () -> assertTrue(copy.getDisplayText().equalTo(original.getDisplayText())));
+                    () -> assertTrue(copy.structuralEquals(original)),
+                    () -> assertTrue(copy.handlers.structuralEquals(original.handlers)),
+                    () -> assertTrue(copy.getDisplayText().structuralEquals(original.getDisplayText())));
         }
 
         @Test
@@ -247,7 +247,7 @@ class TUITextInputModuleTest {
             int secondOutput = app.getInput("logic", Integer.class);
 
             assertAll(
-                    () -> assertTrue(builder.build().equals(builder.build())),
+                    () -> assertTrue(builder.build().structuralEquals(builder.build())),
                     () -> assertEquals(first, second),
                     () -> assertEquals(5, firstOutput),
                     () -> assertEquals(6, secondOutput)
@@ -282,7 +282,7 @@ class TUITextInputModuleTest {
 
             TUITextInputModule.InputHandlers copy = original.getCopy();
 
-            assertTrue(copy.equalTo(original));
+            assertTrue(copy.structuralEquals(original));
         }
 
         @Test
@@ -356,7 +356,7 @@ class TUITextInputModuleTest {
         }
 
         @Test
-        void testEqualTo() {
+        void testShallowShallowStructuralEquals() {
             TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
             TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5);
 
@@ -386,16 +386,16 @@ class TUITextInputModuleTest {
 
 
             assertAll(
-                    () -> assertTrue(handlers1.equalTo(handlers1, handlers1)),
-                    () -> assertTrue(handlers1.equalTo(handlers1, handlers2)),
-                    () -> assertTrue(handlers1.equalTo(handlers2, handlers1)),
-                    () -> assertTrue(handlers5.equalTo(handlers2, handlers1)),
-                    () -> assertTrue(handlers1.equalTo(handlers2, handlers3)),
-                    () -> assertTrue(handlers1.equalTo(handlers1, handlers3)),
-                    () -> assertFalse(handlers1.equalTo(handlers1, handlers4)),
-                    () -> assertFalse(handlers1.equalTo(handlers1, handlers5)),
-                    () -> assertFalse(handlers1.equalTo(handlers1, handlers6)),
-                    () -> assertFalse(handlers1.equalTo(handlers1, handlers7))
+                    () -> assertTrue(handlers1.shallowStructuralEquals(handlers1, handlers1)),
+                    () -> assertTrue(handlers1.shallowStructuralEquals(handlers1, handlers2)),
+                    () -> assertTrue(handlers1.shallowStructuralEquals(handlers2, handlers1)),
+                    () -> assertTrue(handlers5.shallowStructuralEquals(handlers2, handlers1)),
+                    () -> assertTrue(handlers1.shallowStructuralEquals(handlers2, handlers3)),
+                    () -> assertTrue(handlers1.shallowStructuralEquals(handlers1, handlers3)),
+                    () -> assertFalse(handlers1.shallowStructuralEquals(handlers1, handlers4)),
+                    () -> assertFalse(handlers1.shallowStructuralEquals(handlers1, handlers5)),
+                    () -> assertFalse(handlers1.shallowStructuralEquals(handlers1, handlers6)),
+                    () -> assertFalse(handlers1.shallowStructuralEquals(handlers1, handlers7))
             );
 
 
@@ -415,8 +415,8 @@ class TUITextInputModuleTest {
 
                 TUITextInputModule.InputHandler copy = original.getCopy();
                 assertAll(
-                        () -> assertTrue(copy.equalTo(original)),
-                        () -> assertTrue(copy.getModule() == original.getModule() || copy.getModule().equalTo(original.getModule())),
+                        () -> assertTrue(copy.structuralEquals(original)),
+                        () -> assertTrue(copy.getModule() == original.getModule() || copy.getModule().structuralEquals(original.getModule())),
                         () -> assertEquals(copy.getLogic(), original.getLogic()),
                         () -> assertEquals(copy.getExceptionHandler(), original.getExceptionHandler())
                 );
@@ -473,7 +473,7 @@ class TUITextInputModuleTest {
             }
 
             @Test
-            void testEqualTo() {
+            void testShallowShallowStructuralEquals() {
                 Function<String, String> logic = s -> s;
                 Consumer<String> exceptionHandler = s -> System.out.print("");
                 TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
@@ -500,16 +500,16 @@ class TUITextInputModuleTest {
                         .setHandler("logic", logic, exceptionHandler);
 
                 assertAll(
-                        () -> assertTrue(handler1.equalTo(handler1, handler1)),
-                        () -> assertTrue(handler1.equalTo(handler1, handler2)),
-                        () -> assertTrue(handler1.equalTo(handler2, handler1)),
-                        () -> assertTrue(handler5.equalTo(handler2, handler1)),
-                        () -> assertTrue(handler1.equalTo(handler2, handler3)),
-                        () -> assertTrue(handler1.equalTo(handler1, handler3)),
-                        () -> assertFalse(handler1.equalTo(handler1, handler4)),
-                        () -> assertFalse(handler1.equalTo(handler1, handler5)),
-                        () -> assertFalse(handler1.equalTo(handler1, handler6)),
-                        () -> assertFalse(handler1.equalTo(handler1, handler7))
+                        () -> assertTrue(handler1.shallowStructuralEquals(handler1, handler1)),
+                        () -> assertTrue(handler1.shallowStructuralEquals(handler1, handler2)),
+                        () -> assertTrue(handler1.shallowStructuralEquals(handler2, handler1)),
+                        () -> assertTrue(handler5.shallowStructuralEquals(handler2, handler1)),
+                        () -> assertTrue(handler1.shallowStructuralEquals(handler2, handler3)),
+                        () -> assertTrue(handler1.shallowStructuralEquals(handler1, handler3)),
+                        () -> assertFalse(handler1.shallowStructuralEquals(handler1, handler4)),
+                        () -> assertFalse(handler1.shallowStructuralEquals(handler1, handler5)),
+                        () -> assertFalse(handler1.shallowStructuralEquals(handler1, handler6)),
+                        () -> assertFalse(handler1.shallowStructuralEquals(handler1, handler7))
                 );
             }
 
@@ -525,7 +525,7 @@ class TUITextInputModuleTest {
                 TUIContainerModule second = builder.build();
 
                 assertAll(
-                        () -> assertTrue(first.equals(second)),
+                        () -> assertTrue(first.structuralEquals(second)),
                         () -> assertTrue(first.getChild("handler-main").getChildren().contains(logic)),
                         () -> assertEquals(1, first.getChild("handler-main").getChildren().size())
                 );

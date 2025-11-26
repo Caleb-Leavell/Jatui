@@ -106,7 +106,7 @@ public class TUITextModule extends TUIModule {
         return Objects.equals(text, other.text)
                 && Objects.equals(printNewLine, other.printNewLine)
                 && Objects.equals(outputType, other.outputType)
-                && super.equals(other);
+                && super.structuralEquals(other);
     }
 
     public TUITextModule(Builder builder) {
@@ -202,16 +202,16 @@ public class TUITextModule extends TUIModule {
          * @param first The first TUITextModule.Builder to compare
          * @param second The second TUITextModule.Builder to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
-        public boolean equalTo(TUITextModule.Builder first, TUITextModule.Builder second) {
+        public boolean shallowStructuralEquals(TUITextModule.Builder first, TUITextModule.Builder second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
             return Objects.equals(first.text, second.text)
                     && Objects.equals(first.printNewLine, second.printNewLine)
                     && Objects.equals(first.outputType, second.outputType)
-                    && super.equalTo(first, second);
+                    && super.shallowStructuralEquals(first, second);
         }
 
 

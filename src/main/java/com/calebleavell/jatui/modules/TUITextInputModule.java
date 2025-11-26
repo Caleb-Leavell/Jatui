@@ -68,11 +68,11 @@ public class TUITextInputModule extends TUIModule {
      *  This method is merely for checking structural equality, which is generally only necessary for manual testing. Also, no overloaded equals methods
      *  exist since {@code displayText} and {@code handlers} are children of the builder and thus checked automatically.
      */
-    public boolean equals(TUITextInputModule other) {
+    public boolean structuralEquals(TUITextInputModule other) {
         if(this == other) return true;
         if(other == null) return false;
 
-        return TUIModule.Builder.equals(displayText, other.displayText) && super.equals(other);
+        return TUIModule.Builder.structuralEquals(displayText, other.displayText) && super.structuralEquals(other);
     }
 
     public TUITextInputModule(Builder builder) {
@@ -266,17 +266,17 @@ public class TUITextInputModule extends TUIModule {
          * @param first The first InputHandlers to compare
          * @param second The second InputHandlers to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
-        public boolean equalTo(InputHandlers first, InputHandlers second) {
+        public boolean shallowStructuralEquals(InputHandlers first, InputHandlers second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            if(first.inputModule != second.inputModule && !first.inputModule.equalTo(first.inputModule, second.inputModule)) return false;
+            if(first.inputModule != second.inputModule && !first.inputModule.shallowStructuralEquals(first.inputModule, second.inputModule)) return false;
 
             return  Objects.equals(first.num, second.num) &&
-                    super.equalTo(first, second);
+                    super.shallowStructuralEquals(first, second);
         }
 
 
@@ -455,17 +455,17 @@ public class TUITextInputModule extends TUIModule {
          * @param first The first InputHandlers to compare
          * @param second The second InputHandlers to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#equalTo(DirectedGraphNode)}
+         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
-        public boolean equalTo(InputHandler first, InputHandler second) {
+        public boolean shallowStructuralEquals(InputHandler first, InputHandler second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
-            if(first.inputModule != second.inputModule && !first.inputModule.equalTo(first.inputModule, second.inputModule)) return false;
+            if(first.inputModule != second.inputModule && !first.inputModule.shallowStructuralEquals(first.inputModule, second.inputModule)) return false;
 
             return  Objects.equals(first.handlerType, second.handlerType) &&
                     Objects.equals(first.moduleName, second.moduleName) &&
-                    super.equalTo(first, second);
+                    super.shallowStructuralEquals(first, second);
         }
 
         public TUIContainerModule build() {

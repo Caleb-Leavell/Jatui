@@ -161,7 +161,7 @@ class TUITextModuleTest {
             TUITextModule.Builder copy = original.createInstance();
             copy.shallowCopy(original);
 
-            assertTrue(original.equalTo(copy));
+            assertTrue(original.structuralEquals(copy));
         }
 
         @Test
@@ -246,7 +246,7 @@ class TUITextModuleTest {
         }
 
         @Test
-        void testEqualTo() {
+        void testShallowStructuralStructuralEquals() {
             TUITextModule.Builder first = new TUITextModule.Builder("name", "text")
                     .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
@@ -280,16 +280,16 @@ class TUITextModuleTest {
                     .printNewLine(false);
 
             assertAll(
-                    () -> assertTrue(first.equalTo(first, first)),
-                    () -> assertTrue(first.equalTo(first, second)),
-                    () -> assertTrue(first.equalTo(second, first)),
-                    () -> assertTrue(fourth.equalTo(second, first)), // doing fourth.equals to make sure it doesn't matter
-                    () -> assertTrue(first.equalTo(second, third)),
-                    () -> assertTrue(first.equalTo(first, third)),
-                    () -> assertFalse(first.equalTo(first, fourth)),
-                    () -> assertFalse(first.equalTo(first, fifth)),
-                    () -> assertFalse(first.equalTo(first, sixth)),
-                    () -> assertFalse(first.equalTo(first, seventh))
+                    () -> assertTrue(first.shallowStructuralEquals(first, first)),
+                    () -> assertTrue(first.shallowStructuralEquals(first, second)),
+                    () -> assertTrue(first.shallowStructuralEquals(second, first)),
+                    () -> assertTrue(fourth.shallowStructuralEquals(second, first)), // doing fourth.equals to make sure it doesn't matter
+                    () -> assertTrue(first.shallowStructuralEquals(second, third)),
+                    () -> assertTrue(first.shallowStructuralEquals(first, third)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, fourth)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, fifth)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, sixth)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, seventh))
             );
         }
 

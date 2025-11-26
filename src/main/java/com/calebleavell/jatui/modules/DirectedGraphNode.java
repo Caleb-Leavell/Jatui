@@ -224,10 +224,11 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
     }
 
     /**
-     *  @return Structural equality between {@code first} and {@code second}, as defined by<br>
-     *  {@link DirectedGraphNode#equalTo(DirectedGraphNode)} and concrete implementations.
+     *  @return Shallow structural equality between {@code first} and {@code second}, as defined by<br>
+     *  {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)} and concrete implementations.
+     *  Checking structural equality of children is not intended here.
      */
-    public boolean equalTo(T first, T second);
+    public boolean shallowStructuralEquals(T first, T second);
 
     /**
      * <p>Checks for equality with another node based on equalTo. The children are also checked recursively.</p>
@@ -235,7 +236,7 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
      * @param visited The list of visited nodes (prevents infinite recursion).
      * @return Whether this node equals other based on equalityCriteria.
      */
-    default boolean equalTo(A other, Set<A> visited) {
+    default boolean structuralEquals(A other, Set<A> visited) {
         if(other == null) return false;
         if(this == other) return true;
 
@@ -249,7 +250,7 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
         visited.add(other);
 
         if(other.getType() != getType()) return false;
-        if(!equalTo(self(), getType().cast(other))) return false;
+        if(!shallowStructuralEquals(self(), getType().cast(other))) return false;
 
         List<? extends A> children = this.getChildren();
         List<? extends A> otherChildren = other.getChildren();
@@ -261,7 +262,7 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
             if(children.get(i) == null && otherChildren.get(i) == null) continue;
             if(children.get(i) == null || otherChildren.get(i) == null) return false;
 
-            if(!children.get(i).equalTo(otherChildren.get(i), visited)) return false;
+            if(!children.get(i).structuralEquals(otherChildren.get(i), visited)) return false;
 
         }
 
@@ -273,8 +274,8 @@ public interface DirectedGraphNode<P extends Enum<?>, A extends DirectedGraphNod
      * @param other The other node to check. <strong>Must be the same type as this node to return true.</strong>
      * @return Whether this node equals other based on equalityCriteria.
      */
-    default boolean equalTo(A other) {
-        return equalTo(other, new HashSet<>());
+    default boolean structuralEquals(A other) {
+        return structuralEquals(other, new HashSet<>());
     }
 
     @SuppressWarnings("unchecked") // safe to suppress since "this" will always be an instance of T

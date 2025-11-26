@@ -63,7 +63,7 @@ class DirectedGraphNodeTest {
         }
 
         @Override
-        public boolean equalTo(TestNode first, TestNode second) {
+        public boolean shallowStructuralEquals(TestNode first, TestNode second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
@@ -582,13 +582,13 @@ class DirectedGraphNodeTest {
         node2.getPropertyUpdateFlags().put(TestNode.Property.DATA, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
         assertAll(
-                () -> assertTrue(node1.equalTo(node1)),
-                () -> assertTrue(node1.equalTo(node1Copy)),
-                () -> assertFalse(node1.equalTo(node2))
+                () -> assertTrue(node1.structuralEquals(node1)),
+                () -> assertTrue(node1.structuralEquals(node1Copy)),
+                () -> assertFalse(node1.structuralEquals(node2))
         );
 
         node1Copy.setData(5);
 
-        assertFalse(node1.equalTo(node1Copy));
+        assertFalse(node1.structuralEquals(node1Copy));
     }
 }

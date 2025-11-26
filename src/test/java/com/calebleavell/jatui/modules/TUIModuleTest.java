@@ -42,13 +42,13 @@ class TUIModuleTest {
 
     public static TUIFunctionModule.Builder checkRunning(String name, TUIModule parent) {
         TUIFunctionModule.Builder checkRunning = new TUIFunctionModule.Builder(name, () -> {});
-        checkRunning.setFunction(() -> parent.getCurrentRunningBranch().getLast().equals(checkRunning.build()));
+        checkRunning.setFunction(() -> parent.getCurrentRunningBranch().getLast().structuralEquals(checkRunning.build()));
         return checkRunning;
     }
 
     public static TUIFunctionModule.Builder checkShallowRunning (String name, TUIModule parent) {
         TUIFunctionModule.Builder checkRunning = new TUIFunctionModule.Builder(name, () -> {});
-        checkRunning.setFunction(() -> parent.getCurrentRunningChild().equals(checkRunning.build()));
+        checkRunning.setFunction(() -> parent.getCurrentRunningChild().structuralEquals(checkRunning.build()));
         return checkRunning;
     }
 
@@ -431,7 +431,7 @@ class TUIModuleTest {
             List<TUIModule> expectedList = List.of(testApp, home.build(), nest_0.build(), nest_1.build(), nest_2.build());
 
             return IntStream.range(0, expectedList.size())
-                    .allMatch(i -> runningBranch.get(i).equals(expectedList.get(i)));
+                    .allMatch(i -> runningBranch.get(i).structuralEquals(expectedList.get(i)));
         });
 
         home.addChildren(
@@ -500,7 +500,7 @@ class TUIModuleTest {
     }
 
     @Test
-    void testEquals() {
+    void testStructuralEquals() {
         // Shared IOCapture for modules that should be equal
         IOCapture ioShared = new IOCapture();
         TUIApplicationModule app1 = new TUIApplicationModule.Builder("app1").build();
@@ -594,22 +594,22 @@ class TUIModuleTest {
 
         // Assertions
         assertAll(
-                () -> assertTrue(module1.equals(module1), "Reflexive check"),
-                () -> assertFalse(module1.equals(null), "Null check"),
-                () -> assertTrue(module1.equals(module2), "Exact copy should be equal"),
-                () -> assertFalse(module1.equals(moduleNameDiff), "Different name"),
-                () -> assertFalse(module1.equals(moduleAppDiff), "Different application"),
-                () -> assertFalse(module1.equals(moduleAnsiDiff), "Different ANSI"),
-                () -> assertFalse(module1.equals(moduleAnsiEnabledDiff), "Different ANSI enabled flag"),
-                () -> assertFalse(module1.equals(modulePrintStreamDiff), "Different print stream"),
-                () -> assertFalse(module1.equals(moduleScannerDiff), "Different scanner")
+                () -> assertTrue(module1.structuralEquals(module1), "Reflexive check"),
+                () -> assertFalse(module1.structuralEquals(null), "Null check"),
+                () -> assertTrue(module1.structuralEquals(module2), "Exact copy should be equal"),
+                () -> assertFalse(module1.structuralEquals(moduleNameDiff), "Different name"),
+                () -> assertFalse(module1.structuralEquals(moduleAppDiff), "Different application"),
+                () -> assertFalse(module1.structuralEquals(moduleAnsiDiff), "Different ANSI"),
+                () -> assertFalse(module1.structuralEquals(moduleAnsiEnabledDiff), "Different ANSI enabled flag"),
+                () -> assertFalse(module1.structuralEquals(modulePrintStreamDiff), "Different print stream"),
+                () -> assertFalse(module1.structuralEquals(moduleScannerDiff), "Different scanner")
         );
 
     }
 
 
     @Test
-    void testEqualsWithChildren() {
+    void testStructuralEqualsWithChildren() {
         // Children
         TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
         TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
@@ -635,8 +635,8 @@ class TUIModuleTest {
                 .build();
 
         assertAll(
-                () -> assertTrue(parent1.equals(parent2), "Parents with identical children should be equal"),
-                () -> assertFalse(parent1.equals(parent3), "Parents with one different child should not be equal")
+                () -> assertTrue(parent1.structuralEquals(parent2), "Parents with identical children should be equal"),
+                () -> assertFalse(parent1.structuralEquals(parent3), "Parents with one different child should not be equal")
         );
     }
 
@@ -1060,12 +1060,12 @@ class TUIModuleTest {
 
             io.close();
 
-            assertTrue(copied.equalTo(original));
+            assertTrue(copied.structuralEquals(original));
         }
 
         // equality more thoroughly tested in DirectedGraphNodeTest
         @Test
-        void testEqualTo() {
+        void testShallowStructuralStructuralEquals() {
             TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
             TUIContainerModule.Builder first = new TUIContainerModule.Builder("original")
@@ -1137,21 +1137,21 @@ class TUIModuleTest {
             io.close();
 
             assertAll(
-                    () -> assertTrue(first.equalTo(first, first)),
-                    () -> assertTrue(first.equalTo(first, second)),
-                    () -> assertTrue(second.equalTo(first, third)),
-                    () -> assertTrue(first.equalTo(first, third)),
-                    () -> assertFalse(first.equalTo(first, fourth)),
-                    () -> assertFalse(first.equalTo(first, fifth)),
-                    () -> assertFalse(first.equalTo(first, sixth)),
-                    () -> assertFalse(first.equalTo(first, seventh)),
-                    () -> assertFalse(first.equalTo(first, eighth)),
-                    () -> assertFalse(first.equalTo(first, ninth))
+                    () -> assertTrue(first.shallowStructuralEquals(first, first)),
+                    () -> assertTrue(first.shallowStructuralEquals(first, second)),
+                    () -> assertTrue(second.shallowStructuralEquals(first, third)),
+                    () -> assertTrue(first.shallowStructuralEquals(first, third)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, fourth)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, fifth)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, sixth)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, seventh)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, eighth)),
+                    () -> assertFalse(first.shallowStructuralEquals(first, ninth))
             );
         }
 
         @Test
-        void testEquals() {
+        void testStructuralEquals() {
             TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
 
@@ -1185,15 +1185,15 @@ class TUIModuleTest {
             io.close();
 
             assertAll(
-                    () -> assertTrue(TUIModule.Builder.equals(first, first)),
-                    () -> assertTrue(TUIModule.Builder.equals(first, second)),
-                    () -> assertTrue(TUIModule.Builder.equals(second, first)),
-                    () -> assertFalse(TUIModule.Builder.equals(first, third)),
+                    () -> assertTrue(TUIModule.Builder.structuralEquals(first, first)),
+                    () -> assertTrue(TUIModule.Builder.structuralEquals(first, second)),
+                    () -> assertTrue(TUIModule.Builder.structuralEquals(second, first)),
+                    () -> assertFalse(TUIModule.Builder.structuralEquals(first, third)),
 
-                    () -> assertTrue(first.equalTo(first)),
-                    () -> assertTrue(first.equalTo(second)),
-                    () -> assertTrue(second.equalTo(first)),
-                    () -> assertFalse(first.equalTo(third))
+                    () -> assertTrue(first.structuralEquals(first)),
+                    () -> assertTrue(first.structuralEquals(second)),
+                    () -> assertTrue(second.structuralEquals(first)),
+                    () -> assertFalse(first.structuralEquals(third))
             );
         }
 
@@ -1243,7 +1243,7 @@ class TUIModuleTest {
 
             io.close();
 
-            assertTrue(first.equals(second));
+            assertTrue(first.structuralEquals(second));
         }
     }
 
@@ -1280,7 +1280,7 @@ class TUIModuleTest {
             TUIModule.NameOrModule copy = original.getCopy();
 
             assertAll(
-                    () -> assertTrue(original.getModule(app).equalTo(copy.getModule(app))),
+                    () -> assertTrue(original.getModule(app).structuralEquals(copy.getModule(app))),
                     () -> assertNotEquals(original.getModule(app), copy.getModule(app))
             );
         }

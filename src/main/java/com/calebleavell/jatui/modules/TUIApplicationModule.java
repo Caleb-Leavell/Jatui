@@ -141,9 +141,9 @@ public class TUIApplicationModule extends TUIModule {
     /**
      * Returns the input for the given module only if 1. it exists 2. it is of the correct type.
      * @param inputName The name that corresponds to the requested input. In general, this is the
-     *      *  name of the module that supplied the input (it may also just be the
-     *      *  provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
-     *      *  is used.
+     *      name of the module that supplied the input (it may also just be the
+     *      provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     *      is used.
      * @param type The class type of the input
      * @param defaultValue The value to return if the requested value doesn't exist.
      * @return The input, which will be the same type as the "type" parameter, or {@code defaultValue} if it
@@ -157,15 +157,27 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     *
-     * @param module
-     * @param input
+     * Updates the input in {@link TUIApplicationModule#inputMap}, where the key is the name of
+     * {@code module} and the value is {@code input}. <br>
+     * In general, it shouldn't be necessary to
+     * update input apart from a TUIModule, but if it is needed, use {@link TUIApplicationModule#forceUpdateInput(String, Object)}.
+     * @param module The module whose name corresponds to the input.
+     * @param input The new input to store.
      */
     public void updateInput(TUIModule module, Object input) {
         logInput(module.getName(), input);
         inputMap.put(module.getName(), input);
     }
 
+    /**
+     * Updates the input in {@link TUIApplicationModule#inputMap}, where the key is {@code moduleName}
+     * and the value is {@code input}. Note that this searches for an existing module attached to this
+     * application module, and if none is found, the input will not be updated. <br>
+     * In general, it shouldn't be necessary to
+     * update input apart from a TUIModule, but if it is needed, use {@link TUIApplicationModule#forceUpdateInput(String, Object)}.
+     * @param moduleName The name of an existing module that corresponds to the input.
+     * @param input The new input to store.
+     */
     public void updateInput(String moduleName, Object input) {
         logInput(moduleName, input);
         TUIModule.Builder<?> child = getChild(moduleName);
@@ -173,14 +185,33 @@ public class TUIApplicationModule extends TUIModule {
         else logger.debug("no child found of name \"{}\", so no input was updated", moduleName);
     }
 
+    /**
+     * Updates the input in {@link TUIApplicationModule#inputMap}, where the key is {@code identifier}
+     * and the value is {@code input}. This always updates input, regardless of whether a corresponding
+     * module exists or not. Be aware that this can make it more difficult to debug the state of the
+     * application.
+     * @param identifier The name of the input.
+     * @param input The new input to store.
+     */
     public void forceUpdateInput(String identifier, Object input) {
+        logger.info("force-updating input in app \"{}\" for module \"{}\" to \"{}\"", getName(), identifier, (input == null) ? "null" : input.toString());
         inputMap.put(identifier, input);
     }
 
+    /**
+     * Logs that input is being updated.
+     * @param moduleName The name of the relevant module
+     * @param input The new input
+     */
     private void logInput(String moduleName, Object input) {
         logger.info("updating input in app \"{}\" for module \"{}\" to \"{}\"", getName(), moduleName, (input == null) ? "null" : input.toString());
     }
 
+    /**
+     * The home of a {@link TUIApplicationModule} is simply it's first child. This means it will be the first
+     * module to run when this application is run.
+     * @param home The first module to run when this application is run.
+     */
     public void setHome(TUIModule.Builder<?> home) {
         logger.info("setting home of application \"{}\" to module \"{}\"", getName(), home.getName());
         this.getChildren().set(0, home);
@@ -193,11 +224,22 @@ public class TUIApplicationModule extends TUIModule {
         }
     }
 
+    /**
+     * The home of a {@link TUIApplicationModule} is simply it's first child. This means it will be the first
+     * module to run when this application is run.
+     * @return The home of this application module.
+     */
     public TUIModule.Builder<?> getHome() {
         if(this.getChildren().isEmpty()) return null;
         return this.getChildren().getFirst();
     }
 
+    /**
+     * The onExit of a {@link TUIApplicationModule} is <strong>not</strong> a child
+     * of the application module. It is a distinct module to run after every child
+     * has completed running.
+     * @param onExit The module that runs at the end of this application module's run.
+     */
     public void setOnExit(TUIModule.Builder<?> onExit) {
         logger.debug("setting onExit for application \"{}\" to module \"{}\"", getName(), onExit.getName());
         this.onExit = onExit;
@@ -207,6 +249,12 @@ public class TUIApplicationModule extends TUIModule {
         onExit.enableAnsi(this.getAnsiEnabled());
     }
 
+    /**
+     * The onExit of a {@link TUIApplicationModule} is <strong>not</strong> a child
+     * of the application module. It is a distinct module to run after every child
+     * has completed running.
+     * @return The module that runs at the end of this application module's run.
+     */
     public TUIModule.Builder<?> getOnExit() {
         return onExit;
     }
@@ -229,15 +277,15 @@ public class TUIApplicationModule extends TUIModule {
      * @return true if this module equals {@code other} according to builder-provided properties
      * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
      *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
-     *  Also, There is no need for an equalTo method that overrides {@link TUIModule.Builder#equalTo(TUIModule.Builder, TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
+     *  Also, There is no need for an equalTo method that overrides {@link TUIModule.Builder#structuralEquals(TUIModule.Builder, TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
      * child within the Builder, but not in the built module. This ensures property propagation is applied to onExit before building, but
      * after building it is run last.
      */
-    public boolean equals(TUIApplicationModule other) {
+    public boolean structuralEquals(TUIApplicationModule other) {
         if(this == other) return true;
         if(other == null) return false;
 
-        return TUIModule.Builder.equals(onExit, other.onExit) && super.equals(other);
+        return TUIModule.Builder.structuralEquals(onExit, other.onExit) && super.structuralEquals(other);
     }
 
     public TUIApplicationModule(Builder builder) {
