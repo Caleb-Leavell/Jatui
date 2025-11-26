@@ -46,7 +46,7 @@ public class TUIApplicationModule extends TUIModule {
 
     /**
      * The module that runs when the application finishes running. <br>
-     * Displays "Exiting..." in gray by default.
+     * Displays "Exiting..." in gray by default (see {@link TUIApplicationModule#DEFAULT_EXIT}).
      */
     private TUIModule.Builder<?> onExit;
 
@@ -133,8 +133,9 @@ public class TUIApplicationModule extends TUIModule {
      *
      */
     public <T> T getInput(String inputName, Class<T> type) {
-        if(inputMap.get(inputName) == null) return null;
-        if(inputMap.get(inputName).getClass().equals(type)) return type.cast(inputMap.get(inputName));
+        Object value = inputMap.get(inputName);
+        if(value == null) return null;
+        if(type.isInstance(value)) return type.cast(inputMap.get(inputName));
         else return null;
     }
 
@@ -151,8 +152,9 @@ public class TUIApplicationModule extends TUIModule {
      * @param <T> The type to safely cast to.
      */
     public <T> T getInputOrDefault(String inputName, Class<T> type, T defaultValue) {
-        if(inputMap.get(inputName) == null) return defaultValue;
-        if(inputMap.get(inputName).getClass().equals(type)) return type.cast(inputMap.get(inputName));
+        Object value = inputMap.get(inputName);
+        if(value == null) return defaultValue;
+        if(type.isInstance(value)) return type.cast(inputMap.get(inputName));
         else return defaultValue;
     }
 
@@ -277,7 +279,7 @@ public class TUIApplicationModule extends TUIModule {
      * @return true if this module equals {@code other} according to builder-provided properties
      * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
      *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
-     *  Also, There is no need for an equalTo method that overrides {@link TUIModule.Builder#structuralEquals(TUIModule.Builder, TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
+     *  Also, There is no need for an structuralEquals method that overrides {@link TUIModule.Builder#structuralEquals(TUIModule.Builder, TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
      * child within the Builder, but not in the built module. This ensures property propagation is applied to onExit before building, but
      * after building it is run last.
      */
@@ -288,6 +290,10 @@ public class TUIApplicationModule extends TUIModule {
         return TUIModule.Builder.structuralEquals(onExit, other.onExit) && super.structuralEquals(other);
     }
 
+    /**
+     * Builds a TUIApplicationModule based on the state of {@code builder}
+     * @param builder The {@link TUIModule.Builder} that is building the application module.
+     */
     public TUIApplicationModule(Builder builder) {
         super(builder);
         this.inputMap = builder.inputMap;
@@ -305,8 +311,25 @@ public class TUIApplicationModule extends TUIModule {
         this.getChildren().remove(onExit);
     }
 
+    /**
+     * Builder for {@link TUIApplicationModule}. <br>
+     * Required fields: {@code name} <br>
+     * Optional fields (with default values): {@code inputMap}, {@code onExit}
+     */
     public static class Builder extends TUIModule.Builder<Builder> {
+        /**
+         * Where input collected during the application's lifecycle is stored. <br>
+         * It maps a String to an Object, where the String is generally the
+         * name of the module that supplied the input (it may also just be the
+         * provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+         * is used), and the Object is the input itself.
+         */
         private final Map<String, Object> inputMap = new HashMap<>();
+
+        /**
+         * The module that runs when the application finishes running. <br>
+         * Displays "Exiting..." in gray by default (see {@link TUIApplicationModule#DEFAULT_EXIT}).
+         */
         private TUIModule.Builder<?> onExit = DEFAULT_EXIT.getCopy();
 
         public Builder(String name) {
@@ -329,20 +352,39 @@ public class TUIApplicationModule extends TUIModule {
             return new TUIApplicationModule.Builder();
         }
 
-        public TUIModule.Builder<?> getHome() {
-            return this.children.getFirst();
-        }
-
-        public TUIModule.Builder<?> getOnExit() {
-            return this.onExit;
-        }
-
+        /**
+         * Sets the home of the application.
+         * The home of a {@link TUIApplicationModule} is simply it's first child. This means it will be the first
+         * module to run when this application is run.
+         * <br><br>
+         * <strong>Note:</strong> When this application module is built, it will recursively set
+         * the {@code application}, {@code printStream}, {@code scanner}, and {@code ansiEnabled} for all children,
+         * including {@code home}. It will <strong>not</strong> update ansi. It will also not update any properties that
+         * have been locked.
+         * @param home The first module to run when this application is run.
+         */
         public Builder setHome(TUIModule.Builder<?> home) {
             logger.debug("setting home for application builder \"{}\" to module \"{}\"", getName(), (home == null) ? "null" : home.getName());
             this.children.set(0, home);
             return self();
         }
 
+        /**
+         * Gets the home of the application.
+         * The home of a {@link TUIApplicationModule} is simply it's first child. This means it will be the first
+         * module to run when this application is run.
+         * @return The home of this application module.
+         */
+        public TUIModule.Builder<?> getHome() {
+            return this.children.getFirst();
+        }
+
+        /**
+         * Sets the {@code onExit} module for the application. It will remain a child
+         * of the builder to allow for property propagation, but for a built {@link TUIApplicationModule},
+         * it is a distinct module that runs after all children have finished running.
+         * @param onExit The module that runs at the end of this application module's run.
+         */
         public Builder setOnExit(TUIModule.Builder<?> onExit) {
             logger.debug("setting onExit for application builder \"{}\" to \"{}\"", getName(), (onExit == null) ? "null" : onExit.getName());
             this.children.remove(this.onExit);
@@ -351,6 +393,26 @@ public class TUIApplicationModule extends TUIModule {
             return self();
         }
 
+        /**
+         * Gets the {@code onExit} module for the application. It will remain a child
+         * of the builder to allow for property propagation, but for a built {@link TUIApplicationModule},
+         * it is a distinct module that runs after all children have finished running.
+         * @return The module that runs at the end of this application module's run.
+         */
+        public TUIModule.Builder<?> getOnExit() {
+            return this.onExit;
+        }
+
+
+        /**
+         * Builds a new {@link TUIApplicationModule}.
+         *
+         * <strong>Note:</strong> Building this application module will recursively set
+         * the {@code application}, {@code printStream}, {@code scanner}, and {@code ansiEnabled} for all children,
+         * including {@code home}. It will <strong>not</strong> update ansi. It will also not update any properties that
+         * have been locked.
+         * @return
+         */
         @Override
         public TUIApplicationModule build() {
             logger.trace("Building TUIApplicationModule \"{}\"", getName());
