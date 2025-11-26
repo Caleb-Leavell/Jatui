@@ -24,7 +24,7 @@ import java.util.*;
 /**
  * The root TUIModule of an application. This class handles:
  * <ul>
- *     <li>Arbitrary Input storage</li>
+ *     <li>Arbitrary Input storage/management</li>
  *     <li>Entering/Exiting the TUI (via Home and onExit)</li>
  *     <li>Name collision enforcement (logging)</li>
  * </ul>
@@ -300,7 +300,7 @@ public class TUIApplicationModule extends TUIModule {
 
     /**
      * Builds a TUIApplicationModule based on the state of {@code builder}
-     * @param builder The {@link TUIModule.Builder} that is building the application module.
+     * @param builder The {@link TUIApplicationModule.Builder} that is building the application module.
      */
     public TUIApplicationModule(Builder builder) {
         super(builder);
@@ -320,7 +320,8 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * Builder for {@link TUIApplicationModule}. <br>
+     * Builder for {@link TUIApplicationModule}.
+     * <br><br>
      * Required fields: {@code name} <br>
      * Optional fields (with default values): {@code inputMap}, {@code onExit}
      */
@@ -420,12 +421,12 @@ public class TUIApplicationModule extends TUIModule {
 
         /**
          * Builds a new {@link TUIApplicationModule}.
-         *
+         * <br><br>
          * <strong>Note:</strong> Building this application module will recursively set
          * the {@code application}, {@code printStream}, {@code scanner}, and {@code ansiEnabled} for all children,
          * including {@code home}. It will <strong>not</strong> update ansi. It will also not update any properties that
          * have been locked.
-         * @return
+         * @return The built TUIApplicationModule
          */
         @Override
         public TUIApplicationModule build() {

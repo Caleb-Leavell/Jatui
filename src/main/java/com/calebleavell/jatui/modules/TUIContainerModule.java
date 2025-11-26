@@ -23,16 +23,26 @@ package com.calebleavell.jatui.modules;
  */
 public class TUIContainerModule extends TUIModule {
 
+    /**
+     * Simply logs the run and calls the super-method provided by {@link TUIModule#run}.
+     */
     @Override
     public void run() {
         logger.info("Running TUIContainerModule \"{}\"", getName());
         super.run();
     }
-
+    /**
+     * Builds a TUIContainerModule based on the state of {@code builder}
+     * @param builder The {@link TUIContainerModule.Builder} that is building the application module.
+     */
     public TUIContainerModule(TUIModule.Builder<?> builder) {
         super(builder);
     }
 
+    /** Builder for {@link TUIContainerModule}
+     * <br><br>
+     *  Required Fields: {@code name}
+     * **/
     public static class Builder extends TUIModule.Builder<Builder> {
         public Builder(String name) {
             super(Builder.class, name);
@@ -52,6 +62,10 @@ public class TUIContainerModule extends TUIModule {
             return new Builder();
         }
 
+        /**
+         * Builds a new {@link TUIApplicationModule}.
+         * @return The built TUIApplicationModule
+         */
         @Override
         public TUIContainerModule build() {
             logger.trace("Building TUIContainerModule \"{}\"", getName());
