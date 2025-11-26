@@ -181,9 +181,11 @@ public class TUIApplicationModule extends TUIModule {
      * @param input The new input to store.
      */
     public void updateInput(String moduleName, Object input) {
-        logInput(moduleName, input);
         TUIModule.Builder<?> child = getChild(moduleName);
-        if(child != null) updateInput(child.build(), input);
+        if(child != null) {
+            logInput(moduleName, input);
+            updateInput(child.build(), input);
+        }
         else logger.debug("no child found of name \"{}\", so no input was updated", moduleName);
     }
 
