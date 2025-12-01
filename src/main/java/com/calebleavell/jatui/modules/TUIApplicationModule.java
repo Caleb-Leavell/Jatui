@@ -298,8 +298,8 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * Builds a TUIApplicationModule based on the state of {@code builder}
-     * @param builder The {@link TUIApplicationModule.Builder} that is building the application module.
+     * Builds a {@link TUIApplicationModule} based on the state of {@code builder}
+     * @param builder The {@link TUIApplicationModule.Builder} that is building the module.
      */
     public TUIApplicationModule(Builder builder) {
         super(builder);
@@ -323,6 +323,11 @@ public class TUIApplicationModule extends TUIModule {
      * <br><br>
      * Required fields: {@code name} <br>
      * Optional fields (with default values): {@code inputMap}, {@code onExit}
+     *
+     * @implNote This class doesn't override {@link TUIModule.Builder#shallowCopy(TUIModule.Builder)}
+     * because {@code inputMap} is private and thus is known to not be touched before building,
+     * and {@code onExit} is added to children until building, which means it's automatically handled
+     * by the super method.
      */
     public static class Builder extends TUIModule.Builder<Builder> {
         /**
@@ -419,7 +424,7 @@ public class TUIApplicationModule extends TUIModule {
 
 
         /**
-         * Builds a new {@link TUIApplicationModule}.
+         * Builds a new {@link TUIApplicationModule} based on this builder.
          * <br><br>
          * <strong>Note:</strong> Building this application module will recursively set
          * the {@code application}, {@code printStream}, {@code scanner}, and {@code ansiEnabled} for all children,

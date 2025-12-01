@@ -509,6 +509,12 @@ public abstract class TUIModule {
          */
         protected abstract B createInstance();
 
+        /**
+         * Creates a copy of {@code original} by mutating this instance.
+         * Children are not copied.
+         * This is a utility method for {@link Builder#getCopy()}
+         * @param original The builder to copy from
+         */
         protected void shallowCopy(B original) {
             logger.trace("get a shallow copy of module \"{}\"", name);
 

@@ -17,6 +17,7 @@
 
 package com.calebleavell.jatui.modules;
 
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class TUIFunctionModule extends TUIModule {
@@ -28,7 +29,9 @@ public class TUIFunctionModule extends TUIModule {
 
 
     /**
-     *
+     *  Runs the stored function, attempts to update the application input
+     *  based on what the function returned, then runs children as
+     *  provided by {@link TUIModule#run}
      */
     @Override
     public void run() {
@@ -44,38 +47,81 @@ public class TUIFunctionModule extends TUIModule {
         super.run();
     }
 
+    /**
+     * The function is the {@link Supplier} logic that this module will execute when it is run.
+     * @return The function stored by this module.
+     */
     public Supplier<?> getFunction() {
         return function;
     }
 
+
+    /**
+     * Builds a {@link TUIFunctionModule} based on the state of {@code builder}
+     * @param builder The {@link TUIFunctionModule.Builder} that is building the module.
+     */
     public TUIFunctionModule(Builder builder) {
         super(builder);
         this.function = builder.function;
     }
 
+    /**
+     * Builder for {@link TUIFunctionModule}.
+     * <br><br>
+     * Required fields: {@code name}, {@code function}
+     */
     public static class Builder extends TUIModule.Builder<Builder> {
-        Supplier<?> function; // this isn't checked in a .equalTo so structural equality can actually return true
+
+        /**
+         * The logic that this module will execute when it is run.
+         *
+         * @implNote This isn't checked in any equivalent to {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         * in order to allow the structural equality check to return true (since separately declared lambdas and method
+         * references return false on {@link Object#equals}).
+         */
+        Supplier<?> function;
 
         public Builder(String name, Supplier<?> function) {
             super(Builder.class, name);
             this.function = function;
         }
 
+        /**
+         * Constructs a builder based on a provided name and Runnable.
+         * Note that the Runnable will get wrapped in a Supplier that returns {@code null}
+         * @param name The unique name of the module
+         * @param function The Runnable that will be executed when this module is built and run.
+         */
         public Builder(String name, Runnable function) {
             super(Builder.class, name);
             this.setFunction(function);
         }
 
+        /**
+         * The function is the {@link Supplier} logic that this module will execute when it is run.
+         * @return The function stored by this module.
+         */
         public Supplier<?> getFunction() {
             return function;
         }
 
+        /**
+         * The function is the {@link Supplier} logic that this module will execute when it is run.
+         * @param function The Supplier to be run when this module is run
+         * @return self
+         */
         public Builder setFunction(Supplier<?> function) {
             logger.debug("setting function for TUIFUnctionModule builder \"{}\"", getName());
             this.function = function;
             return self();
         }
 
+        /**
+         * The function is the {@link Supplier} logic that this module will execute when it is run.
+         * @param function The Runnable to be run when this module is run (this will be wrapped
+         *                 in a Supplier that returns null.)
+         * @return self
+         */
         public Builder setFunction(Runnable function) {
             logger.debug("setting function for TUIFunctionModule builder \"{}\" based on a Runnable", getName());
             if(function == null) this.function = null;
@@ -103,12 +149,22 @@ public class TUIFunctionModule extends TUIModule {
             return new Builder();
         }
 
+        /**
+         * Creates a copy of {@code original} by mutating this instance.
+         * Children are not copied.
+         * This is a utility method for {@link TUIModule.Builder#getCopy()}
+         * @param original The builder to copy from
+         */
         @Override
         public void shallowCopy(Builder original) {
             this.function = original.function;
             super.shallowCopy(original);
         }
 
+        /**
+         * Builds a new {@link TUIFunctionModule} based on this builder.
+         * @return The built {@link TUIFunctionModule}
+         */
         @Override
         public TUIFunctionModule build() {
             logger.trace("Building TUIFunctionModule \"{}\"", getName());
