@@ -25,18 +25,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.fusesource.jansi.Ansi.ansi;
-
-// TODO - copyright info
 /**
- * The abstract class for all TUIModules. <br>
- * A TUIModule is an immutable, analyzable runtime unit of a TUI that can have children and be run. <br>
- * Use {@link TUIModule.Builder} to construct a TUIModule (note: all concrete subclasses will have their own builder). <br>
+ * The abstract class for all TUIModules.
+ * <br><br>
+ * A TUIModule is an immutable, analyzable runtime unit of a TUI that can have children and be run.
  * <br>
+ * Use {@link TUIModule.Builder} to construct a TUIModule (note: all concrete subclasses will have their own builder).
+ * <br><br>
  * Use {@link TUIContainerModule} as the minimal implementation for this class. <br>
  * <br>
- * This class contains {@link TUIModule.Builder}, {@link TUIModule.Template}, and {@link TUIModule.NameOrModule} as subclasses <br>
- *
- *
+ * This class contains {@link TUIModule.Builder}, {@link TUIModule.Template}, and {@link TUIModule.NameOrModule} as subclasses. <br>
  */
 public abstract class TUIModule {
 
@@ -58,25 +56,32 @@ public abstract class TUIModule {
      *
      */
     public enum Property {
+        /** The {@link TUIApplicationModule} corresponding to this module */
         APPLICATION,
         /** Deals with replacing the ansi completely with setAnsi() **/
         SET_ANSI,
         /** Deals with appending to or prepending to the ansi */
         MERGE_ANSI,
+        /** The Scanner this module may read data from (not every module reads data) */
         SCANNER,
+        /** The PrintStream this module may write to (not every module writes data) */
         PRINTSTREAM,
-        ENABLE_ANSI,
-        LOGGER
+        /** Whether Ansi can be displayed for this module (takes precedent over {@link Property#SET_ANSI})*/
+        ENABLE_ANSI
     }
 
     /**
-     * <p>The identifier for this module.</p>
-     * <p>It is recommended to try and keep this unique in order to allow identification methods (e.g., via {@link TUIApplicationModule#getInput}) to function properly.</p>
+     * The identifier for this module. <br>
+     * It is highly recommended to try and keep this unique in order to allow
+     * identification methods (e.g., via {@link TUIApplicationModule#getInput})
+     * to function properly. <br>
+     * Warnings and potentially errors will be logged if modules with duplicate
+     * names are created.
      */
     private final String name;
 
     /**
-     * The application the module is a child of.
+     * The application this module is tied to.
      */
     private final TUIApplicationModule application;
 
@@ -86,25 +91,32 @@ public abstract class TUIModule {
     private final List<TUIModule.Builder<?>> children;
 
     /**
-     * <p>The ansi that may be displayed (Jansi object)</p>
-     * <p>Currently, only TUITextModule displays the ansi</p>
+     * The ansi that may be displayed (Jansi object).
+     * Note that not every module will display ansi.
      */
     private final Ansi ansi;
 
     /**
-     * <p>The Scanner that reads input from the user-defined source</p>
-     * <p>Is set to System.in by default (defined as SYSTEM_IN in TUIModule) </p>
+     * The Scanner that reads input from the user-defined source.
+     * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
+     *
+     * @implNote Not every TUIModule requires a Scanner, but having each module
+     * store a reference to one makes it significantly easier to allow for recursive updating
+     * of children's scanners.
      */
     private final Scanner scanner;
 
     /**
-     * <p>The PrintStream that outputs data to the user-defined location</p>
-     * <p>Is set to System.out by default</p>
+     * PrintStream that outputs data to the user-defined location.
+     * It is set to {@link System#in} by default.
+     *
+     * @implNote See {@link TUIModule#scanner} for an explanation on why every module
+     * needs an individual reference to a PrintStream.
      */
     private final PrintStream printStream;
 
     /**
-     * <p>Whether ansi will be displayed or not.</p>
+     * Whether ansi will be displayed or not.
      */
     private final boolean enableAnsi;
 
@@ -313,28 +325,63 @@ public abstract class TUIModule {
     }
 
     /**
-     * Some modules can do interesting things if it is tied to an application. <br>
-     * For example, you can set a {@link TUITextModule} to display the output of another module,
-     * and it will look for that output in the application's input map.
+     * The {@link TUIApplicationModule} this module is tied to.
+     * An application module is primarily used for TUI input storage,
+     * as well as for providing a clean way to enter/exit the TUI.
      *
      * @return The {@link TUIApplicationModule} that this module is tied to.
      */
     public TUIApplicationModule getApplication() { return application; }
 
+    /**
+     * If this module displays text, this is the ansi that determines the
+     * text styling of that module (e.g., coloring, bolding, etc.).
+     * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+     *
+     * @return The ansi stored in the module.
+     */
     public Ansi getAnsi() {
         return this.ansi;
     }
 
+    /**
+     * The Scanner that reads input from the user-defined source.
+     * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
+     *
+     * @return The reference to the Scanner used by this module
+     * (Note that not every module will use the Scanner).
+     */
     public Scanner getScanner() {
         return this.scanner;
     }
 
+    /**
+     * PrintStream that outputs data to the user-defined location.
+     * It is set to {@link System#in} by default.
+     *
+     * @return The reference to the PrintStream used by this module
+     * (Note that not every module will use the PrintStream).
+     */
     public PrintStream getPrintStream() {
         return this.printStream;
     }
 
+    /**
+     * Whether ansi is enabled applies to modules who may display text
+     * (e.g., {@link TUITextModule}). If ansi is disabled, only the raw
+     * text is displayed.
+     *
+     * @return Whether ansi is enabled for this module.
+     */
     public boolean getAnsiEnabled() {return this.enableAnsi; }
 
+    /**
+     * Returns the name of this module.
+     * For a formatted string of the module hierarchy stemming from this module,
+     * see {@link TUIModule#toTreeString()}.
+     *
+     * @return The name of this module.
+     */
     @Override
     public String toString() {
         return this.name;
@@ -342,18 +389,20 @@ public abstract class TUIModule {
 
     /**
      * Recursively generates toString with info for this scene and all children.
-     * Will only go as deep as MAX_ITERATIONS_ON_TO_STRING
+     * Will only go as deep as {@link TUIModule#MAX_TREE_STRING_DEPTH}
      *
      * @return formatted string
      */
     public String toTreeString() {
-        return toTreeString(0, true);
+        return toTreeString(0);
     }
 
     /**
      * recursive helper method for toTreeString()
+     *
+     * @param indent The starting indent that defines the number of "\t"s
      */
-    public String toTreeString(int indent, boolean displayChildren) {
+    private String toTreeString(int indent) {
         if(indent > MAX_TREE_STRING_DEPTH) {
             return "";
         }
@@ -363,10 +412,8 @@ public abstract class TUIModule {
 
         output.append(this.name).append(" -- ").append(this.getClass().getSimpleName()).append(String.format("%n"));
 
-        if (displayChildren) {
-            for (TUIModule.Builder<?> child : children) {
-                output.append(child.build().toTreeString(indent + 1, true));
-            }
+        for (TUIModule.Builder<?> child : children) {
+            output.append(child.build().toTreeString(indent + 1));
         }
 
         return output.toString();
@@ -419,6 +466,10 @@ public abstract class TUIModule {
     }
 
 
+    /**
+     * Builds a {@link TUIModule} based on the state of {@code builder}
+     * @param builder The {@link TUIModule.Builder} that is building the module.
+     */
     protected TUIModule(Builder<?> builder) {
         this.name = builder.name;
         this.application = builder.application;
@@ -429,23 +480,97 @@ public abstract class TUIModule {
         this.enableAnsi = builder.enableAnsi;
     }
 
+    /**
+     * Builder for {@link TUIModule}.
+     * The builder uses a Curiously Recurring Template Pattern,
+     * which means Builders which extend this can use the fluent method
+     * chains provided by this builder while retaining their type.
+     * <br><br>
+     * Required fields: {@code type}, {@code name} <br>
+     * Optional fields: {@code children}, {@code propertyUpdateFlags}, {@code application},
+     *  {@code ansi}, {@code scanner}, {@code printStream}, {@code enableAnsi} <br>
+     * Utility fields (not set by user): {@code logger}, {@code usedNames}
+     */
     public abstract static class Builder<B extends Builder<B>> implements DirectedGraphNode<Property, Builder<?>, B> {
+
+        /**
+         * The identifier for this module.<br>
+         * It is highly recommended to try and keep this unique in order to allow
+         * identification methods (e.g., via {@link TUIApplicationModule#getInput})
+         * to function properly. <br>
+         * Warnings and potentially errors will be logged if modules with duplicate
+         * names are created.
+         */
         protected String name;
+
+        /**
+         * Every child module that should be run.
+         */
         protected List<TUIModule.Builder<?>> children = new ArrayList<>();
+
+        /**
+         * Specifies how property propagation functions for
+         * {@link TUIModule.Builder#application}, {@link TUIModule.Builder#ansi},
+         * {@link TUIModule.Builder#scanner}, {@link TUIModule.Builder#printStream},
+         * and {@link TUIModule.Builder#enableAnsi}.
+         * <br>
+         * Property updating behavior is provided by {@link DirectedGraphNode.PropertyUpdateFlag}.
+         * All properties are set to {@link DirectedGraphNode.PropertyUpdateFlag#UPDATE}
+         * by default.
+         */
         protected Map<Property, PropertyUpdateFlag> propertyUpdateFlags = new HashMap<>();
 
         // properties
+
+        /**
+         * The application this module is tied to.
+         */
         protected TUIApplicationModule application;
+
+        /**
+         * The ansi that may be displayed (Jansi object).
+         * Note that not every module will display ansi.
+         */
         protected Ansi ansi = ansi();
+
+
+        /**
+         * The Scanner that reads input from the user-defined source.
+         * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
+         *
+         * @implNote See {@link TUIModule#scanner} for an explanation on why every module
+         * needs an individual reference to a scanner.
+         */
         protected Scanner scanner = TUIModule.DEFAULT_SCANNER;
+
+        /**
+         * PrintStream that outputs data to the user-defined location.
+         * It is set to {@link System#in} by default.
+         *
+         * @implNote See {@link TUIModule#scanner} for an explanation on why every module
+         * needs an individual reference to a PrintStream.
+         */
         protected PrintStream printStream = System.out;
+
+        /**
+         * Whether ansi will be displayed or not.
+         */
         protected boolean enableAnsi = true;
 
+        /**
+         * The class extending this class (CRTP).
+         */
         protected final Class<B> type;
 
+        /** The Logger for the module, provided by the slf4j facade **/
         protected static final Logger logger = LoggerFactory.getLogger(Builder.class);
 
-        protected static final Map<String, Integer> usedNames = new WeakHashMap<>();
+        /**
+         * The frequency of names of all children of this module.
+         * This is used to support name duplicate detection. <br>
+         * An error is logged if there are name collisions.
+         */
+        protected static final Map<String, Integer> usedNames = new HashMap<>();
 
         public Builder(Class<B> type, String name) {
             this.type = type;
@@ -809,10 +934,10 @@ public abstract class TUIModule {
                     first.enableAnsi == second.enableAnsi);
         }
 
-//        @Override
-//        public String toString() {
-//            return this.name;
-//        }
+        @Override
+        public String toString() {
+            return this.name;
+        }
 
         /**
          * This is the same as shallowStructuralEquals, but it's static and does include a recursive children check.

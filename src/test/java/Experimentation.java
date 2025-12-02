@@ -37,6 +37,7 @@ public class Experimentation {
         getPassword.cleanMemory();
 
         System.out.println(app.getInput("get-password-is-matched"));
+        System.out.println(app.toTreeString());
     }
 
     public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {

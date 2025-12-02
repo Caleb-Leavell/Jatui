@@ -111,7 +111,7 @@ public class TUIFunctionModule extends TUIModule {
          * @return self
          */
         public Builder setFunction(Supplier<?> function) {
-            logger.debug("setting function for TUIFUnctionModule builder \"{}\"", getName());
+            logger.debug("setting function for TUIFunctionModule builder \"{}\"", getName());
             this.function = function;
             return self();
         }
