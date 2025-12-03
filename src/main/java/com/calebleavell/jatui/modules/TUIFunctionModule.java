@@ -81,6 +81,11 @@ public class TUIFunctionModule extends TUIModule {
          */
         Supplier<?> function;
 
+        /**
+         * Constructs a builder based on a provided name and Supplier
+         * @param name The unique name of the module
+         * @param function The Supplier that will be executed when this module is built and run.
+         */
         public Builder(String name, Supplier<?> function) {
             super(Builder.class, name);
             this.function = function;

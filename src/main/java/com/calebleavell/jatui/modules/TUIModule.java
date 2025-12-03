@@ -572,6 +572,14 @@ public abstract class TUIModule {
          */
         protected static final Map<String, Integer> usedNames = new HashMap<>();
 
+        /**
+         * Constructs a new {@link TUIModule.Builder}.
+         * @param type The type of the module. This is usually defined
+         *             by the inheriting class (e.g., {@code type} for
+         *             {@link TUITextModule.Builder} would be
+         *             {@code TUITextModule.Builder.class}.
+         * @param name The unique name of this module.
+         */
         public Builder(Class<B> type, String name) {
             this.type = type;
             this.setName(name);
@@ -580,6 +588,13 @@ public abstract class TUIModule {
             }
         }
 
+        /**
+         * Constructs an empty {@link TUIModule.Builder}. Used for copying.
+         * @param type The type of the module. This is usually defined
+         *             by the inheriting class (e.g., {@code type} for
+         *             {@link TUITextModule.Builder} would be
+         *             {@code TUITextModule.Builder.class}.
+         */
         protected Builder(Class<B> type) {
             this.type = type;
         }
@@ -591,6 +606,20 @@ public abstract class TUIModule {
             objects as type B.
          */
 
+        /**
+         * Gets a fresh instance of this type of Builder.
+         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
+         * @return A fresh, empty instance.
+         */
+        protected abstract B createInstance();
+
+        /**
+         * Copies all data of {@code original} into this module, including a deep copy
+         * of all children.
+         * @param original The module to copy from.
+         * @param visited All children that have already been deep-copied.
+         * @return The instance that was copied into (self if {@code original} hasn't been visited yet).
+         */
         protected B deepCopy(B original, Map<Builder<?>, Builder<?>> visited) {
             if(visited.get(original) != null) return original.getType().cast(visited.get(original));
             visited.put(original, this);
@@ -605,15 +634,33 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * This helper exists to help wrangle the CRTP by
+         * casting copyInto into the correct type. It isn't
+         * possible to do this inline.
+         *
+         * @param original The module to copy from.
+         * @param copyInto The module to copy original into.
+         * @param visited All children that have already been deep-copied.
+         * @return self
+         * @param <T> The type held by {@code original} (and technically {@code copyInto}).
+         */
         private static <T extends Builder<T>> Builder<T> deepCopyHelper(Builder<T> original, Builder<?> copyInto, Map<Builder<?>, Builder<?>> visited) {
             Builder<T> toCopy = original.getType().cast(copyInto);
             return toCopy.deepCopy(original.self(), visited);
         }
 
-        protected Map<Builder<?>, Builder<?>> deepCopy(B original) {
+        /**
+         * Wraps {@link TUIModule.Builder#deepCopy(Builder, Map)}
+         * to create {@code copyMap} for us.
+         *
+         * @param original The module to copy into this module.
+         * @return self
+         */
+        protected B deepCopy(B original) {
             Map<Builder<?>, Builder<?>> copyMap = new HashMap<>();
             deepCopy(original, copyMap);
-            return copyMap;
+            return self();
         }
 
         /**
@@ -626,13 +673,6 @@ public abstract class TUIModule {
             logger.trace("get a deep copy of module \"{}\"", name);
             return copy;
         }
-
-        /**
-         * Gets a fresh instance of this type of Builder.
-         *  Note, this is intended only for copying utility and may have unknown consequences if used in other ways.
-         * @return A fresh, empty instance.
-         */
-        protected abstract B createInstance();
 
         /**
          * Creates a copy of {@code original} by mutating this instance.
@@ -662,6 +702,10 @@ public abstract class TUIModule {
             return getDeepCopy();
         }
 
+        /**
+         * Gets the type of this module; enables the CRTP.
+         * @return the class type of this module.
+         */
         public Class<B> getType() {
             return type;
         }
@@ -975,11 +1019,6 @@ public abstract class TUIModule {
             super.deepCopy(original, visited);
             main = (TUIContainerModule.Builder) visited.get(original.main);
             return self();
-        }
-
-        @Override
-        public String toString() {
-            return this.name;
         }
 
         /**
