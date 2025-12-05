@@ -75,7 +75,8 @@ public class TUIFunctionModule extends TUIModule {
         /**
          * The logic that this module will execute when it is run.
          *
-         * @implNote This isn't checked in any equivalent to {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         * @implNote
+         * This isn't checked in any equivalent to {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          * in order to allow the structural equality check to return true (since separately declared lambdas and method
          * references return false on {@link Object#equals}).
          */

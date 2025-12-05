@@ -96,7 +96,9 @@ public class TUITextModule extends TUIModule {
      * </ul>
      * @param other The TUITextModule to compare
      * @return true if this module equals {@code other} according to builder-provided properties
-     * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
+     *
+     * @implNote
+     * This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
      *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
      */
     public boolean equals(TUITextModule other) {
@@ -202,7 +204,9 @@ public class TUITextModule extends TUIModule {
          * @param first The first TUITextModule.Builder to compare
          * @param second The second TUITextModule.Builder to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         public boolean shallowStructuralEquals(TUITextModule.Builder first, TUITextModule.Builder second) {
             if(first == second) return true;

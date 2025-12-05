@@ -64,9 +64,11 @@ public class TUITextInputModule extends TUIModule {
      * <p>Note: Runtime properties (e.g., input, inputMap, currentRunningChild, terminated), are not considered.</p>
      * @param other The TUITextInputModule to compare
      * @return true if this module equals {@code other} according to builder-provided properties
-     * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
-     *  This method is merely for checking structural equality, which is generally only necessary for manual testing. Also, no overloaded equals methods
-     *  exist since {@code displayText} and {@code handlers} are children of the builder and thus checked automatically.
+     *
+     * @implNote
+     * This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
+     * This method is merely for checking structural equality, which is generally only necessary for manual testing. Also, no overloaded equals methods
+     * exist since {@code displayText} and {@code handlers} are children of the builder and thus checked automatically.
      */
     public boolean structuralEquals(TUITextInputModule other) {
         if(this == other) return true;
@@ -266,7 +268,9 @@ public class TUITextInputModule extends TUIModule {
          * @param first The first InputHandlers to compare
          * @param second The second InputHandlers to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
         public boolean shallowStructuralEquals(InputHandlers first, InputHandlers second) {
@@ -455,7 +459,9 @@ public class TUITextInputModule extends TUIModule {
          * @param first The first InputHandlers to compare
          * @param second The second InputHandlers to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         public boolean shallowStructuralEquals(InputHandler first, InputHandler second) {
             if(first == second) return true;

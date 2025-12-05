@@ -38,7 +38,11 @@ import static org.fusesource.jansi.Ansi.ansi;
  */
 public abstract class TUIModule {
 
-    /** reads from System.in **/
+    /** Reads from System.in.
+     * <br><br>
+     * <strong>It is strongly discouraged to close this Scanner, as it would close the scanner
+     * for all modules using it and potentially kill input for the entire TUI.</strong>
+     **/
     static final Scanner DEFAULT_SCANNER = new Scanner(System.in);
 
     /** The standard message for when a module isn't named **/
@@ -100,7 +104,8 @@ public abstract class TUIModule {
      * The Scanner that reads input from the defined source.
      * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
      *
-     * @implNote Not every TUIModule requires a Scanner, but having each module
+     * @implNote
+     * Not every TUIModule requires a Scanner, but having each module
      * store a reference to one makes it significantly easier to allow for recursive updating
      * of children's scanners.
      */
@@ -110,7 +115,8 @@ public abstract class TUIModule {
      * PrintStream that outputs data to the defined location.
      * It is set to {@link System#in} by default.
      *
-     * @implNote See {@link TUIModule#scanner} for an explanation on why every module
+     * @implNote
+     * See {@link TUIModule#scanner} for an explanation on why every module
      * needs an individual reference to a PrintStream.
      */
     private final PrintStream printStream;
@@ -141,12 +147,6 @@ public abstract class TUIModule {
      * after completion
      */
     protected boolean restart = false;
-
-    /**
-     * How deep in the recursion to go on toString()
-     */
-    public int MAX_TREE_STRING_DEPTH = 6;
-
 
     /**
      * Sets terminated to false, then linearly runs children. <br>
@@ -389,12 +389,22 @@ public abstract class TUIModule {
 
     /**
      * Recursively generates toString with info for this scene and all children.
-     * Will only go as deep as {@link TUIModule#MAX_TREE_STRING_DEPTH}
+     * Automatically caps recursion to 6 iterations.
      *
      * @return formatted string
      */
     public String toTreeString() {
-        return toTreeString(0);
+        return toTreeString(0, 6);
+    }
+
+    /**
+     * Recursively generates toString with info for this scene and all children.
+     *
+     * @param maxDepth How deep to allow the recursion to go
+     * @return formatted string
+     */
+    public String toTreeString(int maxDepth) {
+        return toTreeString(0, maxDepth);
     }
 
     /**
@@ -402,8 +412,8 @@ public abstract class TUIModule {
      *
      * @param indent The starting indent that defines the number of "\t"s
      */
-    private String toTreeString(int indent) {
-        if(indent > MAX_TREE_STRING_DEPTH) {
+    private String toTreeString(int indent, int maxDepth) {
+        if(indent > maxDepth) {
             return "";
         }
 
@@ -413,7 +423,7 @@ public abstract class TUIModule {
         output.append(this.name).append(" -- ").append(this.getClass().getSimpleName()).append(String.format("%n"));
 
         for (TUIModule.Builder<?> child : children) {
-            output.append(child.build().toTreeString(indent + 1));
+            output.append(child.build().toTreeString(indent + 1, maxDepth));
         }
 
         return output.toString();
@@ -436,8 +446,10 @@ public abstract class TUIModule {
      * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered.</p>
      * @param other The TUIModule to compare
      * @return true if this module equals {@code other} according to builder-provided properties
-     * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
-     *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
+     *
+     * @implNote
+     * This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
+     * This method is merely for checking structural equality, which is generally only necessary for manual testing.
      */
     public boolean structuralEquals(TUIModule other) {
         if(this == other) return true;
@@ -538,7 +550,8 @@ public abstract class TUIModule {
          * The Scanner that reads input from the defined source.
          * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
          *
-         * @implNote See {@link TUIModule#scanner} for an explanation on why every module
+         * @implNote
+         * See {@link TUIModule#scanner} for an explanation on why every module
          * needs an individual reference to a scanner.
          */
         protected Scanner scanner = TUIModule.DEFAULT_SCANNER;
@@ -547,7 +560,8 @@ public abstract class TUIModule {
          * PrintStream that outputs data to the defined location.
          * It is set to {@link System#in} by default.
          *
-         * @implNote See {@link TUIModule#scanner} for an explanation on why every module
+         * @implNote
+         * See {@link TUIModule#scanner} for an explanation on why every module
          * needs an individual reference to a PrintStream.
          */
         protected PrintStream printStream = System.out;
@@ -750,7 +764,9 @@ public abstract class TUIModule {
          *
          * @param property The property given by {@link TUIModule.Property}
          * @return self
-         * @implNote Internally, this sets the property flag to {@link DirectedGraphNode.PropertyUpdateFlag#HALT}
+         *
+         * @implNote
+         * Internally, this sets the property flag to {@link DirectedGraphNode.PropertyUpdateFlag#HALT}
          */
         public B lockProperty(Property property) {
             logger.debug("locking property \"{}\" for \"{}\"", property.name(), name);
@@ -766,7 +782,9 @@ public abstract class TUIModule {
          *
          * @param property The property given by {@link TUIModule.Property}
          * @return self
-         * @implNote Internally, this sets the property flag to {@link DirectedGraphNode.PropertyUpdateFlag#UPDATE}
+         *
+         * @implNote
+         * Internally, this sets the property flag to {@link DirectedGraphNode.PropertyUpdateFlag#UPDATE}
          */
         public B unlockProperty(Property property) {
             logger.debug("unlocking property \"{}\" for module \"{}\"", property.name(), name);
@@ -909,7 +927,7 @@ public abstract class TUIModule {
 
         /**
          * Prepends {@code name} to the current name of this module.
-         * Useful for doing things like adding the name of hte parent
+         * Useful for doing things like adding the name of the parent
          * module to this module.
          *
          * @param name The name to prepend to the current name.
@@ -1185,6 +1203,15 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Casts this builder into the type given by the CRTP.
+         *
+         * @return self, casted to the appropriate type
+         *
+         * @implNote
+         * This is a safe operation because {@code type} is enforced
+         * to be type {@code B} at runtime.
+         */
         public B self() {
             return type.cast(this);
         }
@@ -1206,7 +1233,9 @@ public abstract class TUIModule {
          * @param first The first TUIModule to compare
          * @param second The second TUIModule to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         public boolean shallowStructuralEquals(B first, B second) {
             if(first == second) return true;
@@ -1224,6 +1253,14 @@ public abstract class TUIModule {
                     first.enableAnsi == second.enableAnsi);
         }
 
+        /**
+         * Returns the name of this module.
+         * For a formatted string of the module hierarchy stemming from this module,
+         * see {@link TUIModule#toTreeString()}. This will require building the
+         * module.
+         *
+         * @return The name of this module.
+         */
         @Override
         public String toString() {
             return this.name;
@@ -1235,7 +1272,9 @@ public abstract class TUIModule {
          * @param first The first TUIModule to compare
          * @param second The second TUIModule to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote Polymorphism is automatic here and thus this method does not generally need to be overloaded.
+         *
+         * @implNote
+         * Polymorphism is automatic here and thus this method does not generally need to be overloaded.
          */
         public static boolean structuralEquals(TUIModule.Builder<?> first, TUIModule.Builder<?> second) {
             if(first == second) return true;
@@ -1244,35 +1283,92 @@ public abstract class TUIModule {
             return first.structuralEquals(second);
         }
 
+        /**
+         * Builds and returns the configured {@link TUIModule}.
+         *
+         * @return the constructed module.
+         */
         public abstract TUIModule build();
     }
 
+    /**
+     * This class is an extension of {@link TUIModule.Builder} that provides a {@code main} field
+     * which will be accessible inside the class extending this. The purpose of {@code main} is
+     * to separate children added from inside the class from children added from whoever is
+     * instantiating the class. For example, suppose MyTemplate extends Template, and a user
+     * calls it as follows:
+     * <pre><code>MyTemplate = new MyTemplate("template").addChild(child, 2)</code></pre>
+     * <br>
+     * That would potentially put the new child inside the automatically added children.
+     * Putting the children inside {@code main} ensures all automatically added children
+     * run as expected and are organized.
+     * <br><br>
+     * Template also enforces building to a {@link TUIContainerModule}, which improves modularity.
+     * @param <B>
+     */
     public abstract static class Template<B extends Template<B>> extends TUIModule.Builder<B> {
+
+        /**
+         * A container for separating children essential to the function of the class
+         * from children added after instantiation.
+         * <br>
+         * For example, suppose MyTemplate extends Template, and a user
+         * calls it as follows:
+         * <pre><code>MyTemplate = new MyTemplate("template").addChild(child, 2)</code></pre>
+         * <br>
+         * That would potentially put the new child inside the automatically added children.
+         * Putting the children inside {@code main} ensures all automatically added children
+         * run as expected and are organized.
+         */
         protected TUIContainerModule.Builder main;
 
+        /**
+         * Creates the new Template and adds {@code main} as the first child.
+         *
+         * @param type The type of the class extending {@link TUIModule.Template}
+         * @param name The unique identifier for the module.
+         */
         public Template(Class<B> type, String name) {
             super(type, name);
             main = new TUIContainerModule.Builder(name + "-main");
             this.addChild(main);
         }
 
+        /**
+         * Creates a fresh instance for copying utility.
+         *
+         * @param type The type of the class extending {@link TUIModule.Template}
+         */
         protected Template(Class<B> type) {
             super(type);
         }
 
+        /**
+         * Copies all data of {@code original} into this module, including a deep copy
+         * of all children.
+         *
+         * @param original The module to copy from.
+         * @param visited All children that have already been deep-copied.
+         * @return The instance that was copied into (self if {@code original} hasn't been visited yet).
+         *
+         * @implNote
+         * Re-assigns {@code main} to the copy that was created from the recursive children copying.
+         */
         @Override
-        public B deepCopy(B original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
+        protected B deepCopy(B original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
             super.deepCopy(original, visited);
             main = (TUIContainerModule.Builder) visited.get(original.main);
             return self();
         }
 
         /**
-         * <p>Builds the finalized ContainerModule</p>
-         * <p><strong>Note:</strong> If you are going to override this method, ensure any changes made to main or other are reset each time it's called.
-         *          We want to ensure calling build() multiple times returns the same output.
-         *          Most likely, you'll want to call main.clearChildren() as the first line of the override.
-         *          </p>
+         * Builds the finalized ContainerModule
+         * <br><br>
+         * <strong>Note:</strong> If you are going to override this method,
+         * ensure any changes made to main or other children are reset each time it's called.
+         * We want to ensure calling build() multiple times returns the same output.
+         * Most likely, you'll want to call main.clearChildren() as the first line of the override.
+         *
          * @return The built ContainerModule
          */
         @Override
@@ -1281,22 +1377,49 @@ public abstract class TUIModule {
         }
     }
 
+    /**
+     * Stores either the module builder or the name of a module, which abstracts
+     * module retrieving. See usage in {@link TUIModuleFactory.NumberedModuleSelector}
+     */
     public final static class NameOrModule {
         private TUIModule.Builder<?> module;
         private String moduleName;
 
+        /**
+         * Sets the stored module to a concrete reference to a builder.
+         * @param module The module to remember.
+         */
         public NameOrModule(TUIModule.Builder<?> module) {
             this.module = module;
         }
+
+        /**
+         * Sets the stored module to the name of a builder.
+         * @param moduleName The name of the module to remember.
+         */
         public NameOrModule(String moduleName) {
             this.moduleName = moduleName;
         }
 
+        /**
+         * Fetches the module that was inputted from either the concrete reference
+         * or the name. Requires the possible names to be a child of {@code app}.
+         *
+         * @param app The app that a potential name of the module would be a child of.
+         * @return The remembered module.
+         */
         public TUIModule.Builder<?> getModule(TUIApplicationModule app) {
             if(module != null) return module;
             else return app.getChild(moduleName);
         }
 
+        /**
+         * Creates a new instance of this {@code NameOrModule} object that remembers
+         * a copy of the module if a concrete reference was stored, or the same name
+         * if only the name was stored.
+         *
+         * @return The new copy of this instance.
+         */
         public NameOrModule getCopy() {
             if(module != null) return new NameOrModule(module.getCopy());
             else return new NameOrModule(moduleName);

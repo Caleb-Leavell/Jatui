@@ -224,7 +224,9 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         public boolean shallowStructuralEquals(NumberedList first, NumberedList second) {
             if(first == second) return true;
@@ -330,7 +332,9 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         *This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
         public boolean shallowStructuralEquals(NumberedModuleSelector first, NumberedModuleSelector second) {
@@ -463,7 +467,9 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
         public boolean shallowStructuralEquals(LineBuilder first, LineBuilder second) {
@@ -616,7 +622,9 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
         public boolean shallowStructuralEquals(ConfirmationPrompt first, ConfirmationPrompt second) {
@@ -849,7 +857,9 @@ public class TUIModuleFactory {
          * @param first The first NumberedList to compare
          * @param second The second NumberedList to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         * @implNote This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         *
+         * @implNote
+         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
         @Override
         public boolean shallowStructuralEquals(PasswordInput first, PasswordInput second) {

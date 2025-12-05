@@ -284,9 +284,11 @@ public class TUIApplicationModule extends TUIModule {
      * <p>Note: Runtime properties (e.g., inputMap, currentRunningChild, terminated), are not considered.</p>
      * @param other The TUIApplicationModule to compare
      * @return true if this module equals {@code other} according to builder-provided properties
-     * @implNote This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
-     *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
-     *  Also, There is no need for an structuralEquals method that overrides {@link TUIModule.Builder#structuralEquals(TUIModule.Builder, TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
+     *
+     * @implNote
+     * This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
+     * This method is merely for checking structural equality, which is generally only necessary for manual testing.
+     * Also, There is no need for an structuralEquals method that overrides {@link TUIModule.Builder#structuralEquals(TUIModule.Builder, TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
      * child within the Builder, but not in the built module. This ensures property propagation is applied to onExit before building, but
      * after building it is run last.
      */
@@ -324,7 +326,8 @@ public class TUIApplicationModule extends TUIModule {
      * Required fields: {@code name} <br>
      * Optional fields (with default values): {@code inputMap}, {@code onExit}
      *
-     * @implNote This class doesn't override {@link TUIModule.Builder#shallowCopy(TUIModule.Builder)}
+     * @implNote
+     * This class doesn't override {@link TUIModule.Builder#shallowCopy(TUIModule.Builder)}
      * because {@code inputMap} is private and thus is known to not be touched before building,
      * and {@code onExit} is added to children until building, which means it's automatically handled
      * by the super method.
@@ -351,6 +354,9 @@ public class TUIApplicationModule extends TUIModule {
             this.children.add(onExit);
         }
 
+        /**
+         * Creates a fresh instance for copying utility.
+         */
         protected Builder() {
             super(Builder.class);
         }
