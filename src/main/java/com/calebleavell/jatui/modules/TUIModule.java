@@ -97,7 +97,7 @@ public abstract class TUIModule {
     private final Ansi ansi;
 
     /**
-     * The Scanner that reads input from the user-defined source.
+     * The Scanner that reads input from the defined source.
      * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
      *
      * @implNote Not every TUIModule requires a Scanner, but having each module
@@ -107,7 +107,7 @@ public abstract class TUIModule {
     private final Scanner scanner;
 
     /**
-     * PrintStream that outputs data to the user-defined location.
+     * PrintStream that outputs data to the defined location.
      * It is set to {@link System#in} by default.
      *
      * @implNote See {@link TUIModule#scanner} for an explanation on why every module
@@ -345,7 +345,7 @@ public abstract class TUIModule {
     }
 
     /**
-     * The Scanner that reads input from the user-defined source.
+     * The Scanner that reads input from the defined source.
      * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
      *
      * @return The reference to the Scanner used by this module
@@ -356,7 +356,7 @@ public abstract class TUIModule {
     }
 
     /**
-     * PrintStream that outputs data to the user-defined location.
+     * PrintStream that outputs data to the defined location.
      * It is set to {@link System#in} by default.
      *
      * @return The reference to the PrintStream used by this module
@@ -535,7 +535,7 @@ public abstract class TUIModule {
 
 
         /**
-         * The Scanner that reads input from the user-defined source.
+         * The Scanner that reads input from the defined source.
          * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
          *
          * @implNote See {@link TUIModule#scanner} for an explanation on why every module
@@ -544,7 +544,7 @@ public abstract class TUIModule {
         protected Scanner scanner = TUIModule.DEFAULT_SCANNER;
 
         /**
-         * PrintStream that outputs data to the user-defined location.
+         * PrintStream that outputs data to the defined location.
          * It is set to {@link System#in} by default.
          *
          * @implNote See {@link TUIModule#scanner} for an explanation on why every module
@@ -710,22 +710,48 @@ public abstract class TUIModule {
             return type;
         }
 
+        /**
+         * Get the TUIModule Builders that are the children of this builder,
+         * in the order they will be run.
+         * @return The list of children of this module.
+         */
         @Override
         public List<TUIModule.Builder<?>> getChildren() {
             return children;
         }
 
+        /**
+         * The {@code PropertyUpdateFlags} determine the behavior of property propagation.
+         * See {@link TUIModule.Property} and {@link DirectedGraphNode.PropertyUpdateFlag}.
+         * @return The flags for each property which determine propagation behavior.
+         */
         @Override
         public Map<Property, PropertyUpdateFlag> getPropertyUpdateFlags() {
             return propertyUpdateFlags;
         }
 
+        /**
+         * Set the propagation behavior of a specific property.
+         * See {@link TUIModule.Property} for the properties and
+         * {@link DirectedGraphNode.PropertyUpdateFlag} for behavior types.
+         * @param property The property given by {@link TUIModule.Property}
+         * @param flag The propagation behavior given by {@link DirectedGraphNode.PropertyUpdateFlag}
+         * @return self
+         */
         public B setPropertyUpdateFlag(Property property, PropertyUpdateFlag flag) {
             propertyUpdateFlags.put(property, flag);
 
             return self();
         }
 
+        /**
+         * Set the propagation behavior of {@code property} to not allow
+         * updates when a parent module is updated.
+         *
+         * @param property The property given by {@link TUIModule.Property}
+         * @return self
+         * @implNote Internally, this sets the property flag to {@link DirectedGraphNode.PropertyUpdateFlag#HALT}
+         */
         public B lockProperty(Property property) {
             logger.debug("locking property \"{}\" for \"{}\"", property.name(), name);
             propertyUpdateFlags.put(property, PropertyUpdateFlag.HALT);
@@ -733,6 +759,15 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Set the propagation behavior of {@code property} to allow
+         * updates when a parent module is updated. Properties are
+         * unlocked by default.
+         *
+         * @param property The property given by {@link TUIModule.Property}
+         * @return self
+         * @implNote Internally, this sets the property flag to {@link DirectedGraphNode.PropertyUpdateFlag#UPDATE}
+         */
         public B unlockProperty(Property property) {
             logger.debug("unlocking property \"{}\" for module \"{}\"", property.name(), name);
             propertyUpdateFlags.put(property, PropertyUpdateFlag.UPDATE);
@@ -740,6 +775,16 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Recursively updates all properties in this module based on the given module.
+         * All the properties that are updated are given by {@link TUIModule.Property}.
+         * This method does not override the property update flags given by
+         * {@link DirectedGraphNode.PropertyUpdateFlag} for either this module
+         * or for children.
+         *
+         * @param module The module to copy properties from.
+         * @return self
+         */
         public B updateProperties(TUIModule module) {
             logger.debug("updating properties for module \"{}\" based on module \"{}\"", name, module.name);
             this.setApplication(module.getApplication());
@@ -751,28 +796,57 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Linearly append the given children to this module's children.
+         *
+         * @param children The children to add.
+         * @return self
+         */
         public B addChildren(List<TUIModule.Builder<?>> children) {
             for(TUIModule.Builder<?> child : children) addChild(child);
             return self();
         }
 
+        /**
+         * Linearly append the given children to this module's children.
+         *
+         * @param children The children to add.
+         * @return self
+         */
         public B addChildren(TUIModule.Builder<?>... children) {
             for(TUIModule.Builder<?> child : children) addChild(child);
             return self();
         }
 
+        /**
+         * Add a child to the end of this module's children.
+         * @param child The child to add.
+         * @return self
+         */
         public B addChild(TUIModule.Builder<?> child) {
             logger.debug("adding child \"{}\" to module \"{}\"", child.name, name);
             this.children.add(child);
             return self();
         }
 
+        /**
+         * Attempts to add a child at the given index.
+         *
+         * @param index The index to add the child at.
+         * @param child The child to add.
+         * @return self
+         */
         public B addChild(int index, TUIModule.Builder<?> child) {
             logger.debug("adding child \"{}\" to module \"{}\" at index \"{}\"", child.name, name, index);
             this.children.add(index, child);
             return self();
         }
 
+        /**
+         * Removes all children from this module.
+         *
+         * @return self.
+         */
         public Builder<B> clearChildren() {
             logger.debug("clearing children of module \"{}\"", name);
             this.children.clear();
@@ -790,6 +864,13 @@ public abstract class TUIModule {
             return dfs(m -> m.getName().equals(name));
         }
 
+        /**
+         *
+         * @param name
+         * @param type
+         * @return
+         * @param <T>
+         */
         public <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
             TUIModule.Builder<?> child = getChild(name);
             if(child == null) return null;
@@ -799,10 +880,21 @@ public abstract class TUIModule {
             else return null;
         }
 
+        /**
+         * @return The name of this module.
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Sets the name of this module. Ideally, each module should get a unique name.
+         * A warning is logged if a module is given a name that has been given to
+         * another module.
+         *
+         * @param name The unique name of this module.
+         * @return self
+         */
         public B setName(String name) {
             logger.debug("setting name for module \"{}\" to \"{}\"", this.name, name);
 
@@ -815,31 +907,89 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Prepends {@code name} to the current name of this module.
+         * Useful for doing things like adding the name of hte parent
+         * module to this module.
+         *
+         * @param name The name to prepend to the current name.
+         */
         public void prependToName(String name) {
             logger.debug("prepending \"{}\" to the name of module \"{}\" to become \"{}\"", name, this.name, name + "-" + this.name);
             this.name = name + "-" + this.name;
         }
 
+        /**
+         * The {@link TUIApplicationModule} this module is tied to.
+         * An application module is primarily used for TUI input storage,
+         * as well as for providing a clean way to enter/exit the TUI.
+         *
+         * @return The {@link TUIApplicationModule} that this module is tied to.
+         */
         public TUIApplicationModule getApplication() {
             return this.application;
         }
 
+        /**
+         * If this module displays text, this is the ansi that determines the
+         * text styling of that module (e.g., coloring, bolding, etc.).
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         *
+         * @return The ansi stored in the module.
+         */
         public Ansi getAnsi() {
             return this.ansi;
         }
 
+        /**
+         * The Scanner that reads input from the defined source.
+         * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
+         *
+         * @return The reference to the Scanner used by this module
+         * (Note that not every module will use the Scanner).
+         */
         public Scanner getScanner() {
             return this.scanner;
         }
 
+        /**
+         * PrintStream that outputs data to the defined location.
+         * It is set to {@link System#in} by default.
+         *
+         * @return The reference to the PrintStream used by this module
+         * (Note that not every module will use the PrintStream).
+         */
         public PrintStream getPrintStream() {
             return this.printStream;
         }
 
+        /**
+         * Whether ansi is enabled applies to modules who may display text
+         * (e.g., {@link TUITextModule}). If ansi is disabled, only the raw
+         * text is displayed.
+         *
+         * @return Whether ansi is enabled for this module.
+         */
         public boolean getAnsiEnabled() {
             return this.enableAnsi;
         }
 
+        /**
+         * Sets the {@link TUIApplicationModule} for this module and recursively
+         * for its children.
+         * <br><br>
+         * An application module is primarily used for TUI input storage,
+         * as well as for providing a clean way to enter/exit the TUI. <br>
+         * For most cases, you only need one application module per TUI. <br><br>
+         *
+         * <strong>Note</strong>: To prevent a module's application from being updated
+         * when you set the property of a parent, use {@link TUIModule.Builder#lockProperty(Property)}.
+         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * for more fine-grained control.
+         *
+         * @param app The {@link TUIApplicationModule} that this module will be tied to.
+         * @return self
+         */
         public B setApplication(TUIApplicationModule app) {
             logger.debug("setting app for module \"{}\" to \"{}\"", name, (app == null) ? "null" : app.getName());
             this.updateProperty(Property.APPLICATION, n -> n.setApplicationNonRecursive(app));
@@ -847,17 +997,35 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Sets the {@link TUIApplicationModule} for this module only.
+         * @param app The {@link TUIApplicationModule} that this module will be tied to.
+         * @return self
+         */
         private B setApplicationNonRecursive(TUIApplicationModule app) {
             logger.trace("setting app for module \"{}\" to \"{}\"", name, (app == null) ? "null" : app.getName());
             if(this.application != null && app == null) return self();
             this.application = app;
             return self();
         }
-
+        
         /**
-         * <p>Recursively replaces the ansi with the provided ansi.</p>
-         * <p>Automatically locks the ansi after calling.</p>
-         * @param ansi The ansi to recursively replace
+         * Sets the {@link Ansi} for this module and recursively
+         * for its children.
+         * <br><br>
+         * For modules that display text,the ansi determines the
+         * text styling of that module (e.g., coloring, bolding, etc.).
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * <br><br>
+         * <strong>Note</strong>: Setting the ansi automatically locks it from further updating,
+         * either directly or via updating a parent. If this is not desired,
+         * use {@link TUIModule.Builder#unlockProperty(Property)}.
+         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}.
+         * Setting the ansi uses {@link TUIModule.Property#SET_ANSI}.
+         * Note that defining behavior for SET_ANSI does <strong>not</strong>
+         * affect behavior for merging ansi (e.g., via {@link TUIModule.Builder#prependAnsi(Ansi)}).
+         *
+         * @param ansi The {@link Ansi} that this module may use.
          * @return self
          */
         public B setAnsi(Ansi ansi) {
@@ -869,14 +1037,25 @@ public abstract class TUIModule {
             this.lockProperty(Property.SET_ANSI);
             return self();
         }
-
+        
         /**
-         * <p>Prepends the ansi to the module's ansi.</p>
-         * <p>Also prepends the ansi for all children that are currently added .</p>
-         * <p>Whether this can be overridden depends on the ANSI property flag.</p>
-         * <p>Note: ansi for TUITextModules is automatically reset after running </p>;
-         * <p>Note: no property is automatically locked after calling this method.</p>
-         * @param ansi The Jansi provided Ansi object
+         * Prepends {@link Ansi} to the beginning of the
+         * existing ansi for this module and recursively
+         * for its children.
+         * <br><br>
+         * For modules that display text,the ansi determines the
+         * text styling of that module (e.g., coloring, bolding, etc.).
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * <br><br>
+         * <strong>Note</strong>: To prevent a module's ansi from being merged into
+         * when you set the property of a parent, use {@link TUIModule.Builder#lockProperty(Property)}.
+         * Prepending the ansi uses {@link TUIModule.Property#MERGE_ANSI}.
+         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * for more fine-grained control.
+         * Note that defining behavior for MERGE_ANSI does <strong>not</strong>
+         * affect behavior for setting ansi directly. <br>
+         *
+         * @param ansi The {@link Ansi} that this module may use.
          * @return self
          */
         public B prependAnsi(Ansi ansi) {
@@ -890,11 +1069,23 @@ public abstract class TUIModule {
         }
 
         /**
-         * <p>Appends the ansi to the module's ansi (using Jansi).</p>
-         * <p>Also appends the ansi for all children that are currently added .</p>
-         * <p>Whether this can be overridden depends on the ANSI property flag.</p>
-         * <p>Note: ansi for TUITextModules is automatically reset after running </p>
-         * @param ansi The Jansi provided Ansi object
+         * Appends {@link Ansi} to the end of the
+         * existing ansi for this module and recursively
+         * for its children.
+         * <br><br>
+         * For modules that display text,the ansi determines the
+         * text styling of that module (e.g., coloring, bolding, etc.).
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * <br><br>
+         * <strong>Note</strong>: To prevent a module's ansi from being merged into
+         * when you set the property of a parent, use {@link TUIModule.Builder#lockProperty(Property)}.
+         * Appending the ansi uses {@link TUIModule.Property#MERGE_ANSI}.
+         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * for more fine-grained control.
+         * Note that defining behavior for MERGE_ANSI does <strong>not</strong>
+         * affect behavior for setting ansi directly. <br>
+         *
+         * @param ansi The {@link Ansi} that this module may use.
          * @return self
          */
         public B appendAnsi(Ansi ansi) {
@@ -907,6 +1098,22 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Sets the {@link Scanner} for this module and recursively
+         * for its children.
+         * <br><br>
+         * The Scanner reads input from the defined source (note that not every module reads input).
+         * It is set to System.in by default (provided by {@link TUIModule#DEFAULT_SCANNER}).
+         * <br><br>
+         * <strong>Note</strong>: Setting the scanner automatically locks it from further updating,
+         * either directly or via updating a parent. If this is not desired,
+         * use {@link TUIModule.Builder#unlockProperty(Property)}.
+         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * for more fine-grained control.
+         *
+         * @param scanner The {@link Scanner} that this module may use.
+         * @return self
+         */
         public B setScanner(Scanner scanner) {
             logger.debug("setting scanner for module \"{}\"", name);
             this.updateProperty(TUIModule.Property.SCANNER, n -> {
@@ -918,6 +1125,22 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Sets the {@link Scanner} for this module and recursively
+         * for its children.
+         * <br><br>
+         * The PrintStream outputs data to the defined location (note that not every module writes data).
+         * It is set to {@link System#in} by default.
+         * <br><br>
+         * <strong>Note</strong>: Setting the PrintStream automatically locks it from further updating,
+         * either directly or via updating a parent. If this is not desired,
+         * use {@link TUIModule.Builder#unlockProperty(Property)}.
+         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * for more fine-grained control.
+         *
+         * @param printStream The {@link PrintStream} that this module may use.
+         * @return self
+         */
         public B setPrintStream(PrintStream printStream) {
             logger.debug("setting print stream for module \"{}\"", name);
             this.updateProperty(TUIModule.Property.PRINTSTREAM, n -> {
@@ -929,6 +1152,29 @@ public abstract class TUIModule {
             return self();
         }
 
+        /**
+         * Enables or disables ansi for this module and recursively for its children.
+         * <br><br>
+         * <strong>Locking {@link TUIModule.Property#SET_ANSI} does not prevent ansi
+         * from being disabled via this method. You must lock
+         * {@link TUIModule.Property#ENABLE_ANSI}</strong>. <br>
+         * Ansi is enabled by default.
+         * <br><br>
+         * For modules that display text,the ansi determines the
+         * text styling of that module (e.g., coloring, bolding, etc.).
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * <br><br>
+         * <strong>Note</strong>: Changing whether ansi is enabled automatically locks it from further updating,
+         * either directly or via updating a parent. If this is not desired,
+         * use {@link TUIModule.Builder#unlockProperty(Property)}.
+         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}.
+         * Changing whether ansi is enabled uses {@link TUIModule.Property#ENABLE_ANSI}.
+         * Note that defining behavior for ENABLE_ANSI does <strong>not</strong>
+         * affect behavior for setting or merging ansi (e.g., via {@link TUIModule.Builder#prependAnsi(Ansi)}).
+         *
+         * @param enable Whether ansi is enabled.
+         * @return self
+         */
         public B enableAnsi(boolean enable) {
             logger.debug("setting ansi enabled for module \"{}\" to {}", name, enable);
             this.updateProperty(Property.ENABLE_ANSI, n -> {
