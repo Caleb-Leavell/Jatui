@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import org.fusesource.jansi.Ansi;
 
@@ -25,16 +25,19 @@ import java.util.function.Supplier;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
-public class TUIModuleFactory {
+/**
+ * Provides abstractions for common TUI patterns.
+ */
+public class ModuleFactory {
     /**
      * Returns an empty ContainerModule - simply wraps <pre><code>new TUIContainerModule.Builder([name])</code></pre>
      * to allow for code that consistently uses TUIModuleFactory if desired.
      * @param name The name of the module
      * @return The empty ContainerModule
      */
-    public static TUIContainerModule.Builder empty(String name) {
+    public static ContainerModule.Builder empty(String name) {
 
-        return new TUIContainerModule.Builder(name);
+        return new ContainerModule.Builder(name);
     }
 
     /**
@@ -44,8 +47,8 @@ public class TUIModuleFactory {
      * @param moduleToTerminate The module to terminate (it will terminate when this module is run)
      * @return The Function Module that terminates the inputted module
      */
-    public static TUIFunctionModule.Builder terminate(String name, TUIModule moduleToTerminate) {
-        return new TUIFunctionModule.Builder(name, moduleToTerminate::terminate);
+    public static FunctionModule.Builder terminate(String name, TUIModule moduleToTerminate) {
+        return new FunctionModule.Builder(name, moduleToTerminate::terminate);
     }
 
     /**
@@ -57,8 +60,8 @@ public class TUIModuleFactory {
      * @param parent The parent module that will terminate the module
      * @return The Function Module that terminates the module corresponding to {@code moduleToTerminate}
      */
-    public static TUIFunctionModule.Builder terminate(String name, String moduleToTerminate, TUIModule parent) {
-        return new TUIFunctionModule.Builder(name, () -> parent.terminateChild(moduleToTerminate));
+    public static FunctionModule.Builder terminate(String name, String moduleToTerminate, TUIModule parent) {
+        return new FunctionModule.Builder(name, () -> parent.terminateChild(moduleToTerminate));
     }
 
     /**
@@ -68,8 +71,8 @@ public class TUIModuleFactory {
      * @param moduleToRun The module to run (it will run when this module is run)
      * @return The Function Module that calls another module's run method
      */
-    public static TUIFunctionModule.Builder run(String name, TUIModule.Builder<?> moduleToRun) {
-        return new TUIFunctionModule.Builder(name, () -> moduleToRun.build().run());
+    public static FunctionModule.Builder run(String name, TUIModule.Builder<?> moduleToRun) {
+        return new FunctionModule.Builder(name, () -> moduleToRun.build().run());
     }
 
     /**
@@ -79,34 +82,34 @@ public class TUIModuleFactory {
      * @param moduleToRun The module to run (it will run when this module is run)
      * @return The Function Module that calls another module's run method
      */
-    public static TUIFunctionModule.Builder run(String name, TUIModule moduleToRun) {
-        return new TUIFunctionModule.Builder(name, moduleToRun::run);
+    public static FunctionModule.Builder run(String name, TUIModule moduleToRun) {
+        return new FunctionModule.Builder(name, moduleToRun::run);
     }
 
     /**
      * Returns a Function Module that finds the child of a parent by name then runs it.
-     * Will do nothing no if the parent's module tree does not have a child with the given name.
+     * Will do nothing if the parent's module tree does not have a child with the given name.
      *
      * @param name         The name of the module to be returned
      * @param parentModule The module that the <strong>module to run</strong> is the child of
      * @param moduleToRun  The name of the module to run (it will run when this module is run)
      * @return The Function Module that calls another module's run method
      */
-    public static TUIFunctionModule.Builder run(String name, TUIModule parentModule, String moduleToRun) {
-        return new TUIFunctionModule.Builder(name, () -> {
+    public static FunctionModule.Builder run(String name, TUIModule parentModule, String moduleToRun) {
+        return new FunctionModule.Builder(name, () -> {
             TUIModule.Builder<?> toRun = parentModule.getChild(moduleToRun);
             if(toRun != null) toRun.build().run();
         });
     }
 
-    public static TUIFunctionModule.Builder restart(String name, TUIModule moduleToRestart) {
-        return new TUIFunctionModule.Builder(name, () -> {
+    public static FunctionModule.Builder restart(String name, TUIModule moduleToRestart) {
+        return new FunctionModule.Builder(name, () -> {
             if(moduleToRestart != null) moduleToRestart.restart();
         });
     }
 
-    public static TUIFunctionModule.Builder restart(String name, TUIModule parent, String moduleToRestart) {
-        return new TUIFunctionModule.Builder(name, () -> parent.restartChild(moduleToRestart));
+    public static FunctionModule.Builder restart(String name, TUIModule parent, String moduleToRestart) {
+        return new FunctionModule.Builder(name, () -> parent.restartChild(moduleToRestart));
     }
 
     /**
@@ -119,7 +122,7 @@ public class TUIModuleFactory {
      * @param app  The Application Module that this module will be the child of
      * @return The Function Module that increments a counter
      */
-    public static TUIFunctionModule.Builder counter(String name, TUIApplicationModule app) {
+    public static FunctionModule.Builder counter(String name, ApplicationModule app) {
         return counter(name, app, 1, 1);
     }
 
@@ -135,8 +138,8 @@ public class TUIModuleFactory {
      * @param step  The amount to increment each time (e.g. step = 5 -> 1, 6, 11, ...)
      * @return The Function Module that increments a counter
      */
-    public static TUIFunctionModule.Builder counter(String name, TUIApplicationModule app, int begin, int step) {
-        return new TUIFunctionModule.Builder(name, () -> {
+    public static FunctionModule.Builder counter(String name, ApplicationModule app, int begin, int step) {
+        return new FunctionModule.Builder(name, () -> {
             Integer counter = app.getInput(name, Integer.class);
             if(counter != null)  return counter + step;
             else return begin;
@@ -242,14 +245,14 @@ public class TUIModuleFactory {
 
     public static class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSelector> {
         private final List<TUIModule.NameOrModule> modules = new ArrayList<>();
-        private TUIApplicationModule app;
+        private ApplicationModule app;
         private NumberedList list;
 
-        public NumberedModuleSelector(String name, TUIApplicationModule app) {
+        public NumberedModuleSelector(String name, ApplicationModule app) {
             super(NumberedModuleSelector.class, name);
             this.app = app;
             list = new NumberedList(name + "-list");
-            TUITextInputModule.Builder collectInput = new TUITextInputModule.Builder(name + "-input", "Your choice: ")
+            TextInputModule.Builder collectInput = new TextInputModule.Builder(name + "-input", "Your choice: ")
                     .addSafeHandler(name + "-goto-module", input -> {
                         int index = Integer.parseInt(input);
                         TUIModule.NameOrModule nameOrModule = modules.get(index - 1);
@@ -376,7 +379,7 @@ public class TUIModuleFactory {
      * </code></pre>
      */
     public static class LineBuilder extends TUIModule.Template<LineBuilder> {
-        private TUITextModule.Builder current;
+        private TextModule.Builder current;
         protected int iterator;
 
         public LineBuilder(String name) {
@@ -405,7 +408,7 @@ public class TUIModuleFactory {
             super.shallowCopy(original);
         }
 
-        public LineBuilder addText(TUITextModule.Builder text) {
+        public LineBuilder addText(TextModule.Builder text) {
             logger.trace("adding text to LineBuilder \"{}\" that displays \"{}\" (output type is \"{}\")", getName(), text.getText(), text.getOutputType());
             main.addChild(text);
             current = text;
@@ -414,7 +417,7 @@ public class TUIModuleFactory {
         }
 
         public LineBuilder addText(String text, Ansi ansi) {
-            this.addText(new TUITextModule.Builder(main.getName() + "-" + iterator, text)
+            this.addText(new TextModule.Builder(main.getName() + "-" + iterator, text)
                     .setAnsi(ansi)
                     .printNewLine(false));
             return self();
@@ -425,8 +428,8 @@ public class TUIModuleFactory {
         }
 
         public LineBuilder addModuleOutput(String moduleName, Ansi ansi) {
-            this.addText(new TUITextModule.Builder(main.getName() + "-" + iterator, moduleName)
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            this.addText(new TextModule.Builder(main.getName() + "-" + iterator, moduleName)
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
                     .setAnsi(ansi));
             return self();
@@ -442,7 +445,7 @@ public class TUIModuleFactory {
             return self();
         }
 
-        protected TUITextModule.Builder getCurrent() {
+        protected TextModule.Builder getCurrent() {
             return current;
         }
 
@@ -494,7 +497,7 @@ public class TUIModuleFactory {
         public ConfirmationPrompt(String name, String displayText) {
             super(ConfirmationPrompt.class, name);
             main.addChild(
-                    new TUITextInputModule.Builder(name + "-input", displayText)
+                    new TextInputModule.Builder(name + "-input", displayText)
             );
         }
 
@@ -553,8 +556,8 @@ public class TUIModuleFactory {
         }
 
         public ConfirmationPrompt addOnConfirm(String name, Supplier<?> logic) {
-            TUITextInputModule.Builder input = this.getChild(this.name+"-input",
-                    TUITextInputModule.Builder.class);
+            TextInputModule.Builder input = this.getChild(this.name+"-input",
+                    TextInputModule.Builder.class);
 
             input.addSafeHandler(name, s -> {
                 String in = s.toLowerCase().replace("\n", "").replace(String.format("%n"), "");
@@ -577,8 +580,8 @@ public class TUIModuleFactory {
 
 
         public ConfirmationPrompt addOnDeny(String name, Supplier<?> logic) {
-            TUITextInputModule.Builder input = this.getChild(this.name+"-input",
-                    TUITextInputModule.Builder.class);
+            TextInputModule.Builder input = this.getChild(this.name+"-input",
+                    TextInputModule.Builder.class);
 
             input.addSafeHandler(name, s -> {
                 String in = s.toLowerCase().strip().replace("\n", "").replace(String.format("%n"), "");
@@ -654,8 +657,8 @@ public class TUIModuleFactory {
         String displayText;
         private Supplier<char[]> passwordSupplier;
 
-        final List<TUIFunctionModule.Builder> onValidPassword = new ArrayList<>();
-        final List<TUIFunctionModule.Builder> onInvalidPassword = new ArrayList<>();
+        final List<FunctionModule.Builder> onValidPassword = new ArrayList<>();
+        final List<FunctionModule.Builder> onInvalidPassword = new ArrayList<>();
         private boolean storeInput = false;
         private boolean storeMatch = false;
 
@@ -663,7 +666,7 @@ public class TUIModuleFactory {
             super(PasswordInput.class, name);
             this.displayText = displayText;
             this.passwordSupplier = passwordSupplier;
-            main.addChild(new TUIFunctionModule.Builder(name+"-input", createPasswordInput()));
+            main.addChild(new FunctionModule.Builder(name+"-input", createPasswordInput()));
         }
 
         protected PasswordInput() {
@@ -706,7 +709,7 @@ public class TUIModuleFactory {
         }
 
         public PasswordInput addOnValidPassword(Runnable onValidPassword) {
-            this.onValidPassword.add(new TUIFunctionModule.Builder("", () -> {
+            this.onValidPassword.add(new FunctionModule.Builder("", () -> {
                 onValidPassword.run();
                 return null;
             }));
@@ -714,12 +717,12 @@ public class TUIModuleFactory {
         }
 
         public PasswordInput addOnValidPassword(String name, Supplier<?> onValidPassword) {
-            this.onValidPassword.add(new TUIFunctionModule.Builder(name, onValidPassword));
+            this.onValidPassword.add(new FunctionModule.Builder(name, onValidPassword));
             return self();
         }
 
         public PasswordInput addOnInvalidPassword(Runnable onInvalidPassword) {
-            this.onInvalidPassword.add(new TUIFunctionModule.Builder("", () -> {
+            this.onInvalidPassword.add(new FunctionModule.Builder("", () -> {
                 onInvalidPassword.run();
                 return null;
             }));
@@ -727,7 +730,7 @@ public class TUIModuleFactory {
         }
 
         public PasswordInput addOnInvalidPassword(String name, Supplier<?> onInvalidPassword) {
-            this.onInvalidPassword.add(new TUIFunctionModule.Builder(name, onInvalidPassword));
+            this.onInvalidPassword.add(new FunctionModule.Builder(name, onInvalidPassword));
             return self();
         }
 
@@ -758,7 +761,7 @@ public class TUIModuleFactory {
         @Override
         public PasswordInput setName(String name) {
             if(this.name == null) return super.setName(name);
-            TUIFunctionModule.Builder input = main.getChild(this.name+"-input", TUIFunctionModule.Builder.class);
+            FunctionModule.Builder input = main.getChild(this.name+"-input", FunctionModule.Builder.class);
             input.setName(name + "-input");
             return super.setName(name);
         }
@@ -771,9 +774,9 @@ public class TUIModuleFactory {
         public String getDisplayText() {return displayText;}
 
         @Override
-        public TUIContainerModule build() {
+        public ContainerModule build() {
             // update the input function to reflect the most recent name, input, and application
-            TUIFunctionModule.Builder input = main.getChild(this.name+"-input", TUIFunctionModule.Builder.class);
+            FunctionModule.Builder input = main.getChild(this.name+"-input", FunctionModule.Builder.class);
             input.setFunction(createPasswordInput());
             return super.build();
         }
@@ -814,8 +817,8 @@ public class TUIModuleFactory {
                     if(correct != null) Arrays.fill(correct, ' ');
                 }
 
-                List<TUIFunctionModule.Builder> functions = match ? onValidPassword : onInvalidPassword;
-                for(TUIFunctionModule.Builder func : functions) {
+                List<FunctionModule.Builder> functions = match ? onValidPassword : onInvalidPassword;
+                for(FunctionModule.Builder func : functions) {
                     func.setApplication(this.application); // application could be null but that's ok
                     func.build().run();
                 }
@@ -891,10 +894,10 @@ public class TUIModuleFactory {
             this.displayText = original.displayText;
             this.onValidPassword.clear();
             this.onInvalidPassword.clear();
-            for(TUIFunctionModule.Builder module: original.onValidPassword) {
+            for(FunctionModule.Builder module: original.onValidPassword) {
                 this.onValidPassword.add(module.getCopy());
             }
-            for(TUIFunctionModule.Builder module: original.onInvalidPassword) {
+            for(FunctionModule.Builder module: original.onInvalidPassword) {
                 this.onInvalidPassword.add(module.getCopy());
             }
             this.storeInput = original.storeInput;

@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import com.calebleavell.jatui.IOCapture;
 import org.fusesource.jansi.Ansi;
@@ -25,14 +25,14 @@ import org.junit.jupiter.api.Test;
 import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TUIApplicationModuleTest {
+class ApplicationModuleTest {
 
     @Test
     void testRun_default_exit() {
         String expected = lines("Exiting...");
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+            ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .enableAnsi(false)
                     .setPrintStream(io.getPrintStream())
                     .build();
@@ -46,8 +46,8 @@ class TUIApplicationModuleTest {
         String expected = lines("Hello, World!", "Exiting...");
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
-                    .addChildren(new TUITextModule.Builder("hello-world", "Hello, World!"))
+            ApplicationModule app = new ApplicationModule.Builder("test-app")
+                    .addChildren(new TextModule.Builder("hello-world", "Hello, World!"))
                     .enableAnsi(false)
                     .setPrintStream(io.getPrintStream())
                     .build();
@@ -65,10 +65,10 @@ class TUIApplicationModuleTest {
         );
 
         try(IOCapture io = new IOCapture("Bob")) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+            ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .addChildren(
-                            new TUITextInputModule.Builder("input", "What is your name? "),
-                            new TUIModuleFactory.LineBuilder("output")
+                            new TextInputModule.Builder("input", "What is your name? "),
+                            new ModuleFactory.LineBuilder("output")
                                     .addText("Hello, ").addModuleOutput("input").addText("!").newLine())
                     .enableAnsi(false)
                     .setScanner(io.getScanner())
@@ -90,10 +90,10 @@ class TUIApplicationModuleTest {
         );
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+            ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .addChildren(
-                            new TUIFunctionModule.Builder("5+5", () -> 5 + 5),
-                            new TUIModuleFactory.LineBuilder("output").addModuleOutput("5+5").newLine()
+                            new FunctionModule.Builder("5+5", () -> 5 + 5),
+                            new ModuleFactory.LineBuilder("output").addModuleOutput("5+5").newLine()
                     )
                     .enableAnsi(false)
                     .setScanner(io.getScanner())
@@ -107,7 +107,7 @@ class TUIApplicationModuleTest {
 
     @Test
     void testResetMemory() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
 
         app.forceUpdateInput("input-1", 5);
         app.forceUpdateInput("input-2", "input");
@@ -129,9 +129,9 @@ class TUIApplicationModuleTest {
         String expected = "Bob";
 
         try(IOCapture io = new IOCapture(expected)) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+            ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .addChildren(
-                            new TUITextInputModule.Builder("input", "What is your name? "))
+                            new TextInputModule.Builder("input", "What is your name? "))
                     .enableAnsi(false)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
@@ -153,9 +153,9 @@ class TUIApplicationModuleTest {
         int expected = 5;
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+            ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .addChildren(
-                            new TUIFunctionModule.Builder("input", () -> expected))
+                            new FunctionModule.Builder("input", () -> expected))
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .build();
@@ -173,7 +173,7 @@ class TUIApplicationModuleTest {
 
     @Test
     void getInputOrDefault() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
 
         app.forceUpdateInput("input", 5);
 
@@ -187,7 +187,7 @@ class TUIApplicationModuleTest {
 
     @Test
     void testUpdateInput_no_module() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
         app.updateInput("input", 5);
         assertNull(app.getInput("input"));
     }
@@ -196,8 +196,8 @@ class TUIApplicationModuleTest {
     void testUpdateInput_module_name() {
         int expected = 5;
 
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                .addChild(TUIModuleFactory.empty("input"))
+        ApplicationModule app = new ApplicationModule.Builder("app")
+                .addChild(ModuleFactory.empty("input"))
                 .build();
         app.updateInput("input", expected);
         assertAll(
@@ -209,9 +209,9 @@ class TUIApplicationModuleTest {
     void testUpdateInput_module_object() {
         int expected = 5;
 
-        TUIContainerModule.Builder input = TUIModuleFactory.empty("input");
+        ContainerModule.Builder input = ModuleFactory.empty("input");
 
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+        ApplicationModule app = new ApplicationModule.Builder("app")
                 .addChild(input)
                 .build();
         app.updateInput(input.build(), expected);
@@ -228,14 +228,14 @@ class TUIApplicationModuleTest {
         );
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+            ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .setAnsi(ansi().bold()) // set to non-default value to test against home ansi
                     .setPrintStream(io.getPrintStream())
                     .setScanner(io.getScanner()) //also set to test against home ansi
                     .enableAnsi(false)
                     .build();
 
-            TUITextModule.Builder home = new TUITextModule.Builder("home", "Hello, World!");
+            TextModule.Builder home = new TextModule.Builder("home", "Hello, World!");
 
             app.setHome(home);
             app.run();
@@ -253,8 +253,8 @@ class TUIApplicationModuleTest {
 
     @Test
     void testGetHome() {
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home");
-        TUIApplicationModule app = new TUIApplicationModule.Builder("test-app").build();
+        ContainerModule.Builder home = new ContainerModule.Builder("home");
+        ApplicationModule app = new ApplicationModule.Builder("test-app").build();
         app.setHome(home);
         assertEquals(app.getHome(), home);
     }
@@ -266,20 +266,20 @@ class TUIApplicationModuleTest {
                 "test exit!");
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+            ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .setAnsi(ansi().bold()) // all properties set to non-default values to test against the onExit module
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TUITextModule.Builder onExit = new TUITextModule.Builder("exit", "test exit!");
+            TextModule.Builder onExit = new TextModule.Builder("exit", "test exit!");
 
             app.setOnExit(onExit);
 
             // we add this manually after setOnExit to make sure it doesn't get added after the exit
             app.getChildren().add(
-                    new TUITextModule.Builder("text", "this should come first")
+                    new TextModule.Builder("text", "this should come first")
                             .setPrintStream(io.getPrintStream())
                             .enableAnsi(false));
 
@@ -299,37 +299,37 @@ class TUIApplicationModuleTest {
 
     @Test
     void testGetOnExit() {
-        TUIContainerModule.Builder onExit = new TUIContainerModule.Builder("exit");
-        TUIApplicationModule app = new TUIApplicationModule.Builder("test-app").build();
+        ContainerModule.Builder onExit = new ContainerModule.Builder("exit");
+        ApplicationModule app = new ApplicationModule.Builder("test-app").build();
         app.setOnExit(onExit);
         assertEquals(app.getOnExit(), onExit);
     }
 
     @Test
     void structuralEqualsTest() {
-        TUIContainerModule.Builder exit = new TUIContainerModule.Builder("exit");
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        ContainerModule.Builder exit = new ContainerModule.Builder("exit");
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
 
-        TUIApplicationModule app1 = new TUIApplicationModule.Builder("app")
+        ApplicationModule app1 = new ApplicationModule.Builder("app")
                 .setApplication(testApp)
                 .setOnExit(exit.getCopy())
                 .build();
 
-        TUIApplicationModule app2 = new TUIApplicationModule.Builder("app")
+        ApplicationModule app2 = new ApplicationModule.Builder("app")
                 .setApplication(testApp)
                 .setOnExit(exit.getCopy())
                 .build();
 
-        TUIApplicationModule app3 = new TUIApplicationModule.Builder("app")
+        ApplicationModule app3 = new ApplicationModule.Builder("app")
                 .setApplication(testApp)
                 .setOnExit(exit.getCopy())
                 .build();
 
-        TUIApplicationModule app4 = new TUIApplicationModule.Builder("app")
+        ApplicationModule app4 = new ApplicationModule.Builder("app")
                 .setOnExit(exit.getCopy())
                 .build();
 
-        TUIApplicationModule app5 = new TUIApplicationModule.Builder("app")
+        ApplicationModule app5 = new ApplicationModule.Builder("app")
                 .setApplication(testApp)
                 .build();
 
@@ -350,13 +350,13 @@ class TUIApplicationModuleTest {
         @Test
         void getCopyTest() {
 
-            var home = new TUIContainerModule.Builder("home");
-            var onExit = new TUIContainerModule.Builder("onExit");
-            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("test-app")
+            var home = new ContainerModule.Builder("home");
+            var onExit = new ContainerModule.Builder("onExit");
+            ApplicationModule.Builder app = new ApplicationModule.Builder("test-app")
                     .setHome(home)
                     .setOnExit(onExit);
 
-            TUIApplicationModule.Builder copy = app.getCopy();
+            ApplicationModule.Builder copy = app.getCopy();
 
             assertAll(
                     () -> assertTrue(app.structuralEquals(copy)),
@@ -367,8 +367,8 @@ class TUIApplicationModuleTest {
 
         @Test
         void setOnExitTest() {
-            var onExit = new TUIContainerModule.Builder("onExit");
-            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("test-app")
+            var onExit = new ContainerModule.Builder("onExit");
+            ApplicationModule.Builder app = new ApplicationModule.Builder("test-app")
                     .setOnExit(onExit);
 
             assertEquals(app.getOnExit(), onExit);
@@ -376,8 +376,8 @@ class TUIApplicationModuleTest {
 
         @Test
         void setHomeTest() {
-            var home = new TUIContainerModule.Builder("home");
-            TUIApplicationModule.Builder app = new TUIApplicationModule.Builder("test-app")
+            var home = new ContainerModule.Builder("home");
+            ApplicationModule.Builder app = new ApplicationModule.Builder("test-app")
                     .setHome(home);
 
             assertEquals(app.getHome(), home);
@@ -385,13 +385,13 @@ class TUIApplicationModuleTest {
 
         @Test
         void buildTest_fields_equal() {
-            TUIApplicationModule setApp = new TUIApplicationModule.Builder("setApp").build();
+            ApplicationModule setApp = new ApplicationModule.Builder("setApp").build();
             Ansi ansi = ansi().bold();
-            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home");
-            TUIContainerModule.Builder onExit = new TUIContainerModule.Builder("exit");
+            ContainerModule.Builder home = new ContainerModule.Builder("home");
+            ContainerModule.Builder onExit = new ContainerModule.Builder("exit");
 
             try(IOCapture io = new IOCapture()) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("test-app")
+                ApplicationModule app = new ApplicationModule.Builder("test-app")
                         .setApplication(setApp)
                         .setAnsi(ansi)
                         .setScanner(io.getScanner())
@@ -414,13 +414,13 @@ class TUIApplicationModuleTest {
 
         @Test
         void buildTest_equivalent_builds() {
-            TUIApplicationModule setApp = new TUIApplicationModule.Builder("setApp").build();
+            ApplicationModule setApp = new ApplicationModule.Builder("setApp").build();
             Ansi ansi = ansi().bold();
-            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home");
-            TUIContainerModule.Builder onExit = new TUIContainerModule.Builder("exit");
+            ContainerModule.Builder home = new ContainerModule.Builder("home");
+            ContainerModule.Builder onExit = new ContainerModule.Builder("exit");
 
             try(IOCapture io = new IOCapture()) {
-                TUIApplicationModule.Builder appBuilder = new TUIApplicationModule.Builder("test-app")
+                ApplicationModule.Builder appBuilder = new ApplicationModule.Builder("test-app")
                         .setApplication(setApp)
                         .setAnsi(ansi)
                         .setScanner(io.getScanner())
@@ -429,8 +429,8 @@ class TUIApplicationModuleTest {
                         .enableAnsi(false)
                         .setOnExit(onExit);
 
-                TUIApplicationModule app1 = appBuilder.build();
-                TUIApplicationModule app2 = appBuilder.build();
+                ApplicationModule app1 = appBuilder.build();
+                ApplicationModule app2 = appBuilder.build();
 
                 assertTrue(app1.structuralEquals(app2));
             }

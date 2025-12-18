@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -29,30 +29,30 @@ import java.util.*;
  *     <li>Name collision enforcement (logging)</li>
  * </ul>
  */
-public class TUIApplicationModule extends TUIModule {
+public class ApplicationModule extends TUIModule {
 
     /** The module that runs by default when the application finishes running **/
-    public static final TUIModule.Builder<?> DEFAULT_EXIT = new TUITextModule.Builder("exit", "Exiting...")
+    public static final TUIModule.Builder<?> DEFAULT_EXIT = new TextModule.Builder("exit", "Exiting...")
             .setAnsi(ansi().fgRgb(125, 100, 100));
 
     /**
      * Where input collected during the application's lifecycle is stored. <br>
      * It maps a String to an Object, where the String is generally the
      * name of the module that supplied the input (it may also just be the
-     * provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     * provided name of the input if {@link ApplicationModule#forceUpdateInput(String, Object)}
      * is used), and the Object is the input itself.
      */
     private final Map<String, Object> inputMap; // maps module names to the input object
 
     /**
      * The module that runs when the application finishes running. <br>
-     * Displays "Exiting..." in gray by default (see {@link TUIApplicationModule#DEFAULT_EXIT}).
+     * Displays "Exiting..." in gray by default (see {@link ApplicationModule#DEFAULT_EXIT}).
      */
     private TUIModule.Builder<?> onExit;
 
     /**
      * The frequency of names of all children of this application. <br>
-     * This is used to support {@link TUIApplicationModule#checkForNameDuplicates()}.
+     * This is used to support {@link ApplicationModule#checkForNameDuplicates()}.
      * An error is logged if there are name collisions.
      */
     private final Map<String, Integer> nameFrequencyMap = new HashMap<>();
@@ -60,7 +60,7 @@ public class TUIApplicationModule extends TUIModule {
     /**
      * Overrides {@link TUIModule#run}. <br>
      * Checks and logs name duplicates, runs children (where "home" is the first child),
-     * and then runs {@link TUIApplicationModule#onExit} if not disabled.
+     * and then runs {@link ApplicationModule#onExit} if not disabled.
      */
     @Override
     public void run() {
@@ -112,7 +112,7 @@ public class TUIApplicationModule extends TUIModule {
      * Return the input corresponding to a given name.
      * @param inputName The name that corresponds to the requested input. In general, this is the
      *  name of the module that supplied the input (it may also just be the
-     *  provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     *  provided name of the input if {@link ApplicationModule#forceUpdateInput(String, Object)}
      *  is used.
      * @return The input corresponding to {@code inputName}, or null if it doesn't exist.
      */
@@ -124,7 +124,7 @@ public class TUIApplicationModule extends TUIModule {
      * Returns the input for the given module only if 1. it exists 2. it is of the correct type.
      * @param inputName The name that corresponds to the requested input. In general, this is the
      *      *  name of the module that supplied the input (it may also just be the
-     *      *  provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     *      *  provided name of the input if {@link ApplicationModule#forceUpdateInput(String, Object)}
      *      *  is used.
      * @param type The class type of the input
      * @return The input, which will be the same type as the "type" parameter, or null if it
@@ -143,7 +143,7 @@ public class TUIApplicationModule extends TUIModule {
      * Returns the input for the given module only if 1. it exists 2. it is of the correct type.
      * @param inputName The name that corresponds to the requested input. In general, this is the
      *      name of the module that supplied the input (it may also just be the
-     *      provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+     *      provided name of the input if {@link ApplicationModule#forceUpdateInput(String, Object)}
      *      is used.
      * @param type The class type of the input
      * @param defaultValue The value to return if the requested value doesn't exist.
@@ -159,10 +159,10 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * Updates the input in {@link TUIApplicationModule#inputMap}, where the key is the name of
+     * Updates the input in {@link ApplicationModule#inputMap}, where the key is the name of
      * {@code module} and the value is {@code input}. <br>
      * In general, it shouldn't be necessary to
-     * update input apart from a TUIModule, but if it is needed, use {@link TUIApplicationModule#forceUpdateInput(String, Object)}.
+     * update input apart from a TUIModule, but if it is needed, use {@link ApplicationModule#forceUpdateInput(String, Object)}.
      * @param module The module whose name corresponds to the input.
      * @param input The new input to store.
      */
@@ -172,11 +172,11 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * Updates the input in {@link TUIApplicationModule#inputMap}, where the key is {@code moduleName}
+     * Updates the input in {@link ApplicationModule#inputMap}, where the key is {@code moduleName}
      * and the value is {@code input}. Note that this searches for an existing module attached to this
      * application module, and if none is found, the input will not be updated. <br>
      * In general, it shouldn't be necessary to
-     * update input apart from a TUIModule, but if it is needed, use {@link TUIApplicationModule#forceUpdateInput(String, Object)}.
+     * update input apart from a TUIModule, but if it is needed, use {@link ApplicationModule#forceUpdateInput(String, Object)}.
      * @param moduleName The name of an existing module that corresponds to the input.
      * @param input The new input to store.
      */
@@ -189,7 +189,7 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * Updates the input in {@link TUIApplicationModule#inputMap}, where the key is {@code identifier}
+     * Updates the input in {@link ApplicationModule#inputMap}, where the key is {@code identifier}
      * and the value is {@code input}. This always updates input, regardless of whether a corresponding
      * module exists or not. Be aware that this can make it more difficult to debug the state of the
      * application.
@@ -211,7 +211,7 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * The home of a {@link TUIApplicationModule} is simply it's first child. This means it will be the first
+     * The home of a {@link ApplicationModule} is simply it's first child. This means it will be the first
      * module to run when this application is run.
      * @param home The first module to run when this application is run.
      */
@@ -234,7 +234,7 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * The home of a {@link TUIApplicationModule} is simply it's first child. This means it will be the first
+     * The home of a {@link ApplicationModule} is simply it's first child. This means it will be the first
      * module to run when this application is run.
      * @return The home of this application module.
      */
@@ -244,7 +244,7 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * The onExit of a {@link TUIApplicationModule} is <strong>not</strong> a child
+     * The onExit of a {@link ApplicationModule} is <strong>not</strong> a child
      * of the application module. It is a distinct module to run after every child
      * has completed running.
      * @param onExit The module that runs at the end of this application module's run.
@@ -259,7 +259,7 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * The onExit of a {@link TUIApplicationModule} is <strong>not</strong> a child
+     * The onExit of a {@link ApplicationModule} is <strong>not</strong> a child
      * of the application module. It is a distinct module to run after every child
      * has completed running.
      * @return The module that runs at the end of this application module's run.
@@ -288,11 +288,11 @@ public class TUIApplicationModule extends TUIModule {
      * @implNote
      * This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
      * This method is merely for checking structural equality, which is generally only necessary for manual testing.
-     * Also, There is no need for an structuralEquals method that overrides {@link TUIModule.Builder#structuralEquals(TUIModule.Builder, TUIModule.Builder)} in {@link TUIApplicationModule.Builder} due to the fact that onExit is a
+     * Also, There is no need for an structuralEquals method that overrides {@link TUIModule.Builder#structuralEquals(TUIModule.Builder, TUIModule.Builder)} in {@link ApplicationModule.Builder} due to the fact that onExit is a
      * child within the Builder, but not in the built module. This ensures property propagation is applied to onExit before building, but
      * after building it is run last.
      */
-    public boolean structuralEquals(TUIApplicationModule other) {
+    public boolean structuralEquals(ApplicationModule other) {
         if(this == other) return true;
         if(other == null) return false;
 
@@ -300,10 +300,10 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * Builds a {@link TUIApplicationModule} based on the state of {@code builder}
-     * @param builder The {@link TUIApplicationModule.Builder} that is building the module.
+     * Builds a {@link ApplicationModule} based on the state of {@code builder}
+     * @param builder The {@link ApplicationModule.Builder} that is building the module.
      */
-    public TUIApplicationModule(Builder builder) {
+    public ApplicationModule(Builder builder) {
         super(builder);
         this.inputMap = builder.inputMap;
         this.onExit = builder.onExit;
@@ -321,7 +321,7 @@ public class TUIApplicationModule extends TUIModule {
     }
 
     /**
-     * Builder for {@link TUIApplicationModule}.
+     * Builder for {@link ApplicationModule}.
      * <br><br>
      * Required fields: {@code name} <br>
      * Optional fields (with default values): {@code inputMap}, {@code onExit}
@@ -337,20 +337,20 @@ public class TUIApplicationModule extends TUIModule {
          * Where input collected during the application's lifecycle is stored. <br>
          * It maps a String to an Object, where the String is generally the
          * name of the module that supplied the input (it may also just be the
-         * provided name of the input if {@link TUIApplicationModule#forceUpdateInput(String, Object)}
+         * provided name of the input if {@link ApplicationModule#forceUpdateInput(String, Object)}
          * is used), and the Object is the input itself.
          */
         private final Map<String, Object> inputMap = new HashMap<>();
 
         /**
          * The module that runs when the application finishes running. <br>
-         * Displays "Exiting..." in gray by default (see {@link TUIApplicationModule#DEFAULT_EXIT}).
+         * Displays "Exiting..." in gray by default (see {@link ApplicationModule#DEFAULT_EXIT}).
          */
         private TUIModule.Builder<?> onExit = DEFAULT_EXIT.getCopy();
 
         public Builder(String name) {
             super(Builder.class, name);
-            this.children.add(TUIModuleFactory.empty("home"));
+            this.children.add(ModuleFactory.empty("home"));
             this.children.add(onExit);
         }
 
@@ -368,12 +368,12 @@ public class TUIApplicationModule extends TUIModule {
          */
         @Override
         protected Builder createInstance() {
-            return new TUIApplicationModule.Builder();
+            return new ApplicationModule.Builder();
         }
 
         /**
          * Sets the home of the application.
-         * The home of a {@link TUIApplicationModule} is simply it's first child. This means it will be the first
+         * The home of a {@link ApplicationModule} is simply it's first child. This means it will be the first
          * module to run when this application is run.
          * <br><br>
          * <strong>Note:</strong> When this application module is built, it will recursively set
@@ -396,7 +396,7 @@ public class TUIApplicationModule extends TUIModule {
 
         /**
          * Gets the home of the application.
-         * The home of a {@link TUIApplicationModule} is simply it's first child. This means it will be the first
+         * The home of a {@link ApplicationModule} is simply it's first child. This means it will be the first
          * module to run when this application is run.
          * @return The home of this application module.
          */
@@ -406,7 +406,7 @@ public class TUIApplicationModule extends TUIModule {
 
         /**
          * Sets the {@code onExit} module for the application. It will remain a child
-         * of the builder to allow for property propagation, but for a built {@link TUIApplicationModule},
+         * of the builder to allow for property propagation, but for a built {@link ApplicationModule},
          * it is a distinct module that runs after all children have finished running.
          * @param onExit The module that runs at the end of this application module's run.
          */
@@ -420,7 +420,7 @@ public class TUIApplicationModule extends TUIModule {
 
         /**
          * Gets the {@code onExit} module for the application. It will remain a child
-         * of the builder to allow for property propagation, but for a built {@link TUIApplicationModule},
+         * of the builder to allow for property propagation, but for a built {@link ApplicationModule},
          * it is a distinct module that runs after all children have finished running.
          * @return The module that runs at the end of this application module's run.
          */
@@ -430,7 +430,7 @@ public class TUIApplicationModule extends TUIModule {
 
 
         /**
-         * Builds a new {@link TUIApplicationModule} based on this builder.
+         * Builds a new {@link ApplicationModule} based on this builder.
          * <br><br>
          * <strong>Note:</strong> Building this application module will recursively set
          * the {@code application}, {@code printStream}, {@code scanner}, and {@code ansiEnabled} for all children,
@@ -439,9 +439,9 @@ public class TUIApplicationModule extends TUIModule {
          * @return The built TUIApplicationModule
          */
         @Override
-        public TUIApplicationModule build() {
+        public ApplicationModule build() {
             logger.trace("Building TUIApplicationModule \"{}\"", getName());
-            return new TUIApplicationModule(self());
+            return new ApplicationModule(self());
         }
     }
 }

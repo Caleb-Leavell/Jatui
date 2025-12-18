@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,12 +26,12 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TUIFunctionModuleTest {
+class FunctionModuleTest {
 
     @Test
     void testRun() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-        TUIFunctionModule.Builder test = new TUIFunctionModule.Builder("test", () -> {
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
+        FunctionModule.Builder test = new FunctionModule.Builder("test", () -> {
             return "Test Output";
         });
 
@@ -45,7 +45,7 @@ class TUIFunctionModuleTest {
     @Test
     void testGetFunction() {
         Supplier<Integer> func = () -> 5;
-        TUIFunctionModule test = new TUIFunctionModule.Builder("test", func).build();
+        FunctionModule test = new FunctionModule.Builder("test", func).build();
         assertEquals(func, test.getFunction());
     }
 
@@ -54,7 +54,7 @@ class TUIFunctionModuleTest {
         @Test
         void testSetFunctionSupplier() {
             Supplier<Integer> func = () -> 5;
-            TUIFunctionModule.Builder test = new TUIFunctionModule.Builder("test", () -> {});
+            FunctionModule.Builder test = new FunctionModule.Builder("test", () -> {});
 
             test.setFunction(func);
 
@@ -66,8 +66,8 @@ class TUIFunctionModuleTest {
             // can't test function equality since a supplier gets constructed from the runnable
             // so we test correct runnable functionality instead
 
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIFunctionModule.Builder test = new TUIFunctionModule.Builder("test", () -> {});
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            FunctionModule.Builder test = new FunctionModule.Builder("test", () -> {});
 
             List<Integer> testList = new ArrayList<>();
 
@@ -88,10 +88,10 @@ class TUIFunctionModuleTest {
         @Test
         void testShallowCopy() {
             Supplier<Integer> func = () -> 31415;
-            TUIFunctionModule.Builder original = new TUIFunctionModule.Builder("original", func)
+            FunctionModule.Builder original = new FunctionModule.Builder("original", func)
                     .enableAnsi(false); // this is to ensure the super method is being called
 
-            TUIFunctionModule.Builder copy = original.createInstance();
+            FunctionModule.Builder copy = original.createInstance();
             copy.shallowCopy(original);
 
             assertAll(
@@ -103,11 +103,11 @@ class TUIFunctionModuleTest {
         @Test
         void testBuild() {
             Supplier<Integer> func = () -> 31415;
-            TUIFunctionModule.Builder builder = new TUIFunctionModule.Builder("original", func)
+            FunctionModule.Builder builder = new FunctionModule.Builder("original", func)
                     .enableAnsi(false);
 
-            TUIFunctionModule first = builder.build();
-            TUIFunctionModule second = builder.build();
+            FunctionModule first = builder.build();
+            FunctionModule second = builder.build();
 
             assertAll(
                     () -> assertEquals(func, first.getFunction()),

@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import com.calebleavell.jatui.IOCapture;
 import org.junit.jupiter.api.Nested;
@@ -29,15 +29,15 @@ import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TUIModuleFactoryTest {
+class ModuleFactoryTest {
 
     @Test
     void testEmpty() {
-        TUIContainerModule empty;
+        ContainerModule empty;
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            empty = TUIModuleFactory.empty("empty")
+            empty = ModuleFactory.empty("empty")
                     .setPrintStream(io.getPrintStream())
                     .build();
 
@@ -58,17 +58,17 @@ class TUIModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                    .setOnExit(TUIModuleFactory.empty("exit"))
+            ApplicationModule app = new ApplicationModule.Builder("app")
+                    .setOnExit(ModuleFactory.empty("exit"))
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+            ContainerModule.Builder home = new ContainerModule.Builder("home")
                     .addChildren(
-                            new TUITextModule.Builder("text-1", "first"),
-                            TUIModuleFactory.terminate("terminate-app", app),
-                            new TUITextModule.Builder("text-2", "second")
+                            new TextModule.Builder("text-1", "first"),
+                            ModuleFactory.terminate("terminate-app", app),
+                            new TextModule.Builder("text-2", "second")
                     );
 
             app.setHome(home);
@@ -85,22 +85,22 @@ class TUIModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                    .setOnExit(TUIModuleFactory.empty("exit"))
+            ApplicationModule app = new ApplicationModule.Builder("app")
+                    .setOnExit(ModuleFactory.empty("exit"))
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+            ContainerModule.Builder home = new ContainerModule.Builder("home")
                     .addChildren(
-                            new TUITextModule.Builder("text-1", "first"),
-                            new TUIContainerModule.Builder("group")
+                            new TextModule.Builder("text-1", "first"),
+                            new ContainerModule.Builder("group")
                                     .addChildren(
-                                            new TUITextModule.Builder("text-2", "second"),
-                                            TUIModuleFactory.terminate("terminate-group", "group", app),
-                                            new TUITextModule.Builder("text-3", "third")
+                                            new TextModule.Builder("text-2", "second"),
+                                            ModuleFactory.terminate("terminate-group", "group", app),
+                                            new TextModule.Builder("text-3", "third")
                                     ),
-                            new TUITextModule.Builder("text-4", "fourth")
+                            new TextModule.Builder("text-4", "fourth")
                     );
 
             app.setHome(home);
@@ -117,23 +117,23 @@ class TUIModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture("a\nb\nc\nd")) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                    .setOnExit(TUIModuleFactory.empty("exit"))
+            ApplicationModule app = new ApplicationModule.Builder("app")
+                    .setOnExit(ModuleFactory.empty("exit"))
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+            ContainerModule.Builder home = new ContainerModule.Builder("home")
                     .addChildren(
-                            new TUITextModule.Builder("text-1", "first"),
-                            new TUITextInputModule.Builder("get-input", "input: ")
+                            new TextModule.Builder("text-1", "first"),
+                            new TextInputModule.Builder("get-input", "input: ")
                                     .addSafeHandler("exit-if-d", s -> {
                                         if(s.equals("d")) app.terminate();
                                         return null;
                                     }),
-                            TUIModuleFactory.restart("restart-app", app),
-                            new TUITextModule.Builder("text-2", "second")
+                            ModuleFactory.restart("restart-app", app),
+                            new TextModule.Builder("text-2", "second")
                     );
 
             app.setHome(home);
@@ -150,28 +150,28 @@ class TUIModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture("a\nb\nc\nd")) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                    .setOnExit(TUIModuleFactory.empty("exit"))
+            ApplicationModule app = new ApplicationModule.Builder("app")
+                    .setOnExit(ModuleFactory.empty("exit"))
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+            ContainerModule.Builder home = new ContainerModule.Builder("home")
                     .addChildren(
-                            new TUITextModule.Builder("text-1", "first"),
-                            new TUIContainerModule.Builder("group")
+                            new TextModule.Builder("text-1", "first"),
+                            new ContainerModule.Builder("group")
                                     .addChildren(
-                                            new TUITextModule.Builder("text-2", "second"),
-                                            new TUITextInputModule.Builder("get-input", "input: ")
+                                            new TextModule.Builder("text-2", "second"),
+                                            new TextInputModule.Builder("get-input", "input: ")
                                                     .addSafeHandler("exit-if-d", s -> {
                                                         if(s.equals("d")) app.terminate();
                                                         return null;
                                                     }),
-                                            TUIModuleFactory.restart("restart-group", app, "group"),
-                                            new TUITextInputModule.Builder("test-3", "third")
+                                            ModuleFactory.restart("restart-group", app, "group"),
+                                            new TextInputModule.Builder("test-3", "third")
                                     ),
-                            new TUITextModule.Builder("text-4", "fourth")
+                            new TextModule.Builder("text-4", "fourth")
                     );
 
             app.setHome(home);
@@ -188,11 +188,11 @@ class TUIModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUITextModule.Builder text = new TUITextModule.Builder("text", "output")
+            TextModule.Builder text = new TextModule.Builder("text", "output")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            TUIFunctionModule.Builder runText = TUIModuleFactory.run("run-text", text);
+            FunctionModule.Builder runText = ModuleFactory.run("run-text", text);
 
             runText.build().run();
 
@@ -207,12 +207,12 @@ class TUIModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUITextModule text = new TUITextModule.Builder("text", "output")
+            TextModule text = new TextModule.Builder("text", "output")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TUIFunctionModule.Builder runText = TUIModuleFactory.run("run-text", text);
+            FunctionModule.Builder runText = ModuleFactory.run("run-text", text);
 
             runText.build().run();
 
@@ -228,20 +228,20 @@ class TUIModuleFactoryTest {
 
         try(IOCapture io = new IOCapture()) {
 
-            TUIContainerModule parent = new TUIContainerModule.Builder("parent")
+            ContainerModule parent = new ContainerModule.Builder("parent")
                     .addChildren(
-                            new TUITextModule.Builder("text-1", "first"),
-                            new TUIContainerModule.Builder("group")
+                            new TextModule.Builder("text-1", "first"),
+                            new ContainerModule.Builder("group")
                                     .addChildren(
-                                            new TUITextModule.Builder("text-2", "second"),
-                                            new TUITextModule.Builder("text-3", "third")
+                                            new TextModule.Builder("text-2", "second"),
+                                            new TextModule.Builder("text-3", "third")
                                     ),
-                            new TUITextModule.Builder("text-4", "fourth"))
+                            new TextModule.Builder("text-4", "fourth"))
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TUIFunctionModule.Builder runText = TUIModuleFactory.run("run-group", parent, "group");
+            FunctionModule.Builder runText = ModuleFactory.run("run-group", parent, "group");
 
             runText.build().run();
 
@@ -257,24 +257,24 @@ class TUIModuleFactoryTest {
 
         try(IOCapture io = new IOCapture()) {
 
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+            ApplicationModule app = new ApplicationModule.Builder("app")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TUIContainerModule.Builder home = new TUIContainerModule.Builder("parent")
+            ContainerModule.Builder home = new ContainerModule.Builder("parent")
                     .addChildren(
-                            new TUITextModule.Builder("text-1", "first"),
-                            new TUIContainerModule.Builder("group")
+                            new TextModule.Builder("text-1", "first"),
+                            new ContainerModule.Builder("group")
                                     .addChildren(
-                                            new TUITextModule.Builder("text-2", "second"),
-                                            new TUITextModule.Builder("text-3", "third")
+                                            new TextModule.Builder("text-2", "second"),
+                                            new TextModule.Builder("text-3", "third")
                                     ),
-                            new TUITextModule.Builder("text-4", "fourth"));
+                            new TextModule.Builder("text-4", "fourth"));
 
             app.setHome(home);
 
-            TUIFunctionModule.Builder runText = TUIModuleFactory.run("run-group", app, "group");
+            FunctionModule.Builder runText = ModuleFactory.run("run-group", app, "group");
 
             runText.build().run();
 
@@ -289,18 +289,18 @@ class TUIModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+            ApplicationModule app = new ApplicationModule.Builder("app")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(TUIModuleFactory.empty("exit"))
+                    .setOnExit(ModuleFactory.empty("exit"))
                     .build();
 
-            TUIContainerModule.Builder printToTen = new TUIContainerModule.Builder("print-to-ten")
+            ContainerModule.Builder printToTen = new ContainerModule.Builder("print-to-ten")
                     .addChildren(
-                            TUIModuleFactory.counter("counter", app),
-                            new TUITextModule.Builder("display", "counter")
-                                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT),
-                            new TUIFunctionModule.Builder("exit-if-greater-than-10", () -> {
+                            ModuleFactory.counter("counter", app),
+                            new TextModule.Builder("display", "counter")
+                                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT),
+                            new FunctionModule.Builder("exit-if-greater-than-10", () -> {
                                 int n = app.getInput("counter", Integer.class);
 
                                 if(n >= 10) {
@@ -325,18 +325,18 @@ class TUIModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+            ApplicationModule app = new ApplicationModule.Builder("app")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(TUIModuleFactory.empty("exit"))
+                    .setOnExit(ModuleFactory.empty("exit"))
                     .build();
 
-            TUIContainerModule.Builder printToTen = new TUIContainerModule.Builder("print-to-ten")
+            ContainerModule.Builder printToTen = new ContainerModule.Builder("print-to-ten")
                     .addChildren(
-                            TUIModuleFactory.counter("counter", app, 5, 2),
-                            new TUITextModule.Builder("display", "counter")
-                                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT),
-                            new TUIFunctionModule.Builder("exit-if-greater-than-10", () -> {
+                            ModuleFactory.counter("counter", app, 5, 2),
+                            new TextModule.Builder("display", "counter")
+                                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT),
+                            new FunctionModule.Builder("exit-if-greater-than-10", () -> {
                                 int n = app.getInput("counter", Integer.class);
 
                                 if(n >= 15) {
@@ -361,11 +361,11 @@ class TUIModuleFactoryTest {
 
         @Test
         void testCopy() {
-            TUIModuleFactory.NumberedList original = new TUIModuleFactory.NumberedList("list", "item1", "item2")
+            ModuleFactory.NumberedList original = new ModuleFactory.NumberedList("list", "item1", "item2")
                     .setStart(5)
                     .setStep(3);
 
-            TUIModuleFactory.NumberedList copy = original.getCopy();
+            ModuleFactory.NumberedList copy = original.getCopy();
 
             assertTrue(original.structuralEquals(copy));
         }
@@ -375,7 +375,7 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIModuleFactory.NumberedList list = new TUIModuleFactory.NumberedList("list", "item1")
+                ModuleFactory.NumberedList list = new ModuleFactory.NumberedList("list", "item1")
                         .addListText("item2")
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false);
@@ -393,7 +393,7 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIModuleFactory.NumberedList list = new TUIModuleFactory.NumberedList("list")
+                ModuleFactory.NumberedList list = new ModuleFactory.NumberedList("list")
                         .setStart(5)
                         .addListText("item1")
                         .addListText("item2")
@@ -413,7 +413,7 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIModuleFactory.NumberedList list = new TUIModuleFactory.NumberedList("list")
+                ModuleFactory.NumberedList list = new ModuleFactory.NumberedList("list")
                         .setStep(3)
                         .addListText("item1")
                         .addListText("item2")
@@ -433,7 +433,7 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIModuleFactory.NumberedList list = new TUIModuleFactory.NumberedList("list")
+                ModuleFactory.NumberedList list = new ModuleFactory.NumberedList("list")
                         .setStart(5)
                         .setStep(3)
                         .addListText("item1")
@@ -451,31 +451,31 @@ class TUIModuleFactoryTest {
 
         @Test
         void testShallowShallowStructuralEquals() {
-            TUIModuleFactory.NumberedList list1 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+            ModuleFactory.NumberedList list1 = new ModuleFactory.NumberedList("list", "text1", "text2")
                     .setStart(5)
                     .setStep(2);
 
-            TUIModuleFactory.NumberedList list2 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+            ModuleFactory.NumberedList list2 = new ModuleFactory.NumberedList("list", "text1", "text2")
                     .setStart(5)
                     .setStep(2);
 
-            TUIModuleFactory.NumberedList list3 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+            ModuleFactory.NumberedList list3 = new ModuleFactory.NumberedList("list", "text1", "text2")
                     .setStart(5)
                     .setStep(2);
 
-            TUIModuleFactory.NumberedList list4 = new TUIModuleFactory.NumberedList("list", "text1", "text2", "text3")
+            ModuleFactory.NumberedList list4 = new ModuleFactory.NumberedList("list", "text1", "text2", "text3")
                     .setStart(5)
                     .setStep(2);
 
-            TUIModuleFactory.NumberedList list5 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+            ModuleFactory.NumberedList list5 = new ModuleFactory.NumberedList("list", "text1", "text2")
                     .setStart(6)
                     .setStep(2);
 
-            TUIModuleFactory.NumberedList list6 = new TUIModuleFactory.NumberedList("list", "text1", "text2")
+            ModuleFactory.NumberedList list6 = new ModuleFactory.NumberedList("list", "text1", "text2")
                     .setStart(5)
                     .setStep(3);
 
-            TUIModuleFactory.NumberedList list7 = new TUIModuleFactory.NumberedList("rename-super-name", "text1", "text2")
+            ModuleFactory.NumberedList list7 = new ModuleFactory.NumberedList("rename-super-name", "text1", "text2")
                     .setStart(5)
                     .setStep(2);
 
@@ -498,21 +498,21 @@ class TUIModuleFactoryTest {
 
         @Test
         void testCopy() {
-            TUIApplicationModule app1 = new TUIApplicationModule.Builder("app")
+            ApplicationModule app1 = new ApplicationModule.Builder("app")
                     .addChildren(
-                            new TUITextModule.Builder("text", "Hello, World!"),
-                            new TUITextInputModule.Builder("input", "input: ")
+                            new TextModule.Builder("text", "Hello, World!"),
+                            new TextInputModule.Builder("input", "input: ")
                     )
                     .build();
 
-            TUIContainerModule.Builder module = new TUIContainerModule.Builder("module");
+            ContainerModule.Builder module = new ContainerModule.Builder("module");
 
-            TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+            ModuleFactory.NumberedModuleSelector original = new ModuleFactory.NumberedModuleSelector("list", app1)
                     .addModule("text")
                     .addModule(module)
                     .addModule("the module", module);
 
-            TUIModuleFactory.NumberedModuleSelector copy = original.getCopy();
+            ModuleFactory.NumberedModuleSelector copy = original.getCopy();
 
             assertTrue(copy.structuralEquals(original));
         }
@@ -524,32 +524,33 @@ class TUIModuleFactoryTest {
             String output;
 
             try (IOCapture io = new IOCapture("1")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .build();
 
-                TUIApplicationModule otherApp = new TUIApplicationModule.Builder("app1")
-                        .addChildren(
-                                new TUITextModule.Builder("text", "Hello, World!"),
-                                new TUITextInputModule.Builder("input", "input: ")
-                        )
-                        .enableAnsi(false)
-                        .setPrintStream(io.getPrintStream())
-                        .build();
-
-                TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", otherApp)
+                ModuleFactory.NumberedModuleSelector selector = new ModuleFactory.NumberedModuleSelector("list", app)
                         .addModule("goto text module", "text");
 
-                app.setHome(original);
+                ContainerModule.Builder content = new ContainerModule.Builder("home")
+                        .addChildren(
+                                selector,
+                                ModuleFactory.terminate("terminate-app", app),
+                                new TextModule.Builder("text", "Hello, World!"),
+                                new TextInputModule.Builder("input", "input: ")
+                        )
+                        .enableAnsi(false)
+                        .setPrintStream(io.getPrintStream());
+
+                app.setHome(content);
                 app.run();
 
                 output = io.getOutput();
             }
 
-            String expected = TUIApplicationModuleTest.lines(
+            String expected = ApplicationModuleTest.lines(
                     "[1] goto text module",
                     "Your choice: Hello, World!"
             );
@@ -563,18 +564,18 @@ class TUIModuleFactoryTest {
             String output;
 
             try (IOCapture io = new IOCapture("1")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .build();
 
-                TUITextModule.Builder text = new TUITextModule.Builder("text", "Hello, World!")
+                TextModule.Builder text = new TextModule.Builder("text", "Hello, World!")
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false);
 
-                TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app)
+                ModuleFactory.NumberedModuleSelector original = new ModuleFactory.NumberedModuleSelector("list", app)
                         .addModule("goto text module", text);
 
                 app.setHome(original);
@@ -583,7 +584,7 @@ class TUIModuleFactoryTest {
                 output = io.getOutput();
             }
 
-            String expected = TUIApplicationModuleTest.lines(
+            String expected = ApplicationModuleTest.lines(
                     "[1] goto text module",
                     "Your choice: Hello, World!"
             );
@@ -597,32 +598,33 @@ class TUIModuleFactoryTest {
             String output;
 
             try (IOCapture io = new IOCapture("1")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .build();
 
-                TUIApplicationModule otherApp = new TUIApplicationModule.Builder("app1")
+                ModuleFactory.NumberedModuleSelector selector = new ModuleFactory.NumberedModuleSelector("list", app)
+                        .addModule("text");
+
+                ContainerModule.Builder content = new ContainerModule.Builder("home")
                         .addChildren(
-                                new TUITextModule.Builder("text", "Hello, World!"),
-                                new TUITextInputModule.Builder("input", "input: ")
+                                selector,
+                                ModuleFactory.terminate("terminate-app", app),
+                                new TextModule.Builder("text", "Hello, World!"),
+                                new TextInputModule.Builder("input", "input: ")
                         )
                         .enableAnsi(false)
-                        .setPrintStream(io.getPrintStream())
-                        .build();
+                        .setPrintStream(io.getPrintStream());
 
-                TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", otherApp)
-                        .addModule( "text");
-
-                app.setHome(original);
+                app.setHome(content);
                 app.run();
 
                 output = io.getOutput();
             }
 
-            String expected = TUIApplicationModuleTest.lines(
+            String expected = ApplicationModuleTest.lines(
                     "[1] text",
                     "Your choice: Hello, World!"
             );
@@ -636,18 +638,18 @@ class TUIModuleFactoryTest {
             String output;
 
             try (IOCapture io = new IOCapture("1")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .build();
 
-                TUITextModule.Builder text = new TUITextModule.Builder("text", "Hello, World!")
+                TextModule.Builder text = new TextModule.Builder("text", "Hello, World!")
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false);
 
-                TUIModuleFactory.NumberedModuleSelector original = new TUIModuleFactory.NumberedModuleSelector("list", app)
+                ModuleFactory.NumberedModuleSelector original = new ModuleFactory.NumberedModuleSelector("list", app)
                         .addModule(text);
 
                 app.setHome(original);
@@ -656,7 +658,7 @@ class TUIModuleFactoryTest {
                 output = io.getOutput();
             }
 
-            String expected = TUIApplicationModuleTest.lines(
+            String expected = ApplicationModuleTest.lines(
                     "[1] text",
                     "Your choice: Hello, World!"
             );
@@ -669,23 +671,23 @@ class TUIModuleFactoryTest {
             String output;
 
             try (IOCapture io = new IOCapture("1\n2\n3")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
-                TUITextModule.Builder text = new TUITextModule.Builder("text", "Hello, World!")
-                        .addChild(TUIModuleFactory.run("run-home", app, "home"))
+                TextModule.Builder text = new TextModule.Builder("text", "Hello, World!")
+                        .addChild(ModuleFactory.run("run-home", app, "home"))
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false);
 
-                TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                ContainerModule.Builder home = new ContainerModule.Builder("home")
                         .addChildren(
-                                new TUIModuleFactory.NumberedModuleSelector("list", app)
+                                new ModuleFactory.NumberedModuleSelector("list", app)
                                         .addModule(text)
                                         .addModule("restart", "home")
-                                        .addModule("exit", TUIModuleFactory.terminate("terminate-app", app))
+                                        .addModule("exit", ModuleFactory.terminate("terminate-app", app))
                         );
 
                 app.setHome(home);
@@ -694,7 +696,7 @@ class TUIModuleFactoryTest {
                 output = io.getOutput();
             }
 
-            String expected = TUIApplicationModuleTest.lines(
+            String expected = ApplicationModuleTest.lines(
                     "[1] text",
                     "[2] restart",
                     "[3] exit",
@@ -713,53 +715,53 @@ class TUIModuleFactoryTest {
 
         @Test
         void testShallowShallowStructuralEquals() {
-            TUIApplicationModule app1 = new TUIApplicationModule.Builder("app")
+            ApplicationModule app1 = new ApplicationModule.Builder("app")
                     .addChildren(
-                            new TUITextModule.Builder("text", "Hello, World!"),
-                            new TUITextInputModule.Builder("input", "input: ")
+                            new TextModule.Builder("text", "Hello, World!"),
+                            new TextInputModule.Builder("input", "input: ")
                     )
                     .build();
 
-            TUIApplicationModule app2 = new TUIApplicationModule.Builder("app")
+            ApplicationModule app2 = new ApplicationModule.Builder("app")
                     .addChildren(
-                            new TUITextModule.Builder("text", "Hello, World!"),
-                            new TUITextInputModule.Builder("input", "input: ")
+                            new TextModule.Builder("text", "Hello, World!"),
+                            new TextInputModule.Builder("input", "input: ")
                     )
                     .build();
 
-            TUIContainerModule.Builder module = new TUIContainerModule.Builder("module");
+            ContainerModule.Builder module = new ContainerModule.Builder("module");
 
-            TUIModuleFactory.NumberedModuleSelector list1 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+            ModuleFactory.NumberedModuleSelector list1 = new ModuleFactory.NumberedModuleSelector("list", app1)
                     .addModule("text")
                     .addModule(module)
                     .addModule("the module", module);
 
-            TUIModuleFactory.NumberedModuleSelector list2 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+            ModuleFactory.NumberedModuleSelector list2 = new ModuleFactory.NumberedModuleSelector("list", app1)
                     .addModule("text")
                     .addModule(module)
                     .addModule("the module", module);
 
-            TUIModuleFactory.NumberedModuleSelector list3 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+            ModuleFactory.NumberedModuleSelector list3 = new ModuleFactory.NumberedModuleSelector("list", app1)
                     .addModule("text")
                     .addModule(module)
                     .addModule("the module", module);
 
-            TUIModuleFactory.NumberedModuleSelector list4 = new TUIModuleFactory.NumberedModuleSelector("list", app2)
+            ModuleFactory.NumberedModuleSelector list4 = new ModuleFactory.NumberedModuleSelector("list", app2)
                     .addModule("text")
                     .addModule(module)
                     .addModule("the module", module);
 
-            TUIModuleFactory.NumberedModuleSelector list5 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+            ModuleFactory.NumberedModuleSelector list5 = new ModuleFactory.NumberedModuleSelector("list", app1)
                     .addModule("input")
                     .addModule(module)
                     .addModule("the module", module);
 
-            TUIModuleFactory.NumberedModuleSelector list6 = new TUIModuleFactory.NumberedModuleSelector("list", app1)
+            ModuleFactory.NumberedModuleSelector list6 = new ModuleFactory.NumberedModuleSelector("list", app1)
                     .addModule("text")
                     .addModule(module)
                     .addModule("other display text", module);
 
-            TUIModuleFactory.NumberedModuleSelector list7 = new TUIModuleFactory.NumberedModuleSelector("other name", app1)
+            ModuleFactory.NumberedModuleSelector list7 = new ModuleFactory.NumberedModuleSelector("other name", app1)
                     .addModule("text")
                     .addModule(module)
                     .addModule("the module", module);
@@ -783,11 +785,11 @@ class TUIModuleFactoryTest {
 
         @Test
         void testGetCopy() {
-            TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+            ModuleFactory.LineBuilder original = new ModuleFactory.LineBuilder("lines")
                     .addText("text1")
                     .addText("text2");
 
-            TUIModuleFactory.LineBuilder copy = original.getCopy();
+            ModuleFactory.LineBuilder copy = original.getCopy();
 
             assertTrue(copy.structuralEquals(original));
         }
@@ -797,8 +799,8 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
-                        .addText(new TUITextModule.Builder("text", "Hello, World!"))
+                ModuleFactory.LineBuilder original = new ModuleFactory.LineBuilder("lines")
+                        .addText(new TextModule.Builder("text", "Hello, World!"))
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false);
 
@@ -815,7 +817,7 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+                ModuleFactory.LineBuilder original = new ModuleFactory.LineBuilder("lines")
                         .addText("Hello, World!", ansi().bold())
                         .setPrintStream(io.getPrintStream());
 
@@ -832,7 +834,7 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+                ModuleFactory.LineBuilder original = new ModuleFactory.LineBuilder("lines")
                         .addText("Hello, World!")
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false);
@@ -850,15 +852,15 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                ApplicationModule app = new ApplicationModule.Builder("app")
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .setPrintStream(io.getPrintStream())
                         .build();
 
-                TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                ContainerModule.Builder home = new ContainerModule.Builder("home")
                         .addChildren(
-                                new TUIFunctionModule.Builder("five", () -> 5),
-                                new TUIModuleFactory.LineBuilder("display-five")
+                                new FunctionModule.Builder("five", () -> 5),
+                                new ModuleFactory.LineBuilder("display-five")
                                         .addText("Output: ")
                                         .addModuleOutput("five", ansi().bold())
                                         .newLine()
@@ -878,16 +880,16 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                ApplicationModule app = new ApplicationModule.Builder("app")
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
-                TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+                ContainerModule.Builder home = new ContainerModule.Builder("home")
                         .addChildren(
-                                new TUIFunctionModule.Builder("five", () -> 5),
-                                new TUIModuleFactory.LineBuilder("display-five")
+                                new FunctionModule.Builder("five", () -> 5),
+                                new ModuleFactory.LineBuilder("display-five")
                                         .addText("Output: ")
                                         .addModuleOutput("five")
                                         .newLine()
@@ -907,7 +909,7 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture()) {
-                TUIModuleFactory.LineBuilder original = new TUIModuleFactory.LineBuilder("lines")
+                ModuleFactory.LineBuilder original = new ModuleFactory.LineBuilder("lines")
                         .addText("Hello,")
                         .newLine()
                         .addText("World!")
@@ -925,28 +927,28 @@ class TUIModuleFactoryTest {
 
         @Test
         void testShallowStructuralStructuralEquals() {
-            TUIModuleFactory.LineBuilder lines1 = new TUIModuleFactory.LineBuilder("lines")
+            ModuleFactory.LineBuilder lines1 = new ModuleFactory.LineBuilder("lines")
                     .addText("text1")
                     .addText("text2");
 
-            TUIModuleFactory.LineBuilder lines2 = new TUIModuleFactory.LineBuilder("lines")
+            ModuleFactory.LineBuilder lines2 = new ModuleFactory.LineBuilder("lines")
                     .addText("text1")
                     .addText("text2");
 
-            TUIModuleFactory.LineBuilder lines3 = new TUIModuleFactory.LineBuilder("lines")
+            ModuleFactory.LineBuilder lines3 = new ModuleFactory.LineBuilder("lines")
                     .addText("text1")
                     .addText("text2");
 
-            TUIModuleFactory.LineBuilder lines4 = new TUIModuleFactory.LineBuilder("lines")
+            ModuleFactory.LineBuilder lines4 = new ModuleFactory.LineBuilder("lines")
                     .addText("text1_other")
                     .addText("text2");
 
-            TUIModuleFactory.LineBuilder lines5 = new TUIModuleFactory.LineBuilder("lines")
+            ModuleFactory.LineBuilder lines5 = new ModuleFactory.LineBuilder("lines")
                     .addText("text1")
                     .addText("text2")
                     .addText("text3");
 
-            TUIModuleFactory.LineBuilder lines6 = new TUIModuleFactory.LineBuilder("other")
+            ModuleFactory.LineBuilder lines6 = new ModuleFactory.LineBuilder("other")
                     .addText("text1")
                     .addText("text2");
 
@@ -967,7 +969,7 @@ class TUIModuleFactoryTest {
 
         @Test
         void testSetValidConfirm() {
-            TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("name", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt confirm = new ModuleFactory.ConfirmationPrompt("name", "Are you sure? ")
                     .setValidConfirm("1", "2", "3");
 
             assertEquals(Set.of("1", "2", "3"), confirm.getValidConfirm());
@@ -975,7 +977,7 @@ class TUIModuleFactoryTest {
 
         @Test
         void testSetValidDeny() {
-            TUIModuleFactory.ConfirmationPrompt deny = new TUIModuleFactory.ConfirmationPrompt("name", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt deny = new ModuleFactory.ConfirmationPrompt("name", "Are you sure? ")
                     .setValidConfirm("1", "2", "3");
 
             assertEquals(Set.of("1", "2", "3"), deny.getValidConfirm());
@@ -986,14 +988,14 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture("yes")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                ApplicationModule app = new ApplicationModule.Builder("app")
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .setPrintStream(io.getPrintStream())
                         .setScanner(io.getScanner())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                ModuleFactory.ConfirmationPrompt confirm = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                         .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
 
                 app.setHome(confirm);
@@ -1010,14 +1012,14 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture("yes\nyeah")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                ApplicationModule app = new ApplicationModule.Builder("app")
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .setPrintStream(io.getPrintStream())
                         .setScanner(io.getScanner())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                ModuleFactory.ConfirmationPrompt confirm = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                         .setValidConfirm("yeah")
                         .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
 
@@ -1035,14 +1037,14 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture("yes\nyeah")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                ApplicationModule app = new ApplicationModule.Builder("app")
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .setPrintStream(io.getPrintStream())
                         .setScanner(io.getScanner())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                ModuleFactory.ConfirmationPrompt confirm = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                         .setValidConfirm("yeah")
                         .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
 
@@ -1060,14 +1062,14 @@ class TUIModuleFactoryTest {
             String output;
 
             try(IOCapture io = new IOCapture("yes\nyeah")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                ApplicationModule app = new ApplicationModule.Builder("app")
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .setPrintStream(io.getPrintStream())
                         .setScanner(io.getScanner())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                ModuleFactory.ConfirmationPrompt confirm = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                         .setValidConfirm("yeah")
                         .addOnConfirm("on-confirm", () -> "confirmed");
 
@@ -1087,14 +1089,14 @@ class TUIModuleFactoryTest {
             String confirmed2;
 
             try(IOCapture io = new IOCapture("yes\nyeah")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                ApplicationModule app = new ApplicationModule.Builder("app")
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .setPrintStream(io.getPrintStream())
                         .setScanner(io.getScanner())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                ModuleFactory.ConfirmationPrompt confirm = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                         .setValidConfirm("yeah")
                         .addOnConfirm("on-confirm-1", () -> "confirmed")
                         .addOnConfirm(() -> io.getPrintStream().print("confirmed"))
@@ -1122,14 +1124,14 @@ class TUIModuleFactoryTest {
             String denied2;
 
             try(IOCapture io = new IOCapture("no\nnah")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                        .setOnExit(TUIModuleFactory.empty("empty"))
+                ApplicationModule app = new ApplicationModule.Builder("app")
+                        .setOnExit(ModuleFactory.empty("empty"))
                         .setPrintStream(io.getPrintStream())
                         .setScanner(io.getScanner())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+                ModuleFactory.ConfirmationPrompt confirm = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                         .setValidDeny("nah")
                         .addOnDeny("on-deny-1", () -> "denied")
                         .addOnDeny(() -> io.getPrintStream().print("denied"))
@@ -1152,7 +1154,7 @@ class TUIModuleFactoryTest {
 
         @Test
         void testSetName() {
-            TUIModuleFactory.ConfirmationPrompt confirm = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt confirm = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setName("new-confirm-name");
 
             assertAll(
@@ -1165,55 +1167,55 @@ class TUIModuleFactoryTest {
 
         @Test
         void testShallowShallowStructuralEquals() {
-            TUIModuleFactory.ConfirmationPrompt prompt1 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt prompt1 = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm(() -> System.out.println("text"))
                     .addOnDeny(() -> System.out.println("text"));
 
-            TUIModuleFactory.ConfirmationPrompt prompt2 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt prompt2 = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm(() -> System.out.println("text"))
                     .addOnDeny(() -> System.out.println("text"));
 
-            TUIModuleFactory.ConfirmationPrompt prompt3 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt prompt3 = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm(() -> System.out.println("text"))
                     .addOnDeny(() -> System.out.println("text"));
 
-            TUIModuleFactory.ConfirmationPrompt prompt4 = new TUIModuleFactory.ConfirmationPrompt("confirm", "other text")
+            ModuleFactory.ConfirmationPrompt prompt4 = new ModuleFactory.ConfirmationPrompt("confirm", "other text")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm(() -> System.out.println("text"))
                     .addOnDeny(() -> System.out.println("text"));
 
-            TUIModuleFactory.ConfirmationPrompt prompt5 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt prompt5 = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps", "new valid confirm")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm(() -> System.out.println("text"))
                     .addOnDeny(() -> System.out.println("text"));
 
-            TUIModuleFactory.ConfirmationPrompt prompt6 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt prompt6 = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not", "new valid deny")
                     .addOnConfirm(() -> System.out.println("text"))
                     .addOnDeny(() -> System.out.println("text"));
 
-            TUIModuleFactory.ConfirmationPrompt prompt7 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt prompt7 = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm("different-on-confirm", () -> 0)
                     .addOnDeny(() -> System.out.println("text"));
 
-            TUIModuleFactory.ConfirmationPrompt prompt8 = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt prompt8 = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm(() -> System.out.println("text"))
                     .addOnDeny("different-on-deny", () -> 0);
 
-            TUIModuleFactory.ConfirmationPrompt prompt9 = new TUIModuleFactory.ConfirmationPrompt("other-name", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt prompt9 = new ModuleFactory.ConfirmationPrompt("other-name", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm(() -> System.out.println("text"))
@@ -1236,13 +1238,13 @@ class TUIModuleFactoryTest {
 
         @Test
         void testGetCopy() {
-            TUIModuleFactory.ConfirmationPrompt original = new TUIModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
+            ModuleFactory.ConfirmationPrompt original = new ModuleFactory.ConfirmationPrompt("confirm", "Are you sure? ")
                     .setValidConfirm("mhm", "perhaps")
                     .setValidDeny("not sure", "probably not")
                     .addOnConfirm(() -> System.out.println("text"))
                     .addOnDeny(() -> System.out.println("text"));
 
-            TUIModuleFactory.ConfirmationPrompt copy = original.getCopy();
+            ModuleFactory.ConfirmationPrompt copy = original.getCopy();
 
             assertTrue(original.structuralEquals(copy));
         }
@@ -1256,13 +1258,13 @@ class TUIModuleFactoryTest {
             Supplier<char[]> supplyCorrect = () -> correct;
 
             try(IOCapture io = new IOCapture("my-password")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.PasswordInput myInput = new TUIModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
+                ModuleFactory.PasswordInput myInput = new ModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
                         .storeInputAndMatch();
 
                 app.setHome(myInput);
@@ -1294,13 +1296,13 @@ class TUIModuleFactoryTest {
             Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
             try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.PasswordInput myInput = new TUIModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
+                ModuleFactory.PasswordInput myInput = new ModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
                         .storeInput();
 
                 app.setHome(myInput);
@@ -1329,13 +1331,13 @@ class TUIModuleFactoryTest {
             Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
             try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password\nwrong-password")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.PasswordInput myInput = new TUIModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
+                ModuleFactory.PasswordInput myInput = new ModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
                         .addOnValidPassword("on-valid", () -> 5);
 
                 app.setHome(myInput);
@@ -1366,14 +1368,14 @@ class TUIModuleFactoryTest {
             Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
             try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password\nwrong-password")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
                 Runnable addOne = () -> app.forceUpdateInput("on-valid", app.getInputOrDefault("on-valid", Integer.class, 0) + 1);
-                TUIModuleFactory.PasswordInput myInput = new TUIModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
+                ModuleFactory.PasswordInput myInput = new ModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
                         .addOnValidPassword(addOne)
                         .addOnValidPassword(addOne);
 
@@ -1405,13 +1407,13 @@ class TUIModuleFactoryTest {
             Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
             try(IOCapture io = new IOCapture("correct-password\nwrong-password\nwrong-password\ncorrect-password")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
-                TUIModuleFactory.PasswordInput myInput = new TUIModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
+                ModuleFactory.PasswordInput myInput = new ModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
                         .addOnInvalidPassword("on-invalid", () -> 5);
 
                 app.setHome(myInput);
@@ -1442,14 +1444,14 @@ class TUIModuleFactoryTest {
             Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
             try(IOCapture io = new IOCapture("correct-password\nwrong-password\nwrong-password\ncorrect-password")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
                 Runnable addOne = () -> app.forceUpdateInput("on-invalid", app.getInputOrDefault("on-invalid", Integer.class, 0) + 1);
-                TUIModuleFactory.PasswordInput myInput = new TUIModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
+                ModuleFactory.PasswordInput myInput = new ModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
                         .addOnInvalidPassword(addOne)
                         .addOnInvalidPassword(addOne);
 
@@ -1481,14 +1483,14 @@ class TUIModuleFactoryTest {
             Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
             try(IOCapture io = new IOCapture("correct-password\ncorrect-password\nwrong-password\nwrong-password\ncorrect-password")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
                         .build();
 
                 Runnable addOne = () -> app.forceUpdateInput("output", app.getInputOrDefault("output", Integer.class, 0) + 1);
-                TUIModuleFactory.PasswordInput myInput = new TUIModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
+                ModuleFactory.PasswordInput myInput = new ModuleFactory.PasswordInput("pw-input", "password: ", supplyCorrect)
                         .addOnInvalidPassword(addOne)
                         .addOnValidPassword(addOne)
                         .addOnValidPassword(addOne)
@@ -1525,7 +1527,7 @@ class TUIModuleFactoryTest {
 
         @Test
         void testSetName() {
-            TUIModuleFactory.PasswordInput input = new TUIModuleFactory.PasswordInput("name-1", "text", null);
+            ModuleFactory.PasswordInput input = new ModuleFactory.PasswordInput("name-1", "text", null);
             input.setName("name-2");
 
             assertAll(
@@ -1541,14 +1543,14 @@ class TUIModuleFactoryTest {
             Supplier<char[]> supplyCorrect = () -> correct;
 
             try(IOCapture io = new IOCapture("input1\ninput2")) {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+                ApplicationModule app = new ApplicationModule.Builder("app")
                         .setScanner(io.getScanner())
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false)
-                        .setOnExit(TUIModuleFactory.empty("on-exit"))
+                        .setOnExit(ModuleFactory.empty("on-exit"))
                         .build();
 
-                TUIModuleFactory.PasswordInput myInput = new TUIModuleFactory.PasswordInput("pw-input", "text-1", supplyCorrect)
+                ModuleFactory.PasswordInput myInput = new ModuleFactory.PasswordInput("pw-input", "text-1", supplyCorrect)
                         .storeInputAndMatch();
 
                 app.setHome(myInput);
@@ -1571,53 +1573,53 @@ class TUIModuleFactoryTest {
             Supplier<char[]> first = () -> pw;
             Supplier<char[]> second = () -> pw;
 
-            TUIModuleFactory.PasswordInput input1 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
+            ModuleFactory.PasswordInput input1 = new ModuleFactory.PasswordInput("pw-input", "password: ", first)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> {})
                     .storeInputAndMatch();
 
-            TUIModuleFactory.PasswordInput input2 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
+            ModuleFactory.PasswordInput input2 = new ModuleFactory.PasswordInput("pw-input", "password: ", first)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> {})
                     .storeInputAndMatch();
 
 
-            TUIModuleFactory.PasswordInput input3 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
+            ModuleFactory.PasswordInput input3 = new ModuleFactory.PasswordInput("pw-input", "password: ", first)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> {})
                     .storeInputAndMatch();
 
-            TUIModuleFactory.PasswordInput input4 = new TUIModuleFactory.PasswordInput("pw-input", "other text: ", first)
+            ModuleFactory.PasswordInput input4 = new ModuleFactory.PasswordInput("pw-input", "other text: ", first)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> {})
                     .storeInputAndMatch();
 
-            TUIModuleFactory.PasswordInput input5 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
+            ModuleFactory.PasswordInput input5 = new ModuleFactory.PasswordInput("pw-input", "password: ", first)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> {})
                     .storeInput();
 
-            TUIModuleFactory.PasswordInput input6 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
+            ModuleFactory.PasswordInput input6 = new ModuleFactory.PasswordInput("pw-input", "password: ", first)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> {})
                     .storeIfMatched();
 
-            TUIModuleFactory.PasswordInput input7 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", second)
+            ModuleFactory.PasswordInput input7 = new ModuleFactory.PasswordInput("pw-input", "password: ", second)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> {})
                     .storeInputAndMatch();
 
-            TUIModuleFactory.PasswordInput input8 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
+            ModuleFactory.PasswordInput input8 = new ModuleFactory.PasswordInput("pw-input", "password: ", first)
                     .addOnInvalidPassword(() -> System.out.println("different"))
                     .addOnValidPassword(() -> {})
                     .storeInputAndMatch();
 
-            TUIModuleFactory.PasswordInput input9 = new TUIModuleFactory.PasswordInput("pw-input", "password: ", first)
+            ModuleFactory.PasswordInput input9 = new ModuleFactory.PasswordInput("pw-input", "password: ", first)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> System.out.println("other"))
                     .storeInputAndMatch();
 
-            TUIModuleFactory.PasswordInput input10 = new TUIModuleFactory.PasswordInput("other-name", "password: ", first)
+            ModuleFactory.PasswordInput input10 = new ModuleFactory.PasswordInput("other-name", "password: ", first)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> System.out.println("other"))
                     .storeInputAndMatch();
@@ -1644,12 +1646,12 @@ class TUIModuleFactoryTest {
             char[] pw = {'a'};
             Supplier<char[]> sup = () -> pw;
 
-            TUIModuleFactory.PasswordInput original = new TUIModuleFactory.PasswordInput("pw-input", "password: ", sup)
+            ModuleFactory.PasswordInput original = new ModuleFactory.PasswordInput("pw-input", "password: ", sup)
                     .addOnInvalidPassword(() -> {})
                     .addOnValidPassword(() -> {})
                     .storeInputAndMatch();
 
-            TUIModuleFactory.PasswordInput copy = original.getCopy();
+            ModuleFactory.PasswordInput copy = original.getCopy();
 
             assertTrue(original.structuralEquals(copy));
         }

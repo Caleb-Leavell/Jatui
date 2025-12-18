@@ -15,13 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import java.util.Objects;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
-public class TUITextModule extends TUIModule {
+public class TextModule extends TUIModule {
     private final String text;
     private final boolean printNewLine;
     private final OutputType outputType;
@@ -32,7 +32,7 @@ public class TUITextModule extends TUIModule {
     }
 
     @Override
-    public void run() {
+    public void shallowRun(RunFrame frame) {
         logger.info("Running TUITextModule {}", getName());
         if(getAnsiEnabled()) {
             logger.debug("printing ansi for {}", getName());
@@ -68,7 +68,7 @@ public class TUITextModule extends TUIModule {
             getPrintStream().println();
         }
 
-        super.run();
+        super.shallowRun(frame);
     }
 
     String getText() {
@@ -101,7 +101,7 @@ public class TUITextModule extends TUIModule {
      * This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
      *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
      */
-    public boolean equals(TUITextModule other) {
+    public boolean equals(TextModule other) {
         if(this == other) return true;
         if(other == null) return false;
 
@@ -111,7 +111,7 @@ public class TUITextModule extends TUIModule {
                 && super.structuralEquals(other);
     }
 
-    public TUITextModule(Builder builder) {
+    public TextModule(Builder builder) {
         super(builder);
         this.text = builder.text;
         this.printNewLine = builder.printNewLine;
@@ -208,7 +208,7 @@ public class TUITextModule extends TUIModule {
          * @implNote
          * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
          */
-        public boolean shallowStructuralEquals(TUITextModule.Builder first, TUITextModule.Builder second) {
+        public boolean shallowStructuralEquals(TextModule.Builder first, TextModule.Builder second) {
             if(first == second) return true;
             if(first == null || second == null) return false;
 
@@ -220,9 +220,9 @@ public class TUITextModule extends TUIModule {
 
 
         @Override
-        public TUITextModule build() {
+        public TextModule build() {
             logger.trace("Building TUITextModule {}", getName());
-            return new TUITextModule(self());
+            return new TextModule(self());
         }
     }
 }

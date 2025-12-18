@@ -15,33 +15,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class TUITextInputModule extends TUIModule {
+public class TextInputModule extends TUIModule {
     private String input;
     private final TUIModule.Builder<?> displayText;
 
     public final static String INVALID = "Error: input was invalid";
 
     @Override
-    public void run() {
+    public void shallowRun(RunFrame frame) {
         logger.info("Running TUITextInputModule {}", getName());
         displayText.build().run();
         logger.info("collecting input...");
         input = getScanner().nextLine();
         logger.info("input collected: \"{}\"", input);
 
-        TUIApplicationModule app = getApplication();
+        ApplicationModule app = getApplication();
         if(app != null) app.updateInput(this, input);
 
-        super.run();
+        super.shallowRun(frame);
     }
 
     public String getInput() {
@@ -70,14 +67,14 @@ public class TUITextInputModule extends TUIModule {
      * This method is merely for checking structural equality, which is generally only necessary for manual testing. Also, no overloaded equals methods
      * exist since {@code displayText} and {@code handlers} are children of the builder and thus checked automatically.
      */
-    public boolean structuralEquals(TUITextInputModule other) {
+    public boolean structuralEquals(TextInputModule other) {
         if(this == other) return true;
         if(other == null) return false;
 
         return TUIModule.Builder.structuralEquals(displayText, other.displayText) && super.structuralEquals(other);
     }
 
-    public TUITextInputModule(Builder builder) {
+    public TextInputModule(Builder builder) {
         super(builder);
         displayText = builder.displayText;
     }
@@ -85,12 +82,12 @@ public class TUITextInputModule extends TUIModule {
     public static class Builder extends TUIModule.Builder<Builder> {
 
         protected InputHandlers handlers;
-        protected TUITextModule.Builder displayText;
+        protected TextModule.Builder displayText;
 
         public Builder(String name, String displayText) {
             super(Builder.class, name);
 
-            this.displayText = new TUITextModule.Builder(name+"-display", displayText).printNewLine(false);
+            this.displayText = new TextModule.Builder(name+"-display", displayText).printNewLine(false);
             this.children.add(this.displayText);
 
             handlers = new InputHandlers(this.name + "-handlers", this);
@@ -120,7 +117,7 @@ public class TUITextInputModule extends TUIModule {
             return this;
         }
 
-        public TUITextModule.Builder getDisplayText() {
+        public TextModule.Builder getDisplayText() {
             return displayText;
         }
 
@@ -132,7 +129,7 @@ public class TUITextInputModule extends TUIModule {
          * @param handler The Function Module builder to execute after input is collected
          * @return self
          */
-        public Builder addHandler(TUIFunctionModule.Builder handler) {
+        public Builder addHandler(FunctionModule.Builder handler) {
             logger.trace("adding handler via TUIFunctionModule \"{}\"", handler.getName());
             handlers.addHandler(handler);
             return self();
@@ -153,7 +150,7 @@ public class TUITextInputModule extends TUIModule {
         public Builder addSafeHandler(String name, Function<String, ?> logic, String exceptionMessage) {
             handlers.addSafeHandler(name, logic, o -> {
                 logger.trace("adding safe handler \"{}\" via inputted logic and exception message", name);
-                TUIApplicationModule app = this.getApplication();
+                ApplicationModule app = this.getApplication();
                 if(app == null) return;
                 this.getPrintStream().println(exceptionMessage);
                 app.terminateChild(this.name);
@@ -170,7 +167,7 @@ public class TUITextInputModule extends TUIModule {
         }
 
         @Override
-        public TUITextInputModule build() {
+        public TextInputModule build() {
             logger.trace("Building TUITextInputModule {}", getName());
 
             // remove the display text from the children since we need it to run before the parent module
@@ -182,7 +179,7 @@ public class TUITextInputModule extends TUIModule {
             this.children.remove(handlers);
             this.children.add(handlers);
             this.setApplication(application);
-            TUITextInputModule output = new TUITextInputModule(self());
+            TextInputModule output = new TextInputModule(self());
             // re-add the child after constructing the module so that it can be edited if needed
             this.children.addFirst(displayText);
             return output;
@@ -229,7 +226,7 @@ public class TUITextInputModule extends TUIModule {
          * @param handler The Function Module builder to execute after input is collected
          * @return self
          */
-        public InputHandlers addHandler(TUIFunctionModule.Builder handler) {
+        public InputHandlers addHandler(FunctionModule.Builder handler) {
             main.addChild(new InputHandler(this.name + "-" + num, inputModule).setHandler(handler));
             num ++;
             return self();
@@ -291,7 +288,7 @@ public class TUITextInputModule extends TUIModule {
         protected Builder inputModule;
 
         protected HandlerType handlerType;
-        private TUIFunctionModule.Builder module;
+        private FunctionModule.Builder module;
         private Function<String, ?> logic;
         private Consumer<String> exceptionHandler;
         private String moduleName;
@@ -334,7 +331,7 @@ public class TUITextInputModule extends TUIModule {
             this.moduleName = other.moduleName;
         }
 
-        protected TUIFunctionModule.Builder getModule() {
+        protected FunctionModule.Builder getModule() {
             return module;
         }
 
@@ -352,7 +349,7 @@ public class TUITextInputModule extends TUIModule {
 
         // note that handler does not get added as a child until this module is built
         // so property updates won't be propagated to it from this module
-        public InputHandler setHandler(TUIFunctionModule.Builder handler) {
+        public InputHandler setHandler(FunctionModule.Builder handler) {
             this.handlerType = HandlerType.MODULE;
             this.module = handler;
             return self();
@@ -381,15 +378,15 @@ public class TUITextInputModule extends TUIModule {
          * @param handler The Function Module builder to execute after input is collected
          * @return self
          */
-        private InputHandler addHandler(TUIFunctionModule.Builder handler) {
+        private InputHandler addHandler(FunctionModule.Builder handler) {
             main.addChild(handler);
             checkForHandlerDuplicates(handler.getName(), handler);
             return self();
         }
 
         private <T> InputHandler addHandler(String name, Function<String, T> logic) {
-            TUIFunctionModule.Builder handler = new TUIFunctionModule.Builder(name, () -> {
-                TUIApplicationModule app = this.getApplication();
+            FunctionModule.Builder handler = new FunctionModule.Builder(name, () -> {
+                ApplicationModule app = this.getApplication();
                 if(app == null) {
                     logger.warn("tried to run logic for handler \"{}\" but app was null", name);
                     return null;
@@ -404,8 +401,8 @@ public class TUITextInputModule extends TUIModule {
         }
 
         private <T> InputHandler addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
-            TUIFunctionModule.Builder handler = new TUIFunctionModule.Builder(name, () -> {
-                TUIApplicationModule app = this.getApplication();
+            FunctionModule.Builder handler = new FunctionModule.Builder(name, () -> {
+                ApplicationModule app = this.getApplication();
                 if(app == null) {
                     logger.warn("tried to run logic for safe handler \"{}\" but app was null", name);
                     return null;
@@ -474,7 +471,7 @@ public class TUITextInputModule extends TUIModule {
                     super.shallowStructuralEquals(first, second);
         }
 
-        public TUIContainerModule build() {
+        public ContainerModule build() {
             if(handlerType == HandlerType.HANDLER || handlerType == HandlerType.SAFE_HANDLER) {
                 for(TUIModule.Builder<?> child : main.children) {
                     child.setName(""); //prevent duplicate name warning

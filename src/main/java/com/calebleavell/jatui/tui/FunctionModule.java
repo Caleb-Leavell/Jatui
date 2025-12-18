@@ -15,12 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
-import java.util.Set;
 import java.util.function.Supplier;
 
-public class TUIFunctionModule extends TUIModule {
+public class FunctionModule extends TUIModule {
 
     /**
      * The logic that this module will execute when it is run.
@@ -34,7 +33,7 @@ public class TUIFunctionModule extends TUIModule {
      *  provided by {@link TUIModule#run}
      */
     @Override
-    public void run() {
+    public void shallowRun(RunFrame frame) {
         logger.info("Running TUIFunctionModule \"{}\"", getName());
         Object output = function.get();
         if(getApplication() != null)
@@ -44,7 +43,7 @@ public class TUIFunctionModule extends TUIModule {
         else
             logger.debug("No output produced by TUIFunctionModule \"{}\" and no application exists", getName());
 
-        super.run();
+        super.shallowRun(frame);
     }
 
     /**
@@ -57,16 +56,16 @@ public class TUIFunctionModule extends TUIModule {
 
 
     /**
-     * Builds a {@link TUIFunctionModule} based on the state of {@code builder}
-     * @param builder The {@link TUIFunctionModule.Builder} that is building the module.
+     * Builds a {@link FunctionModule} based on the state of {@code builder}
+     * @param builder The {@link FunctionModule.Builder} that is building the module.
      */
-    public TUIFunctionModule(Builder builder) {
+    public FunctionModule(Builder builder) {
         super(builder);
         this.function = builder.function;
     }
 
     /**
-     * Builder for {@link TUIFunctionModule}.
+     * Builder for {@link FunctionModule}.
      * <br><br>
      * Required fields: {@code name}, {@code function}
      */
@@ -168,13 +167,13 @@ public class TUIFunctionModule extends TUIModule {
         }
 
         /**
-         * Builds a new {@link TUIFunctionModule} based on this builder.
-         * @return The built {@link TUIFunctionModule}
+         * Builds a new {@link FunctionModule} based on this builder.
+         * @return The built {@link FunctionModule}
          */
         @Override
-        public TUIFunctionModule build() {
+        public FunctionModule build() {
             logger.trace("Building TUIFunctionModule \"{}\"", getName());
-            return new TUIFunctionModule(self());
+            return new FunctionModule(self());
         }
     }
 

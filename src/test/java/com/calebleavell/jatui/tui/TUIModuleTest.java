@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import com.calebleavell.jatui.IOCapture;
 
@@ -40,31 +40,25 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class TUIModuleTest {
 
-    public static TUIFunctionModule.Builder checkRunning(String name, TUIModule parent) {
-        TUIFunctionModule.Builder checkRunning = new TUIFunctionModule.Builder(name, () -> {});
-        checkRunning.setFunction(() -> parent.getCurrentRunningBranch().getLast().structuralEquals(checkRunning.build()));
+    public static FunctionModule.Builder checkRunning(String name, TUIModule parent) {
+        FunctionModule.Builder checkRunning = new FunctionModule.Builder(name, () -> {});
+        checkRunning.setFunction(() -> {
+            return parent.getCurrentRunningBranch().getLast().structuralEquals(checkRunning.build());
+        });
         return checkRunning;
     }
 
-    public static TUIFunctionModule.Builder checkShallowRunning (String name, TUIModule parent) {
-        TUIFunctionModule.Builder checkRunning = new TUIFunctionModule.Builder(name, () -> {});
+    public static FunctionModule.Builder checkShallowRunning (String name, TUIModule parent) {
+        FunctionModule.Builder checkRunning = new FunctionModule.Builder(name, () -> {});
         checkRunning.setFunction(() -> parent.getCurrentRunningChild().structuralEquals(checkRunning.build()));
         return checkRunning;
     }
 
     @Test
-    void testRun_termination() {
-        TUIContainerModule test = new TUIContainerModule.Builder("test").build();
-        test.terminated = true;
-        test.run();
-        assertFalse(test.terminated);
-    }
-
-    @Test
     void testRun_currentRunningChild() {
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
                         checkRunning("check-running-1", testApp),
                         checkRunning("check-running-2", testApp)
@@ -82,22 +76,20 @@ class TUIModuleTest {
 
     @Test
     void testRunModuleAsChild() {
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
 
-        TUIFunctionModule.Builder checkRunning = checkRunning("check-running-2", testApp);
+        FunctionModule.Builder checkRunning = checkRunning("check-running-2", testApp);
 
-        TUIApplicationModule otherApp = new TUIApplicationModule.Builder("other-app")
+        ApplicationModule otherApp = new ApplicationModule.Builder("other-app")
                 .setHome(checkRunning)
                 .build();
 
-
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
                         checkRunning("check-running-1", testApp),
-                        new TUIFunctionModule.Builder("run-other", () -> testApp.runModuleAsChild(checkRunning)),
+                        new FunctionModule.Builder("run-other", () -> testApp.runModuleAsChild(checkRunning)),
                         checkRunning("check-running-3", testApp)
                 );
-
 
         testApp.setHome(home);
         testApp.run();
@@ -112,7 +104,7 @@ class TUIModuleTest {
 
     @Test
     void getName() {
-        TUIContainerModule test = new TUIContainerModule.Builder("test").build();
+        ContainerModule test = new ContainerModule.Builder("test").build();
         assertEquals("test", test.getName());
     }
 
@@ -120,11 +112,11 @@ class TUIModuleTest {
     void getChildren() {
         List<TUIModule.Builder<?>> children = new ArrayList<>(
                 List.of(
-                        new TUIContainerModule.Builder("one"),
-                        new TUIContainerModule.Builder("two"),
-                        new TUIContainerModule.Builder("three")));
+                        new ContainerModule.Builder("one"),
+                        new ContainerModule.Builder("two"),
+                        new ContainerModule.Builder("three")));
 
-        TUIContainerModule parent = new TUIContainerModule.Builder("parent")
+        ContainerModule parent = new ContainerModule.Builder("parent")
                 .addChildren(children)
                 .build();
 
@@ -133,24 +125,24 @@ class TUIModuleTest {
 
     @Test
     void testGetChild() {
-        TUIContainerModule.Builder one_2 = new TUIContainerModule.Builder("one-2");
-        TUIContainerModule.Builder three_1_1 = new TUIContainerModule.Builder("three-1-1");
+        ContainerModule.Builder one_2 = new ContainerModule.Builder("one-2");
+        ContainerModule.Builder three_1_1 = new ContainerModule.Builder("three-1-1");
 
         List<TUIModule.Builder<?>> children = new ArrayList<>(
                 List.of(
-                        new TUIContainerModule.Builder("one")
+                        new ContainerModule.Builder("one")
                                 .addChildren(
-                                        new TUIContainerModule.Builder("one-1"),
+                                        new ContainerModule.Builder("one-1"),
                                         one_2
                                 ),
-                        new TUIContainerModule.Builder("two"),
-                        new TUIContainerModule.Builder("three")
+                        new ContainerModule.Builder("two"),
+                        new ContainerModule.Builder("three")
                                 .addChild(
-                                        new TUIContainerModule.Builder("three-1")
+                                        new ContainerModule.Builder("three-1")
                                                 .addChild(three_1_1)
                                 )));
 
-        TUIContainerModule parent = new TUIContainerModule.Builder("parent")
+        ContainerModule parent = new ContainerModule.Builder("parent")
                 .addChildren(children)
                 .build();
 
@@ -164,46 +156,46 @@ class TUIModuleTest {
 
     @Test
     void testGetChild_with_class() {
-        TUIContainerModule.Builder one_2 = new TUIContainerModule.Builder("one-2");
-        TUITextModule.Builder three_1_1 = new TUITextModule.Builder("three-1-1", "hello!");
+        ContainerModule.Builder one_2 = new ContainerModule.Builder("one-2");
+        TextModule.Builder three_1_1 = new TextModule.Builder("three-1-1", "hello!");
 
         List<TUIModule.Builder<?>> children = new ArrayList<>(
                 List.of(
-                        new TUIContainerModule.Builder("one")
+                        new ContainerModule.Builder("one")
                                 .addChildren(
-                                        new TUIContainerModule.Builder("one-1"),
+                                        new ContainerModule.Builder("one-1"),
                                         one_2
                                 ),
-                        new TUIContainerModule.Builder("two"),
-                        new TUIContainerModule.Builder("three")
+                        new ContainerModule.Builder("two"),
+                        new ContainerModule.Builder("three")
                                 .addChild(
-                                        new TUIContainerModule.Builder("three-1")
+                                        new ContainerModule.Builder("three-1")
                                                 .addChild(three_1_1)
                                 )));
 
-        TUIContainerModule parent = new TUIContainerModule.Builder("parent")
+        ContainerModule parent = new ContainerModule.Builder("parent")
                 .addChildren(children)
                 .build();
 
         assertAll(
-                () -> assertEquals(children.getFirst(), parent.getChild("one", TUIContainerModule.Builder.class)),
-                () -> assertEquals( one_2, parent.getChild("one-2", TUIContainerModule.Builder.class)),
-                () -> assertEquals(three_1_1, parent.getChild("three-1-1", TUITextModule.Builder.class)),
-                () -> assertNull(parent.getChild("three-1-1", TUIContainerModule.Builder.class)),
+                () -> assertEquals(children.getFirst(), parent.getChild("one", ContainerModule.Builder.class)),
+                () -> assertEquals( one_2, parent.getChild("one-2", ContainerModule.Builder.class)),
+                () -> assertEquals(three_1_1, parent.getChild("three-1-1", TextModule.Builder.class)),
+                () -> assertNull(parent.getChild("three-1-1", ContainerModule.Builder.class)),
                 () -> assertNull(parent.getChild("other")),
-                () -> assertNull(parent.getChild("other", TUIContainerModule.Builder.class))
+                () -> assertNull(parent.getChild("other", ContainerModule.Builder.class))
         );
     }
 
     @Test
     void testTerminate() {
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
-                        new TUIFunctionModule.Builder("is-run-1", () -> true),
-                        new TUIFunctionModule.Builder("terminate", testApp::terminate),
-                        new TUIFunctionModule.Builder("is-run-2", () -> true)
+                        new FunctionModule.Builder("is-run-1", () -> true),
+                        new FunctionModule.Builder("terminate", testApp::terminate),
+                        new FunctionModule.Builder("is-run-2", () -> true)
                 );
 
         testApp.setHome(home);
@@ -218,17 +210,17 @@ class TUIModuleTest {
 
     @Test
     void testTerminate_nested() {
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
-                        new TUIFunctionModule.Builder("is-run-1", () -> true),
-                        new TUIContainerModule.Builder("container")
+                        new FunctionModule.Builder("is-run-1", () -> true),
+                        new ContainerModule.Builder("container")
                                 .addChildren(
-                                        new TUIFunctionModule.Builder("terminate", testApp::terminate),
-                                        new TUIFunctionModule.Builder("is-run-2", () -> true)
+                                        new FunctionModule.Builder("terminate", testApp::terminate),
+                                        new FunctionModule.Builder("is-run-2", () -> true)
                                 ),
-                        new TUIFunctionModule.Builder("is-run-3", () -> true)
+                        new FunctionModule.Builder("is-run-3", () -> true)
                 );
 
 
@@ -245,17 +237,17 @@ class TUIModuleTest {
 
     @Test
     void testTerminateChild() {
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
-                        new TUIFunctionModule.Builder("is-run-1", () -> true),
-                        new TUIContainerModule.Builder("container")
+                        new FunctionModule.Builder("is-run-1", () -> true),
+                        new ContainerModule.Builder("container")
                                 .addChildren(
-                                        new TUIFunctionModule.Builder("terminate", () -> testApp.terminateChild("container")),
-                                        new TUIFunctionModule.Builder("is-run-2", () -> true)
+                                        new FunctionModule.Builder("terminate", () -> testApp.terminateChild("container")),
+                                        new FunctionModule.Builder("is-run-2", () -> true)
                                 ),
-                        new TUIFunctionModule.Builder("is-run-3", () -> true)
+                        new FunctionModule.Builder("is-run-3", () -> true)
                 );
 
 
@@ -272,17 +264,17 @@ class TUIModuleTest {
 
     @Test
     void testRestart() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
 
         int[] count = {0, 0};
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
-                        new TUIFunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
-                        new TUIFunctionModule.Builder("restart", () -> {
+                        new FunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
+                        new FunctionModule.Builder("restart", () -> {
                             if(count[0] == 1) app.restart();
                         }),
-                        new TUIFunctionModule.Builder("count-2", () -> count[1] = count[1] + 1)
+                        new FunctionModule.Builder("count-2", () -> count[1] = count[1] + 1)
                 );
 
         app.setHome(home);
@@ -296,22 +288,22 @@ class TUIModuleTest {
 
     @Test
     void testRestartNested() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
 
         int[] count = {0, 0, 0, 0};
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
-                        new TUIFunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
-                        new TUIContainerModule.Builder("container")
+                        new FunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
+                        new ContainerModule.Builder("container")
                                 .addChildren(
-                                        new TUIFunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
-                                        new TUIFunctionModule.Builder("restart", () -> {
+                                        new FunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
+                                        new FunctionModule.Builder("restart", () -> {
                                             if(count[0] == 1) app.restart();
                                         }),
-                                        new TUIFunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
+                                        new FunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
                                 ),
-                        new TUIFunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
+                        new FunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
                 );
 
         app.setHome(home);
@@ -327,22 +319,22 @@ class TUIModuleTest {
 
     @Test
     void testRestartMultipleTimes() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
 
         int[] count = {0, 0, 0, 0};
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
-                        new TUIFunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
-                        new TUIContainerModule.Builder("container")
+                        new FunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
+                        new ContainerModule.Builder("container")
                                 .addChildren(
-                                        new TUIFunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
-                                        new TUIFunctionModule.Builder("restart", () -> {
+                                        new FunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
+                                        new FunctionModule.Builder("restart", () -> {
                                             if(count[0] < 5) app.restart();
                                         }),
-                                        new TUIFunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
+                                        new FunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
                                 ),
-                        new TUIFunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
+                        new FunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
                 );
 
         app.setHome(home);
@@ -358,22 +350,22 @@ class TUIModuleTest {
 
     @Test
     void testRestartChild() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
 
         int[] count = {0, 0, 0, 0};
 
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+        ContainerModule.Builder home = new ContainerModule.Builder("home")
                 .addChildren(
-                        new TUIFunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
-                        new TUIContainerModule.Builder("container")
+                        new FunctionModule.Builder("count-1", () -> count[0] = count[0] + 1),
+                        new ContainerModule.Builder("container")
                                 .addChildren(
-                                        new TUIFunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
-                                        new TUIFunctionModule.Builder("restart", () -> {
+                                        new FunctionModule.Builder("count-2", () -> count[1] = count[1] + 1),
+                                        new FunctionModule.Builder("restart", () -> {
                                             if(count[1] == 1) app.restartChild("container");
                                         }),
-                                        new TUIFunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
+                                        new FunctionModule.Builder("count-3", () -> count[2] = count[2] + 1)
                                 ),
-                        new TUIFunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
+                        new FunctionModule.Builder("count-4", () -> count[3] = count[3] + 1)
                 );
 
         app.setHome(home);
@@ -388,21 +380,8 @@ class TUIModuleTest {
     }
 
     @Test
-    void testIsTerminated() {
-        TUIContainerModule test = new TUIContainerModule.Builder("test").build();
-        boolean terminated_before = test.isTerminated();
-        test.terminated = true;
-        boolean terminated_after = test.isTerminated();
-
-        assertAll(
-                () -> assertFalse(terminated_before),
-                () -> assertTrue(terminated_after)
-        );
-    }
-
-    @Test
     void testGetCurrentRunningChild() {
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
         testApp.getChildren().clear();
         testApp.getChildren().addAll(
                 List.of(
@@ -420,12 +399,12 @@ class TUIModuleTest {
 
     @Test
     void testGetCurrentRunningBranch() {
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
-        TUIContainerModule.Builder home = new TUIContainerModule.Builder("home");
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
+        ContainerModule.Builder home = new ContainerModule.Builder("home");
 
-        TUIContainerModule.Builder nest_0 = new TUIContainerModule.Builder("nest-0");
-        TUIContainerModule.Builder nest_1 = new TUIContainerModule.Builder("nest-1");
-        TUIFunctionModule.Builder nest_2 = new TUIFunctionModule.Builder("nest-2", () -> {});
+        ContainerModule.Builder nest_0 = new ContainerModule.Builder("nest-0");
+        ContainerModule.Builder nest_1 = new ContainerModule.Builder("nest-1");
+        FunctionModule.Builder nest_2 = new FunctionModule.Builder("nest-2", () -> {});
         nest_2.setFunction(() -> {
             List<TUIModule> runningBranch = testApp.getCurrentRunningBranch();
             List<TUIModule> expectedList = List.of(testApp, home.build(), nest_0.build(), nest_1.build(), nest_2.build());
@@ -435,9 +414,9 @@ class TUIModuleTest {
         });
 
         home.addChildren(
-                        new TUIContainerModule.Builder("empty-1"),
-                        nest_0.addChild(nest_1.addChild(nest_2.addChild(new TUIContainerModule.Builder("empty_2")))),
-                        new TUIContainerModule.Builder("empty_3")
+                        new ContainerModule.Builder("empty-1"),
+                        nest_0.addChild(nest_1.addChild(nest_2.addChild(new ContainerModule.Builder("empty_2")))),
+                        new ContainerModule.Builder("empty_3")
                 );
 
         testApp.setHome(home);
@@ -448,35 +427,35 @@ class TUIModuleTest {
 
     @Test
     void testGetApplication() {
-        TUIApplicationModule testApp = new TUIApplicationModule.Builder("test-app").build();
-        TUIContainerModule test = new TUIContainerModule.Builder("test").setApplication(testApp).build();
+        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
+        ContainerModule test = new ContainerModule.Builder("test").setApplication(testApp).build();
         assertEquals(testApp, test.getApplication());
     }
 
     @Test
     void testGetAnsi() {
         Ansi ansi = ansi().bold().fgRgb(50, 50, 50);
-        TUIContainerModule test = new TUIContainerModule.Builder("test").setAnsi(ansi).build();
+        ContainerModule test = new ContainerModule.Builder("test").setAnsi(ansi).build();
         assertEquals(ansi, test.getAnsi());
     }
 
     @Test
     void testGetScanner() {
         Scanner scnr = new Scanner(new ByteArrayInputStream("test".getBytes()));
-        TUIContainerModule test = new TUIContainerModule.Builder("test").setScanner(scnr).build();
+        ContainerModule test = new ContainerModule.Builder("test").setScanner(scnr).build();
         assertEquals(scnr, test.getScanner());
     }
 
     @Test
     void getPrintStream() {
         PrintStream strm = new PrintStream(new ByteArrayOutputStream());
-        TUIContainerModule test = new TUIContainerModule.Builder("test").setPrintStream(strm).build();
+        ContainerModule test = new ContainerModule.Builder("test").setPrintStream(strm).build();
         assertEquals(strm, test.getPrintStream());
     }
 
     @Test
     void getAnsiEnabled() {
-        TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+        ContainerModule.Builder test = new ContainerModule.Builder("test");
         boolean enabledBefore = test.build().getAnsiEnabled();
         test.enableAnsi(false);
         boolean enabledAfter = test.build().getAnsiEnabled();
@@ -490,7 +469,7 @@ class TUIModuleTest {
     @Test
     void testLogger() {
 
-        TUIContainerModule module = new TUIContainerModule.Builder("module").build();
+        ContainerModule module = new ContainerModule.Builder("module").build();
         module.run();
     }
 
@@ -503,10 +482,10 @@ class TUIModuleTest {
     void testStructuralEquals() {
         // Shared IOCapture for modules that should be equal
         IOCapture ioShared = new IOCapture();
-        TUIApplicationModule app1 = new TUIApplicationModule.Builder("app1").build();
+        ApplicationModule app1 = new ApplicationModule.Builder("app1").build();
 
         // Base module
-        TUIContainerModule module1 = new TUIContainerModule.Builder("")
+        ContainerModule module1 = new ContainerModule.Builder("")
                 .setName("module-name")
                 .setAnsi(ansi().bold())
                 .enableAnsi(false)
@@ -516,7 +495,7 @@ class TUIModuleTest {
                 .build();
 
         // Exact copy: all properties same
-        TUIContainerModule module2 = new TUIContainerModule.Builder("")
+        ContainerModule module2 = new ContainerModule.Builder("")
                 .setName("module-name")
                 .setAnsi(ansi().bold())
                 .enableAnsi(false)
@@ -528,7 +507,7 @@ class TUIModuleTest {
         // Differences:
 
         // Different name
-        TUIContainerModule moduleNameDiff = new TUIContainerModule.Builder("")
+        ContainerModule moduleNameDiff = new ContainerModule.Builder("")
                 .setName("different-name")
                 .setAnsi(ansi().bold())
                 .enableAnsi(false)
@@ -538,8 +517,8 @@ class TUIModuleTest {
                 .build();
 
         // Different application
-        TUIApplicationModule app2 = new TUIApplicationModule.Builder("app2").build();
-        TUIContainerModule moduleAppDiff = new TUIContainerModule.Builder("")
+        ApplicationModule app2 = new ApplicationModule.Builder("app2").build();
+        ContainerModule moduleAppDiff = new ContainerModule.Builder("")
                 .setName("module-name")
                 .setAnsi(ansi().bold())
                 .enableAnsi(false)
@@ -549,7 +528,7 @@ class TUIModuleTest {
                 .build();
 
         // Different ANSI
-        TUIContainerModule moduleAnsiDiff = new TUIContainerModule.Builder("")
+        ContainerModule moduleAnsiDiff = new ContainerModule.Builder("")
                 .setName("module-name")
                 .setAnsi(ansi().bgRgb(10, 10, 10))
                 .enableAnsi(false)
@@ -559,7 +538,7 @@ class TUIModuleTest {
                 .build();
 
         // Different ANSI enabled flag
-        TUIContainerModule moduleAnsiEnabledDiff = new TUIContainerModule.Builder("")
+        ContainerModule moduleAnsiEnabledDiff = new ContainerModule.Builder("")
                 .setName("module-name")
                 .setAnsi(ansi().bold())
                 .enableAnsi(true)
@@ -570,7 +549,7 @@ class TUIModuleTest {
 
         // Different print stream (new IOCapture)
         IOCapture ioOther = new IOCapture();
-        TUIContainerModule modulePrintStreamDiff = new TUIContainerModule.Builder("")
+        ContainerModule modulePrintStreamDiff = new ContainerModule.Builder("")
                 .setName("module-name")
                 .setAnsi(ansi().bold())
                 .enableAnsi(false)
@@ -580,7 +559,7 @@ class TUIModuleTest {
                 .build();
 
         // Different scanner (new IOCapture)
-        TUIContainerModule moduleScannerDiff = new TUIContainerModule.Builder("")
+        ContainerModule moduleScannerDiff = new ContainerModule.Builder("")
                 .setName("module-name")
                 .setAnsi(ansi().bold())
                 .enableAnsi(false)
@@ -611,25 +590,25 @@ class TUIModuleTest {
     @Test
     void testStructuralEqualsWithChildren() {
         // Children
-        TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-        TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+        ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+        ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
 
         // Parent with two children
-        TUIContainerModule parent1 = new TUIContainerModule.Builder("parent")
+        ContainerModule parent1 = new ContainerModule.Builder("parent")
                 .addChild(child1.getCopy())
                 .addChild(child2.getCopy())
                 .build();
 
         // Exact copy of parent
-        TUIContainerModule parent2 = new TUIContainerModule.Builder("parent")
+        ContainerModule parent2 = new ContainerModule.Builder("parent")
                 .addChild(child1.getCopy())
                 .addChild(child2.getCopy())
                 .build();
 
         // Parent with a modified child
-        TUIContainerModule.Builder child3 = new TUIContainerModule.Builder("child3");
+        ContainerModule.Builder child3 = new ContainerModule.Builder("child3");
 
-        TUIContainerModule parent3 = new TUIContainerModule.Builder("parent")
+        ContainerModule parent3 = new ContainerModule.Builder("parent")
                 .addChild(child3.getCopy())
                 .addChild(child2.getCopy())
                 .build();
@@ -645,7 +624,7 @@ class TUIModuleTest {
 
         @Test
         void testSetNameAndGetName() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("old-name");
+            ContainerModule.Builder test = new ContainerModule.Builder("old-name");
             String oldName = test.getName();
             test.setName("new-name");
             String newName = test.getName();
@@ -658,22 +637,22 @@ class TUIModuleTest {
 
         @Test
         void testPrependToName() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("name");
+            ContainerModule.Builder test = new ContainerModule.Builder("name");
             test.prependToName("new");
             assertEquals("new-name", test.getName());
         }
 
         @Test
         void testSetApplicationAndGetApplication() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child = new ContainerModule.Builder("child");
             test.addChild(child);
 
-            TUIApplicationModule oldApp = test.getApplication();
+            ApplicationModule oldApp = test.getApplication();
             test.setApplication(app);
-            TUIApplicationModule newApp = test.getApplication();
-            TUIApplicationModule childApp = child.getApplication();
+            ApplicationModule newApp = test.getApplication();
+            ApplicationModule childApp = child.getApplication();
 
             assertAll(
                     () -> assertNull(oldApp),
@@ -684,8 +663,8 @@ class TUIModuleTest {
 
         @Test
         void testSetAnsiAndGetAnsi() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child = new ContainerModule.Builder("child");
             test.addChild(child);
 
             Ansi oldAnsi  = test.getAnsi();
@@ -702,8 +681,8 @@ class TUIModuleTest {
 
         @Test
         void testPrependAnsi() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child")
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child = new ContainerModule.Builder("child")
                     .setAnsi(ansi().bold().reset());
             test.addChild(child);
 
@@ -721,8 +700,8 @@ class TUIModuleTest {
 
         @Test
         void testAppendAnsi() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child")
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child = new ContainerModule.Builder("child")
                     .setAnsi(ansi().bold().reset());
             test.addChild(child);
 
@@ -741,8 +720,8 @@ class TUIModuleTest {
         @Test
         void testSetScannerAndGetScanner() {
             Scanner scanner = new Scanner("test");
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child = new ContainerModule.Builder("child");
             test.addChild(child);
 
             Scanner oldScanner = test.getScanner();
@@ -760,8 +739,8 @@ class TUIModuleTest {
         @Test
         void testSetPrintStreamAndGetPrintStream() {
             PrintStream ps = new PrintStream(new ByteArrayOutputStream());
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child = new ContainerModule.Builder("child");
             test.addChild(child);
 
             PrintStream oldPs = test.getPrintStream();
@@ -778,8 +757,8 @@ class TUIModuleTest {
 
         @Test
         void testEnableAnsiAndGetAnsiEnabled() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child = new ContainerModule.Builder("child");
             test.addChild(child);
 
             boolean oldAnsi = test.getAnsiEnabled();
@@ -796,9 +775,9 @@ class TUIModuleTest {
 
         @Test
         void testAddChild() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+            ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
             test.addChild(child1);
             test.addChild(child2);
             assertEquals(List.of(child1, child2), test.getChildren());
@@ -806,9 +785,9 @@ class TUIModuleTest {
 
         @Test
         void testAddChildAtIndex() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+            ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
             test.addChild(child1);
             test.addChild(0, child2);
             assertEquals(List.of(child2, child1), test.getChildren());
@@ -816,27 +795,27 @@ class TUIModuleTest {
 
         @Test
         void testAddChildrenVarargs() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+            ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
             test.addChildren(child1, child2);
             assertEquals(List.of(child1, child2), test.getChildren());
         }
 
         @Test
         void testAddChildrenList() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+            ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
             test.addChildren(new ArrayList<>(List.of(child1, child2)));
             assertEquals(List.of(child1, child2), test.getChildren());
         }
 
         @Test
         void testClearChildren() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+            ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
             test.addChildren(child1, child2);
             test.clearChildren();
             assertEquals(List.of(), test.getChildren());
@@ -844,15 +823,15 @@ class TUIModuleTest {
 
         @Test
         void testGetChildByName() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child = new ContainerModule.Builder("child");
 
             test.addChildren(
-                    new TUIContainerModule.Builder("a"),
+                    new ContainerModule.Builder("a"),
                     test,
-                    new TUIContainerModule.Builder("b")
+                    new ContainerModule.Builder("b")
                             .addChild(child),
-                    new TUIContainerModule.Builder("child")
+                    new ContainerModule.Builder("child")
             );
 
             TUIModule.Builder<?> found = test.getChild("child");
@@ -862,19 +841,19 @@ class TUIModuleTest {
 
         @Test
         void testGetChildByNameAndType() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUITextModule.Builder child = new TUITextModule.Builder("child", "child");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            TextModule.Builder child = new TextModule.Builder("child", "child");
 
             test.addChildren(
-                    new TUIContainerModule.Builder("a"),
+                    new ContainerModule.Builder("a"),
                     test,
-                    new TUIContainerModule.Builder("b")
+                    new ContainerModule.Builder("b")
                             .addChild(child),
-                    new TUIContainerModule.Builder("child")
+                    new ContainerModule.Builder("child")
             );
 
-            TUITextModule.Builder found = test.getChild("child", TUITextModule.Builder.class);
-            TUIContainerModule.Builder other = test.getChild("child", TUIContainerModule.Builder.class);
+            TextModule.Builder found = test.getChild("child", TextModule.Builder.class);
+            ContainerModule.Builder other = test.getChild("child", ContainerModule.Builder.class);
 
             assertAll(
                     () -> assertEquals(child, found),
@@ -884,10 +863,10 @@ class TUIModuleTest {
 
         @Test
         void testSetPropertyUpdateFlag() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+            ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
 
             test.addChild(child1);
             child1.addChild(child2);
@@ -906,10 +885,10 @@ class TUIModuleTest {
 
         @Test
         void testLockProperty() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+            ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
 
             test.addChild(child1);
             child1.addChild(child2);
@@ -928,10 +907,10 @@ class TUIModuleTest {
 
         @Test
         void testUnlockProperty() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
-            TUIContainerModule.Builder child1 = new TUIContainerModule.Builder("child1");
-            TUIContainerModule.Builder child2 = new TUIContainerModule.Builder("child2");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
+            ContainerModule.Builder child1 = new ContainerModule.Builder("child1");
+            ContainerModule.Builder child2 = new ContainerModule.Builder("child2");
 
             test.addChild(child1);
             child1.addChild(child2);
@@ -951,16 +930,16 @@ class TUIModuleTest {
 
         @Test
         void testUpdateProperties() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
-            TUIContainerModule.Builder populated = new TUIContainerModule.Builder("populated")
+            ContainerModule.Builder populated = new ContainerModule.Builder("populated")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setAnsi(ansi().bold());
 
-            TUIContainerModule.Builder empty = new TUIContainerModule.Builder("empty");
+            ContainerModule.Builder empty = new ContainerModule.Builder("empty");
 
             empty.updateProperties(populated.build());
 
@@ -979,7 +958,7 @@ class TUIModuleTest {
 
         @Test
         void testGetPropertyUpdateFlags() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
 
             DirectedGraphNode.PropertyUpdateFlag oldFlag = test.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION);
             test.setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.SKIP);
@@ -993,7 +972,7 @@ class TUIModuleTest {
 
         @Test
         void testPropertyUpdateFlagDefaults() {
-            TUIContainerModule.Builder test = new TUIContainerModule.Builder("test");
+            ContainerModule.Builder test = new ContainerModule.Builder("test");
 
             boolean allUpdate = true;
             for(TUIModule.Property flag : test.getPropertyUpdateFlags().keySet()) {
@@ -1008,9 +987,9 @@ class TUIModuleTest {
 
         @Test
         void testShallowCopy() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
-            TUIContainerModule.Builder original = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder original = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
@@ -1018,7 +997,7 @@ class TUIModuleTest {
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder copied  = original.getCopy();
+            ContainerModule.Builder copied  = original.getCopy();
 
             io.close();
 
@@ -1035,9 +1014,9 @@ class TUIModuleTest {
 
         @Test
         void testGetDeepCopy() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
-            TUIContainerModule.Builder original = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder original = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
@@ -1045,18 +1024,18 @@ class TUIModuleTest {
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
                     .addChildren(
-                            new TUIContainerModule.Builder("child1"),
-                            new TUIContainerModule.Builder("child2")
+                            new ContainerModule.Builder("child1"),
+                            new ContainerModule.Builder("child2")
                                     .setApplication(app),
-                            new TUIContainerModule.Builder("child3")
-                                    .addChild(new TUIContainerModule.Builder("child4")),
-                            new TUIContainerModule.Builder("child5")
+                            new ContainerModule.Builder("child3")
+                                    .addChild(new ContainerModule.Builder("child4")),
+                            new ContainerModule.Builder("child5")
                                     .setAnsi(ansi().a("testAnsi"))
                     );
 
             original.getChild("child4").addChild(original);
 
-            TUIContainerModule.Builder copied  = original.getCopy();
+            ContainerModule.Builder copied  = original.getCopy();
 
             io.close();
 
@@ -1066,9 +1045,9 @@ class TUIModuleTest {
         // equality more thoroughly tested in DirectedGraphNodeTest
         @Test
         void testShallowStructuralStructuralEquals() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
-            TUIContainerModule.Builder first = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder first = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
@@ -1076,7 +1055,7 @@ class TUIModuleTest {
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder second = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder second = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
@@ -1084,7 +1063,7 @@ class TUIModuleTest {
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder third = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder third = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
@@ -1092,42 +1071,42 @@ class TUIModuleTest {
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder fourth = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder fourth = new ContainerModule.Builder("original")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder fifth = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder fifth = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder sixth = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder sixth = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .enableAnsi(false)
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder seventh = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder seventh = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder eighth = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder eighth = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
-            TUIContainerModule.Builder ninth = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder ninth = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
@@ -1152,35 +1131,35 @@ class TUIModuleTest {
 
         @Test
         void testStructuralEquals() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
 
-            TUIContainerModule.Builder first = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder first = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
-                    .addChild(new TUIContainerModule.Builder("child"));
+                    .addChild(new ContainerModule.Builder("child"));
 
-            TUIContainerModule.Builder second = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder second = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
-                    .addChild(new TUIContainerModule.Builder("child"));
+                    .addChild(new ContainerModule.Builder("child"));
 
-            TUIContainerModule.Builder third = new TUIContainerModule.Builder("original")
+            ContainerModule.Builder third = new ContainerModule.Builder("original")
                     .setApplication(app)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setAnsi(ansi().bold())
                     .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
-                    .addChild(new TUIContainerModule.Builder("child").enableAnsi(false));
+                    .addChild(new ContainerModule.Builder("child").enableAnsi(false));
 
             io.close();
 
@@ -1199,11 +1178,11 @@ class TUIModuleTest {
 
         @Test
         void testBuild() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            ContainerModule.Builder child = new ContainerModule.Builder("child");
 
-            TUIModule test = new TUIContainerModule.Builder("test")
+            TUIModule test = new ContainerModule.Builder("test")
                     .setApplication(app)
                     .addChild(child)
                     .setAnsi(ansi().bold())
@@ -1226,11 +1205,11 @@ class TUIModuleTest {
 
         @Test
         void testBuildRepeated() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
             IOCapture io = new IOCapture();
-            TUIContainerModule.Builder child = new TUIContainerModule.Builder("child");
+            ContainerModule.Builder child = new ContainerModule.Builder("child");
 
-            TUIContainerModule.Builder builder = new TUIContainerModule.Builder("test")
+            ContainerModule.Builder builder = new ContainerModule.Builder("test")
                     .setApplication(app)
                     .addChild(child)
                     .setAnsi(ansi().bold())
@@ -1252,8 +1231,8 @@ class TUIModuleTest {
 
         @Test
         void testGetModuleFromModule() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIContainerModule.Builder container = new TUIContainerModule.Builder("module");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ContainerModule.Builder container = new ContainerModule.Builder("module");
 
             TUIModule.NameOrModule module = new TUIModule.NameOrModule(container);
 
@@ -1262,8 +1241,8 @@ class TUIModuleTest {
 
         @Test
         void testGetModuleFromName() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIContainerModule.Builder container = new TUIContainerModule.Builder("module");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ContainerModule.Builder container = new ContainerModule.Builder("module");
             app.setHome(container);
 
             TUIModule.NameOrModule module = new TUIModule.NameOrModule("module");
@@ -1273,8 +1252,8 @@ class TUIModuleTest {
 
         @Test
         void testGetCopyFromModule() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIContainerModule.Builder container = new TUIContainerModule.Builder("module");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ContainerModule.Builder container = new ContainerModule.Builder("module");
 
             TUIModule.NameOrModule original = new TUIModule.NameOrModule(container);
             TUIModule.NameOrModule copy = original.getCopy();
@@ -1287,8 +1266,8 @@ class TUIModuleTest {
 
         @Test
         void testGetCopyFromName() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUIContainerModule.Builder container = new TUIContainerModule.Builder("module");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ContainerModule.Builder container = new ContainerModule.Builder("module");
             app.setHome(container);
 
             TUIModule.NameOrModule original = new TUIModule.NameOrModule("module");

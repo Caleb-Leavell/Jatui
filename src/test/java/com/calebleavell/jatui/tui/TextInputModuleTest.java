@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import com.calebleavell.jatui.IOCapture;
 import org.junit.jupiter.api.Nested;
@@ -26,15 +26,15 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TUITextInputModuleTest {
+class TextInputModuleTest {
     @Test
     void testRun() {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app")
+        ApplicationModule app = new ApplicationModule.Builder("app")
                 .build();
 
         String output;
         try(IOCapture io = new IOCapture("test")) {
-            TUITextInputModule.Builder input = new TUITextInputModule.Builder("test-input", "input: ")
+            TextInputModule.Builder input = new TextInputModule.Builder("test-input", "input: ")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
@@ -55,10 +55,10 @@ class TUITextInputModuleTest {
 
     @Test
     void testGetInput() {
-        TUITextInputModule input;
+        TextInputModule input;
 
         try(IOCapture io = new IOCapture("test")) {
-            input = new TUITextInputModule.Builder("test-input", "input: ")
+            input = new TextInputModule.Builder("test-input", "input: ")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
@@ -73,19 +73,19 @@ class TUITextInputModuleTest {
 
     @Test
     void testStructuralEquals() {
-        TUITextInputModule input1 = new TUITextInputModule.Builder("input", "input: ")
+        TextInputModule input1 = new TextInputModule.Builder("input", "input: ")
                 .build();
 
-        TUITextInputModule input2 = new TUITextInputModule.Builder("input", "input: ")
+        TextInputModule input2 = new TextInputModule.Builder("input", "input: ")
                 .build();
 
-        TUITextInputModule input3 = new TUITextInputModule.Builder("input", "input: ")
+        TextInputModule input3 = new TextInputModule.Builder("input", "input: ")
                 .build();
 
-        TUITextInputModule input4 = new TUITextInputModule.Builder("other", "input: ")
+        TextInputModule input4 = new TextInputModule.Builder("other", "input: ")
                 .build();
 
-        TUITextInputModule input5 = new TUITextInputModule.Builder("input", "other: ")
+        TextInputModule input5 = new TextInputModule.Builder("input", "other: ")
                 .build();
 
         assertAll(
@@ -104,10 +104,10 @@ class TUITextInputModuleTest {
 
         @Test
         void testCopy() {
-            TUITextInputModule.Builder original = new TUITextInputModule.Builder("input", "input: ")
+            TextInputModule.Builder original = new TextInputModule.Builder("input", "input: ")
                     .addHandler("logic", s -> 5);
 
-            TUITextInputModule.Builder copy = original.getCopy();
+            TextInputModule.Builder copy = original.getCopy();
 
             assertAll(
                     () -> assertTrue(copy.structuralEquals(original)),
@@ -117,12 +117,12 @@ class TUITextInputModuleTest {
 
         @Test
         void testAddHandlerModule() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
 
             try(IOCapture io = new IOCapture("a")) {
-                TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5)
+                FunctionModule.Builder logic = new FunctionModule.Builder("logic", () -> 5)
                         .setApplication(app);
-                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
                         .setScanner(io.getScanner())
                         .addHandler(logic);
 
@@ -137,10 +137,10 @@ class TUITextInputModuleTest {
 
         @Test
         void testAddHandler() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
 
             try(IOCapture io = new IOCapture("a")) {
-                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
                         .setScanner(io.getScanner())
                         .addHandler("logic", s -> 5);
 
@@ -154,10 +154,10 @@ class TUITextInputModuleTest {
 
         @Test
         void testAddSafeHandlerExceptionHandler() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
 
             try(IOCapture io = new IOCapture("a")) {
-                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
                         .setScanner(io.getScanner())
                         .addSafeHandler("logic",
                                 s -> {throw new RuntimeException("force throw");},
@@ -173,13 +173,13 @@ class TUITextInputModuleTest {
 
         @Test
         void testAddSafeHandlerExceptionMessage() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                    .setOnExit(TUIModuleFactory.empty("do-nothing"))
+            ApplicationModule app = new ApplicationModule.Builder("app")
+                    .setOnExit(ModuleFactory.empty("do-nothing"))
                     .build();
 
             String output;
             try(IOCapture io = new IOCapture("a\n5")) {
-                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
                         .enableAnsi(false)
                         .addSafeHandler("logic",
                                 Integer::parseInt,
@@ -202,13 +202,13 @@ class TUITextInputModuleTest {
 
         @Test
         void testAddSafeHandler() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                    .setOnExit(TUIModuleFactory.empty("do-nothing"))
+            ApplicationModule app = new ApplicationModule.Builder("app")
+                    .setOnExit(ModuleFactory.empty("do-nothing"))
                     .build();
 
             String output;
             try(IOCapture io = new IOCapture("a\n5")) {
-                TUITextInputModule.Builder input = new TUITextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
                         .enableAnsi(false)
                         .addSafeHandler("logic", Integer::parseInt)
                         .setScanner(io.getScanner())
@@ -229,14 +229,14 @@ class TUITextInputModuleTest {
 
         @Test
         void testBuild() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app")
-                    .setOnExit(TUIModuleFactory.empty("empty"))
+            ApplicationModule app = new ApplicationModule.Builder("app")
+                    .setOnExit(ModuleFactory.empty("empty"))
                     .build();
 
-            TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5)
+            FunctionModule.Builder logic = new FunctionModule.Builder("logic", () -> 5)
                     .setApplication(app);
 
-            TUITextInputModule.Builder builder = new TUITextInputModule.Builder("input", "input: ")
+            TextInputModule.Builder builder = new TextInputModule.Builder("input", "input: ")
                     .addHandler(logic);
 
 
@@ -255,7 +255,7 @@ class TUITextInputModuleTest {
         }
     }
 
-    private static String runInputModule(TUITextInputModule.Builder builder) {
+    private static String runInputModule(TextInputModule.Builder builder) {
         try(IOCapture io = new IOCapture("input\ninput\ninput")) {
             builder.unlockProperty(TUIModule.Property.SCANNER);
             builder.unlockProperty(TUIModule.Property.PRINTSTREAM);
@@ -275,24 +275,24 @@ class TUITextInputModuleTest {
         void testCopy() {
             Function<String, String> logic = s -> s;
             Consumer<String> exceptionHandler = s -> System.out.print("");
-            TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
+            TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
 
-            TUITextInputModule.InputHandlers original = new TUITextInputModule.InputHandlers("handler", module)
+            TextInputModule.InputHandlers original = new TextInputModule.InputHandlers("handler", module)
                     .addSafeHandler("logic", logic, exceptionHandler);
 
-            TUITextInputModule.InputHandlers copy = original.getCopy();
+            TextInputModule.InputHandlers copy = original.getCopy();
 
             assertTrue(copy.structuralEquals(original));
         }
 
         @Test
         void testAddHandlerModule() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
-            TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5)
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
+            FunctionModule.Builder logic = new FunctionModule.Builder("logic", () -> 5)
                     .setApplication(app);
 
-            TUITextInputModule.InputHandlers handlers = new TUITextInputModule.InputHandlers("handlers", module)
+            TextInputModule.InputHandlers handlers = new TextInputModule.InputHandlers("handlers", module)
                     .addHandler(logic);
 
             app.setHome(handlers);
@@ -303,10 +303,10 @@ class TUITextInputModuleTest {
 
         @Test
         void testAddHandler() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
 
-            TUITextInputModule.InputHandlers handlers = new TUITextInputModule.InputHandlers("handlers", module)
+            TextInputModule.InputHandlers handlers = new TextInputModule.InputHandlers("handlers", module)
                     .addHandler("logic", s -> 5);
 
             app.setHome(handlers);
@@ -317,10 +317,10 @@ class TUITextInputModuleTest {
 
         @Test
         void testAddSafeHandler() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
 
-            TUITextInputModule.InputHandlers handlers = new TUITextInputModule.InputHandlers("handlers", module)
+            TextInputModule.InputHandlers handlers = new TextInputModule.InputHandlers("handlers", module)
                     .addSafeHandler("logic",
                             s -> {throw new RuntimeException("forced exception");},
                             s -> app.updateInput("logic", "Success!"));
@@ -333,12 +333,12 @@ class TUITextInputModuleTest {
 
         @Test
         void addMultipleHandlers() {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-            TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
-            TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic1", () -> 5)
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
+            FunctionModule.Builder logic = new FunctionModule.Builder("logic1", () -> 5)
                     .setApplication(app);
 
-            TUITextInputModule.InputHandlers handlers = new TUITextInputModule.InputHandlers("handlers", module)
+            TextInputModule.InputHandlers handlers = new TextInputModule.InputHandlers("handlers", module)
                     .addHandler(logic)
                     .addHandler("logic2", s -> 10)
                     .addSafeHandler("logic3",
@@ -357,31 +357,31 @@ class TUITextInputModuleTest {
 
         @Test
         void testShallowShallowStructuralEquals() {
-            TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
-            TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5);
+            TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
+            FunctionModule.Builder logic = new FunctionModule.Builder("logic", () -> 5);
 
-            TUITextInputModule.InputHandlers handlers1 = new TUITextInputModule.InputHandlers("handlers", module)
+            TextInputModule.InputHandlers handlers1 = new TextInputModule.InputHandlers("handlers", module)
                     .addHandler(logic);
 
-            TUITextInputModule.InputHandlers handlers2 = new TUITextInputModule.InputHandlers("handlers", module)
+            TextInputModule.InputHandlers handlers2 = new TextInputModule.InputHandlers("handlers", module)
                     .addHandler(logic);
 
-            TUITextInputModule.InputHandlers handlers3 = new TUITextInputModule.InputHandlers("handlers", module)
+            TextInputModule.InputHandlers handlers3 = new TextInputModule.InputHandlers("handlers", module)
                     .addHandler(logic);
 
-            TUITextInputModule.InputHandlers handlers4 = new TUITextInputModule.InputHandlers("handlers", new TUITextInputModule.Builder())
+            TextInputModule.InputHandlers handlers4 = new TextInputModule.InputHandlers("handlers", new TextInputModule.Builder())
                     .addHandler(logic);
 
-            TUITextInputModule.InputHandlers handlers5 = new TUITextInputModule.InputHandlers("handlers", module);
+            TextInputModule.InputHandlers handlers5 = new TextInputModule.InputHandlers("handlers", module);
 
-            TUIFunctionModule.Builder other = new TUIFunctionModule.Builder("other", () -> 5);
-            TUITextInputModule.InputHandlers handlers6 = new TUITextInputModule.InputHandlers("handlers", module)
+            FunctionModule.Builder other = new FunctionModule.Builder("other", () -> 5);
+            TextInputModule.InputHandlers handlers6 = new TextInputModule.InputHandlers("handlers", module)
                     .addHandler(logic)
                     .addHandler(other);
             // this is just to get the num to something different, everything else should be the same
             handlers6.getChild("handlers-main").getChildren().remove(handlers6.getChild("handlers-2"));
 
-            TUITextInputModule.InputHandlers handlers7 = new TUITextInputModule.InputHandlers("other", module)
+            TextInputModule.InputHandlers handlers7 = new TextInputModule.InputHandlers("other", module)
                     .addHandler(logic);
 
 
@@ -408,12 +408,12 @@ class TUITextInputModuleTest {
             void testCopy() {
                 Function<String, String> logic = s -> s;
                 Consumer<String> exceptionHandler = s -> System.out.print("");
-                TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
+                TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
 
-                TUITextInputModule.InputHandler original = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler original = new TextInputModule.InputHandler("handler", module)
                         .setHandler("logic", logic, exceptionHandler);
 
-                TUITextInputModule.InputHandler copy = original.getCopy();
+                TextInputModule.InputHandler copy = original.getCopy();
                 assertAll(
                         () -> assertTrue(copy.structuralEquals(original)),
                         () -> assertTrue(copy.getModule() == original.getModule() || copy.getModule().structuralEquals(original.getModule())),
@@ -424,12 +424,12 @@ class TUITextInputModuleTest {
 
             @Test
             void testSetHandlerModule() {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-                TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
-                TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5)
+                ApplicationModule app = new ApplicationModule.Builder("app").build();
+                TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
+                FunctionModule.Builder logic = new FunctionModule.Builder("logic", () -> 5)
                         .setApplication(app);
 
-                TUITextInputModule.InputHandler handler = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler handler = new TextInputModule.InputHandler("handler", module)
                         .setHandler(logic);
 
                 app.setHome(handler);
@@ -441,10 +441,10 @@ class TUITextInputModuleTest {
 
             @Test
             void testSetHandlerLogic() {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-                TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
+                ApplicationModule app = new ApplicationModule.Builder("app").build();
+                TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
 
-                TUITextInputModule.InputHandler handler = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler handler = new TextInputModule.InputHandler("handler", module)
                         .setHandler("logic", s -> 5);
 
                 app.setHome(handler);
@@ -456,10 +456,10 @@ class TUITextInputModuleTest {
 
             @Test
             void testSetHandlerLogicExceptionHandler() {
-                TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-                TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
+                ApplicationModule app = new ApplicationModule.Builder("app").build();
+                TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
 
-                TUITextInputModule.InputHandler handler = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler handler = new TextInputModule.InputHandler("handler", module)
                         .setHandler("logic",
                                 s -> {throw new RuntimeException("forced exception");},
                                 s -> app.updateInput("logic", "Success!")
@@ -476,27 +476,27 @@ class TUITextInputModuleTest {
             void testShallowShallowStructuralEquals() {
                 Function<String, String> logic = s -> s;
                 Consumer<String> exceptionHandler = s -> System.out.print("");
-                TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
+                TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
 
-                TUITextInputModule.InputHandler handler1 = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler handler1 = new TextInputModule.InputHandler("handler", module)
                         .setHandler("logic", logic, exceptionHandler);
 
-                TUITextInputModule.InputHandler handler2 = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler handler2 = new TextInputModule.InputHandler("handler", module)
                         .setHandler("logic", logic, exceptionHandler);
 
-                TUITextInputModule.InputHandler handler3 = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler handler3 = new TextInputModule.InputHandler("handler", module)
                         .setHandler("logic", logic, exceptionHandler);
 
-                TUITextInputModule.InputHandler handler4 = new TUITextInputModule.InputHandler("handler", new TUITextInputModule.Builder("a", "b"))
+                TextInputModule.InputHandler handler4 = new TextInputModule.InputHandler("handler", new TextInputModule.Builder("a", "b"))
                         .setHandler("logic", logic, exceptionHandler);
 
-                TUITextInputModule.InputHandler handler5 = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler handler5 = new TextInputModule.InputHandler("handler", module)
                         .setHandler("logic", logic);
 
-                TUITextInputModule.InputHandler handler6 = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler handler6 = new TextInputModule.InputHandler("handler", module)
                         .setHandler("other-name", logic, exceptionHandler);
 
-                TUITextInputModule.InputHandler handler7 = new TUITextInputModule.InputHandler("other-name", module)
+                TextInputModule.InputHandler handler7 = new TextInputModule.InputHandler("other-name", module)
                         .setHandler("logic", logic, exceptionHandler);
 
                 assertAll(
@@ -515,14 +515,14 @@ class TUITextInputModuleTest {
 
             @Test
             void testBuild() {
-                TUIFunctionModule.Builder logic = new TUIFunctionModule.Builder("logic", () -> 5);
-                TUITextInputModule.Builder module = new TUITextInputModule.Builder("input", "Your input: ");
+                FunctionModule.Builder logic = new FunctionModule.Builder("logic", () -> 5);
+                TextInputModule.Builder module = new TextInputModule.Builder("input", "Your input: ");
 
-                TUITextInputModule.InputHandler builder = new TUITextInputModule.InputHandler("handler", module)
+                TextInputModule.InputHandler builder = new TextInputModule.InputHandler("handler", module)
                         .setHandler(logic);
 
-                TUIContainerModule first = builder.build();
-                TUIContainerModule second = builder.build();
+                ContainerModule first = builder.build();
+                ContainerModule second = builder.build();
 
                 assertAll(
                         () -> assertTrue(first.structuralEquals(second)),

@@ -15,31 +15,31 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 /**
  * Not only does this class improve modularity by housing other modules,
  * but it also provides a template for extending TUIGenericModule.
  */
-public class TUIContainerModule extends TUIModule {
+public class ContainerModule extends TUIModule {
 
     /**
      * Simply logs the run and calls the super-method provided by {@link TUIModule#run}.
      */
     @Override
-    public void run() {
+    public void shallowRun(RunFrame frame) {
         logger.info("Running TUIContainerModule \"{}\"", getName());
-        super.run();
+        super.shallowRun(frame);
     }
     /**
      * Builds a TUIContainerModule based on the state of {@code builder}
-     * @param builder The {@link TUIContainerModule.Builder} that is building the application module.
+     * @param builder The {@link ContainerModule.Builder} that is building the application module.
      */
-    public TUIContainerModule(TUIModule.Builder<?> builder) {
+    public ContainerModule(TUIModule.Builder<?> builder) {
         super(builder);
     }
 
-    /** Builder for {@link TUIContainerModule}
+    /** Builder for {@link ContainerModule}
      * <br><br>
      *  Required Fields: {@code name}
      * **/
@@ -63,13 +63,13 @@ public class TUIContainerModule extends TUIModule {
         }
 
         /**
-         * Builds a new {@link TUIApplicationModule}.
+         * Builds a new {@link ApplicationModule}.
          * @return The built TUIApplicationModule
          */
         @Override
-        public TUIContainerModule build() {
+        public ContainerModule build() {
             logger.trace("Building TUIContainerModule \"{}\"", getName());
-            return new TUIContainerModule(self());
+            return new ContainerModule(self());
         }
     }
 }

@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import com.calebleavell.jatui.IOCapture;
 import org.junit.jupiter.api.Nested;
@@ -24,14 +24,14 @@ import org.junit.jupiter.api.Test;
 import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TUITextModuleTest {
+class TextModuleTest {
 
     @Test
     void testRunDisplayText() {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUITextModule text = new TUITextModule.Builder("test", "Test Text")
+            TextModule text = new TextModule.Builder("test", "Test Text")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
@@ -49,7 +49,7 @@ class TUITextModuleTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUITextModule text = new TUITextModule.Builder("test", "Test Text")
+            TextModule text = new TextModule.Builder("test", "Test Text")
                     .setPrintStream(io.getPrintStream())
                     .setAnsi(ansi().bold().fgRgb(255, 0, 0))
                     .build();
@@ -67,13 +67,13 @@ class TUITextModuleTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+            ApplicationModule app = new ApplicationModule.Builder("app").build();
 
-            TUIContainerModule.Builder home = new TUIContainerModule.Builder("home")
+            ContainerModule.Builder home = new ContainerModule.Builder("home")
                     .addChildren(
-                            new TUIFunctionModule.Builder("func", () -> 5),
-                            new TUITextModule.Builder("test", "func")
-                                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                            new FunctionModule.Builder("func", () -> 5),
+                            new TextModule.Builder("test", "func")
+                                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                                     .setPrintStream(io.getPrintStream())
                                     .enableAnsi(false)
                     );
@@ -89,49 +89,49 @@ class TUITextModuleTest {
 
     @Test
     void testGetText() {
-        TUITextModule text = new TUITextModule.Builder("text", "Test Text").build();
+        TextModule text = new TextModule.Builder("text", "Test Text").build();
 
         assertEquals("Test Text", text.getText());
     }
 
     @Test
     void testEquals() {
-        TUITextModule first = new TUITextModule.Builder("name", "text")
-                .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+        TextModule first = new TextModule.Builder("name", "text")
+                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                 .printNewLine(false)
                 .enableAnsi(false) // setting one super field to non-default to ensure that's handled as well
                 .build();
 
-        TUITextModule second = new TUITextModule.Builder("name", "text")
-                .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+        TextModule second = new TextModule.Builder("name", "text")
+                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                 .printNewLine(false)
                 .enableAnsi(false)
                 .build();
 
-        TUITextModule third = new TUITextModule.Builder("name", "text")
-                .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+        TextModule third = new TextModule.Builder("name", "text")
+                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                 .printNewLine(false)
                 .enableAnsi(false)
                 .build();
 
-        TUITextModule fourth = new TUITextModule.Builder("name", "other-text")
-                .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+        TextModule fourth = new TextModule.Builder("name", "other-text")
+                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                 .printNewLine(false)
                 .enableAnsi(false)
                 .build();
 
-        TUITextModule fifth = new TUITextModule.Builder("name", "text")
+        TextModule fifth = new TextModule.Builder("name", "text")
                 .printNewLine(false)
                 .enableAnsi(false)
                 .build();
 
-        TUITextModule sixth = new TUITextModule.Builder("name", "text")
-                .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+        TextModule sixth = new TextModule.Builder("name", "text")
+                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                 .enableAnsi(false)
                 .build();
 
-        TUITextModule seventh = new TUITextModule.Builder("name", "text")
-                .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+        TextModule seventh = new TextModule.Builder("name", "text")
+                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                 .printNewLine(false)
                 .build();
 
@@ -153,12 +153,12 @@ class TUITextModuleTest {
     class BuilderTest {
         @Test
         void testShallowCopy() {
-            TUITextModule.Builder original = new TUITextModule.Builder("name", "text")
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            TextModule.Builder original = new TextModule.Builder("name", "text")
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
                     .enableAnsi(false); // setting one super field to non-default to ensure that's handled as well
 
-            TUITextModule.Builder copy = original.createInstance();
+            TextModule.Builder copy = original.createInstance();
             copy.shallowCopy(original);
 
             assertTrue(original.structuralEquals(copy));
@@ -171,7 +171,7 @@ class TUITextModuleTest {
             boolean after;
 
             try(IOCapture io = new IOCapture()) {
-                TUITextModule.Builder text = new TUITextModule.Builder("text", "Test Text")
+                TextModule.Builder text = new TextModule.Builder("text", "Test Text")
                         .setPrintStream(io.getPrintStream())
                         .enableAnsi(false);
 
@@ -192,20 +192,20 @@ class TUITextModuleTest {
 
         @Test
         void testSetOutputType() {
-            TUITextModule.OutputType before;
-            TUITextModule.OutputType after;
+            TextModule.OutputType before;
+            TextModule.OutputType after;
 
-            TUITextModule.Builder text = new TUITextModule.Builder("text", "Test Text");
+            TextModule.Builder text = new TextModule.Builder("text", "Test Text");
 
             before = text.getOutputType();
-            text.setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT);
+            text.setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT);
             after = text.getOutputType();
             text.build().run();
 
 
             assertAll(
-                    () -> assertEquals(TUITextModule.OutputType.DISPLAY_TEXT, before),
-                    () -> assertEquals(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT, after)
+                    () -> assertEquals(TextModule.OutputType.DISPLAY_TEXT, before),
+                    () -> assertEquals(TextModule.OutputType.DISPLAY_MODULE_OUTPUT, after)
             );
         }
 
@@ -214,7 +214,7 @@ class TUITextModuleTest {
             String before;
             String after;
 
-            TUITextModule.Builder text = new TUITextModule.Builder("text", "before");
+            TextModule.Builder text = new TextModule.Builder("text", "before");
 
             before = text.getText();
             text.setText("after");
@@ -233,7 +233,7 @@ class TUITextModuleTest {
             String before;
             String after;
 
-            TUITextModule.Builder text = new TUITextModule.Builder("text", "before");
+            TextModule.Builder text = new TextModule.Builder("text", "before");
 
             before = text.getText();
             text.append("after");
@@ -247,36 +247,36 @@ class TUITextModuleTest {
 
         @Test
         void testShallowStructuralStructuralEquals() {
-            TUITextModule.Builder first = new TUITextModule.Builder("name", "text")
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            TextModule.Builder first = new TextModule.Builder("name", "text")
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
                     .enableAnsi(false); // setting one super field to non-default to ensure that's handled as well
 
-            TUITextModule.Builder second = new TUITextModule.Builder("name", "text")
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            TextModule.Builder second = new TextModule.Builder("name", "text")
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
                     .enableAnsi(false);
 
-            TUITextModule.Builder third = new TUITextModule.Builder("name", "text")
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            TextModule.Builder third = new TextModule.Builder("name", "text")
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
                     .enableAnsi(false);
 
-            TUITextModule.Builder fourth = new TUITextModule.Builder("name", "other-text")
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            TextModule.Builder fourth = new TextModule.Builder("name", "other-text")
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false)
                     .enableAnsi(false);
 
-            TUITextModule.Builder fifth = new TUITextModule.Builder("name", "text")
+            TextModule.Builder fifth = new TextModule.Builder("name", "text")
                     .printNewLine(false)
                     .enableAnsi(false);
 
-            TUITextModule.Builder sixth = new TUITextModule.Builder("name", "text")
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            TextModule.Builder sixth = new TextModule.Builder("name", "text")
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .enableAnsi(false);
 
-            TUITextModule.Builder seventh = new TUITextModule.Builder("name", "text")
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            TextModule.Builder seventh = new TextModule.Builder("name", "text")
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false);
 
             assertAll(
@@ -295,16 +295,16 @@ class TUITextModuleTest {
 
         @Test
         void testBuild() {
-            TUITextModule.Builder builder = new TUITextModule.Builder("text", "Test Text")
-                    .setOutputType(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+            TextModule.Builder builder = new TextModule.Builder("text", "Test Text")
+                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
                     .printNewLine(false);
 
-            TUITextModule first = builder.build();
-            TUITextModule second = builder.build();
+            TextModule first = builder.build();
+            TextModule second = builder.build();
 
             assertAll(
                     () -> assertEquals("Test Text", first.getText()),
-                    () -> assertEquals(TUITextModule.OutputType.DISPLAY_MODULE_OUTPUT, first.getOutputType()),
+                    () -> assertEquals(TextModule.OutputType.DISPLAY_MODULE_OUTPUT, first.getOutputType()),
                     () -> assertFalse(first.getPrintNewLine()),
                     () -> assertTrue(first.equals(second))
             );

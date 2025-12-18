@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.calebleavell.jatui.modules.*;
+import com.calebleavell.jatui.tui.*;
 
 import java.io.*;
 import java.util.*;
@@ -23,28 +23,29 @@ import java.util.function.Supplier;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
-        final char[] correct = {'a', 'e', 'i', 'o', 'u'};
-        Supplier<char[]> supplyCorrect = () -> correct;
-        var getPassword = new TUIModuleFactory.PasswordInput("get-password", "Your password: ", supplyCorrect)
-                .addOnValidPassword(() -> System.out.println("You were correct."))
-                .addOnInvalidPassword(() -> System.out.println("You were incorrect."))
-                .storeInputAndMatch();
 
-        app.setHome(getPassword);
+        var app = new ApplicationModule.Builder("app").build();
+
+        var text = new TextModule.Builder("txt", "hello!");
+
+        var home = new ContainerModule.Builder("home");
+
+        home.addChildren(text, home);
+
+        app.setHome(home);
         app.run();
 
-        getPassword.cleanMemory();
+//        TUIModule a = new TextModule.Builder("a", "b").build();
+//
+//        a.run();
 
-        System.out.println(app.getInput("get-password-is-matched"));
-        System.out.println(app.toTreeString());
     }
 
-    public static TUIContainerModule.Builder LineWithDot(String name, int dotX) {
+    public static ContainerModule.Builder LineWithDot(String name, int dotX) {
         String line = "   ".repeat(Math.max(0, dotX)) + "[##]";
-        return new TUIContainerModule.Builder(name).addChildren(
-                new TUITextModule.Builder(name+"dot", line),
-                new TUIFunctionModule.Builder(name+"sleep", () -> {
+        return new ContainerModule.Builder(name).addChildren(
+                new TextModule.Builder(name+"dot", line),
+                new FunctionModule.Builder(name+"sleep", () -> {
                     try {
                         System.out.flush();
                         Thread.sleep(250);

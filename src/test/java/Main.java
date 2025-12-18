@@ -15,11 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.calebleavell.jatui.modules.*;
+import com.calebleavell.jatui.tui.*;
 
 import java.util.Random;
 
-import static com.calebleavell.jatui.modules.TUITextModule.OutputType.*;
+import static com.calebleavell.jatui.tui.TextModule.OutputType.*;
 
 import static org.fusesource.jansi.Ansi.*;
 
@@ -30,13 +30,13 @@ public class Main {
         // and repeat until the user decides to exit.
 
         // Application object
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
 
         // Builder for a TUITextModule that displays the output of another module, and is bold with gold text.
         // Since we've declared the builder here, we can copy it anywhere we want and update what we need.
         // It's generally a good idea to start abstracting modules away like this when they have complex
         // information attached to them (e.g. here it has the output type and ansi)
-        var moduleOutput = new TUITextModule.Builder("module-output-template", "template")
+        var moduleOutput = new TextModule.Builder("module-output-template", "template")
                 .setOutputType(DISPLAY_MODULE_OUTPUT)
                 // We set the ansi to a nice gold color.
                 // Setting the ansi automatically locks it from being set again,
@@ -47,17 +47,17 @@ public class Main {
         // It will be called later in the actual app.
         // If the user confirms they want to exit, the app terminates;
         // otherwise, the app restarts
-        var confirmExit = new TUIModuleFactory.ConfirmationPrompt("confirm-exit",
+        var confirmExit = new ModuleFactory.ConfirmationPrompt("confirm-exit",
                 "Are you sure you want to exit (y/n)? ")
                 .setApplication(app)
                 .addOnConfirm(app::terminate)
                 .addOnDeny(app::restart);
 
         // We declare the "scene" in a ContainerModule so that it's nicely compartmentalized and reusable if needed.
-        var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator");
+        var randomNumberGenerator = new ContainerModule.Builder("random-number-generator");
         randomNumberGenerator.addChildren(
             // Input Module that gets the maximum number
-            new TUITextInputModule.Builder("get-random-number", "Maximum Number (or -1 to exit): ")
+            new TextInputModule.Builder("get-random-number", "Maximum Number (or -1 to exit): ")
                     // We declare a safe handler to check for negative input.
                     // Since it's a safe handler, the input will rerun if the handler throws an exception.
                     // (we can define custom exception behavior if we wish in an overloaded method)
@@ -74,7 +74,7 @@ public class Main {
                     .addSafeHandler("generated-number", Main::getRandomInt),
             // Text Modules that display the generated number
             // This can be done with TUITextModule.Builder, but TextBuilder facilitates chaining text modules.
-            new TUIModuleFactory.LineBuilder("generated-number-display")
+            new ModuleFactory.LineBuilder("generated-number-display")
                     .addText("Generated Number: ")
                     // We create a copy of moduleOutput, declared above
                     // We update the name and set the text as the name of module "generated-number",
@@ -86,9 +86,9 @@ public class Main {
                     .newLine(),
             // TUIModuleFactory provides NumberedModuleSelector, which displays a numbered list of
             // text, asks for user input, and runs the module corresponding to the choice of the user.
-            new TUIModuleFactory.NumberedModuleSelector("selector", app)
+            new ModuleFactory.NumberedModuleSelector("selector", app)
                     // This choice restarts the app
-                    .addModule("Generate another number", TUIModuleFactory.restart("restart", app))
+                    .addModule("Generate another number", ModuleFactory.restart("restart", app))
                     // TUIModuleFactory also provides Terminate, which returns a TUIFunctionModule builder
                     // that, when run, simply terminates the module that was inputted into Terminate().
                     // So here, it's terminating app.
@@ -129,7 +129,7 @@ public class Main {
             this.x = x;
             this.y = y;
 
-            main.addChild(new TUIFunctionModule.Builder("func", () -> logger.info("test")));
+            main.addChild(new FunctionModule.Builder("func", () -> logger.info("test")));
         }
 
         protected Rect() {
@@ -155,11 +155,11 @@ public class Main {
         }
 
         @Override
-        public TUIContainerModule build() {
+        public ContainerModule build() {
             main.clearChildren(); // this prevents the children from duplicating every time.
 
             for(int i = 0; i < y; i ++) {
-                TUITextModule.Builder row = new TUITextModule.Builder(name + "-" + y, "");
+                TextModule.Builder row = new TextModule.Builder(name + "-" + y, "");
 
                 for(int j = 0; j < x; j ++) {
                     row.append(cell);

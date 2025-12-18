@@ -15,12 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.modules;
+package com.calebleavell.jatui.tui;
 
 import org.fusesource.jansi.Ansi;
 
 import java.io.PrintStream;
 import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ import static org.fusesource.jansi.Ansi.ansi;
  * <br>
  * Use {@link TUIModule.Builder} to construct a TUIModule (note: all concrete subclasses will have their own builder).
  * <br><br>
- * Use {@link TUIContainerModule} as the minimal implementation for this class. <br>
+ * Use {@link ContainerModule} as the minimal implementation for this class. <br>
  * <br>
  * This class contains {@link TUIModule.Builder}, {@link TUIModule.Template}, and {@link TUIModule.NameOrModule} as subclasses. <br>
  */
@@ -60,7 +61,7 @@ public abstract class TUIModule {
      *
      */
     public enum Property {
-        /** The {@link TUIApplicationModule} corresponding to this module */
+        /** The {@link ApplicationModule} corresponding to this module */
         APPLICATION,
         /** Deals with replacing the ansi completely with setAnsi() **/
         SET_ANSI,
@@ -77,7 +78,7 @@ public abstract class TUIModule {
     /**
      * The identifier for this module. <br>
      * It is highly recommended to try and keep this unique in order to allow
-     * identification methods (e.g., via {@link TUIApplicationModule#getInput})
+     * identification methods (e.g., via {@link ApplicationModule#getInput})
      * to function properly. <br>
      * Warnings and potentially errors will be logged if modules with duplicate
      * names are created.
@@ -87,7 +88,7 @@ public abstract class TUIModule {
     /**
      * The application this module is tied to.
      */
-    private final TUIApplicationModule application;
+    private final ApplicationModule application;
 
     /**
      * Every child module that should be run.
@@ -135,55 +136,16 @@ public abstract class TUIModule {
     private TUIModule currentRunningChild;
 
     /**
-     * Whether this module is currently terminated. <br>
-     * If a module is terminated, it will stop running its children. <br>
-     * Running a module will automatically cause it to be no longer terminated.
-     */
-    protected boolean terminated = false;
-
-    /**
      * Whether this module is flagged to restart. <br>
-     * If restart is true while the module is running, it will run again.
-     * after completion
+     * If restart is true while the module is running, it will run again
+     * after completion.
      */
     protected boolean restart = false;
 
-    /**
-     * Sets terminated to false, then linearly runs children. <br>
-     * If there is a child currently running, you can access it via {@link TUIModule#getCurrentRunningChild()}. <br>
-     */
-    public void run() {
-        logger.debug("Running children for module \"{}\"", name);
-        terminated = false;
-        restart = false;
+    private Deque<RunFrame> runStack = null;
 
-        for(TUIModule.Builder<?> child : children) {
-            if(terminated) break;
-            TUIModule toRun = child.build();
-            currentRunningChild = toRun;
-            toRun.run();
-            currentRunningChild = null;
-        }
-
-        if(restart) this.run();
-    }
-
-    /**
-     * Runs the module and updates {@link TUIModule#currentRunningChild} to be {@code module}.
-     * @param module The module to run as the child of this module.
-     */
-    public void runModuleAsChild(TUIModule.Builder<?> module) {
-        logger.debug("Running module \"{}\" as child", module.name);
-        if(currentRunningChild == null) {
-            TUIModule built = module.build();
-            currentRunningChild = built;
-            built.run();
-            currentRunningChild = null;
-            return;
-        }
-
-        TUIModule currentRunningModule = getCurrentRunningBranch().getLast();
-        currentRunningModule.runModuleAsChild(module);
+    protected Deque<RunFrame> getRunStack() {
+        return runStack;
     }
 
     /**
@@ -232,14 +194,107 @@ public abstract class TUIModule {
         else return null;
     }
 
+    // TODO - explore having a single run() that branches depending on whether runStack is null
+    // TODO - ensure safety when run() is called while a module is currently running
+    // TODO - documentation
+
+    /**
+     * Sets terminated to false, then linearly runs children. <br>
+     * If there is a child currently running, you can access it via {@link TUIModule#getCurrentRunningChild()}. <br>
+     */
+    public void run() {
+        logger.debug("Running children for module \"{}\"", name);
+
+        Deque<RunFrame> localStack = new ArrayDeque<>();
+        this.runStack = localStack;
+
+        this.shallowRun(new RunFrame(null, null, null));
+
+        while (!localStack.isEmpty()) {
+            RunFrame frame = runStack.pop();
+            TUIModule module = frame.module;
+            TUIModule parent = frame.parent;
+            RunFrame.State state = frame.state;
+
+            if(module == null) continue;
+
+            switch(state) {
+                case RunFrame.State.BEGIN -> {
+                    if(parent != null) parent.currentRunningChild = module;
+                    module.shallowRun(frame);
+                }
+                case RunFrame.State.END -> {
+                    if(parent != null) parent.currentRunningChild = frame.displacedChild; // usually null
+                    if(module.restart) {
+                        module.restart = false;
+                        module.terminate();
+                        runStack.push(new RunFrame(module, parent, RunFrame.State.BEGIN, frame.displacedChild));
+                    } else {
+                        module.runStack = null;
+                    }
+                }
+                default -> {
+                    throw new UnsupportedOperationException("Only BEGIN and END are valid RunFrame states.");
+                }
+            }
+        }
+    }
+
+    public void shallowRun(RunFrame frame) {
+        runStack.push(new RunFrame(this, frame.parent, RunFrame.State.END, frame.displacedChild));
+
+        for(TUIModule.Builder<?> child : children.reversed()) {
+            TUIModule toRun = child.build();
+            toRun.runStack = runStack;
+            runStack.push(new RunFrame(toRun, this, RunFrame.State.BEGIN));
+        }
+    }
+
+    /**
+     * Runs the module with this module as the parent (important for checking the current running child and getting the current running branch).
+     * @param module The module to run as the child of this module.
+     */
+    public void runModuleAsChild(TUIModule.Builder<?> module) {
+        if(runStack == null) return; // if this module isn't running, then it can't run another module as it's child
+
+        TUIModule previous = this.currentRunningChild;
+
+        TUIModule toRun = module.build();
+        toRun.runStack = runStack;
+        runStack.push(new RunFrame(toRun, this, RunFrame.State.BEGIN, previous));
+    }
+
     /**
      * Stop this module from running any more children. <br>
      * Recursively propagates the termination to its children. <br>
      * If a terminated module is run again, it will no longer be terminated.
      */
     public void terminate() {
-        this.terminated = true;
-        if(this.currentRunningChild != null) currentRunningChild.terminate();
+        if(this.runStack == null) return;
+
+        // first pass to confirm this module is running
+        boolean found = false;
+        for(RunFrame frame : runStack) {
+            if(frame.module == this && frame.state == RunFrame.State.END) {
+                found = true;
+                break;
+            }
+        }
+
+        if(!found) return;
+
+        Deque<RunFrame> addBack = new ArrayDeque<>();
+        while(!runStack.isEmpty()) {
+            RunFrame next = runStack.peek();
+            if (next.module == this && next.state == RunFrame.State.END) break;
+            if(next.state == RunFrame.State.END) {
+                next.module.restart = false;
+                addBack.push(next);
+            }
+            runStack.pop();
+        }
+
+        while(!addBack.isEmpty()) runStack.push(addBack.pop());
     }
 
     /**
@@ -271,13 +326,6 @@ public abstract class TUIModule {
         getCurrentRunningBranch().forEach(m -> {
             if(m.getName().equals(moduleName)) m.restart();
         });
-    }
-
-    /**
-     * @return Whether this module is {@link TUIModule#terminated}
-     */
-    public boolean isTerminated() {
-        return terminated;
     }
 
     /**
@@ -325,13 +373,13 @@ public abstract class TUIModule {
     }
 
     /**
-     * The {@link TUIApplicationModule} this module is tied to.
+     * The {@link ApplicationModule} this module is tied to.
      * An application module is primarily used for TUI input storage,
      * as well as for providing a clean way to enter/exit the TUI.
      *
-     * @return The {@link TUIApplicationModule} that this module is tied to.
+     * @return The {@link ApplicationModule} that this module is tied to.
      */
-    public TUIApplicationModule getApplication() { return application; }
+    public ApplicationModule getApplication() { return application; }
 
     /**
      * If this module displays text, this is the ansi that determines the
@@ -368,7 +416,7 @@ public abstract class TUIModule {
 
     /**
      * Whether ansi is enabled applies to modules who may display text
-     * (e.g., {@link TUITextModule}). If ansi is disabled, only the raw
+     * (e.g., {@link TextModule}). If ansi is disabled, only the raw
      * text is displayed.
      *
      * @return Whether ansi is enabled for this module.
@@ -508,7 +556,7 @@ public abstract class TUIModule {
         /**
          * The identifier for this module.<br>
          * It is highly recommended to try and keep this unique in order to allow
-         * identification methods (e.g., via {@link TUIApplicationModule#getInput})
+         * identification methods (e.g., via {@link ApplicationModule#getInput})
          * to function properly. <br>
          * Warnings and potentially errors will be logged if modules with duplicate
          * names are created.
@@ -537,7 +585,7 @@ public abstract class TUIModule {
         /**
          * The application this module is tied to.
          */
-        protected TUIApplicationModule application;
+        protected ApplicationModule application;
 
         /**
          * The ansi that may be displayed (Jansi object).
@@ -590,7 +638,7 @@ public abstract class TUIModule {
          * Constructs a new {@link TUIModule.Builder}.
          * @param type The type of the module. This is usually defined
          *             by the inheriting class (e.g., {@code type} for
-         *             {@link TUITextModule.Builder} would be
+         *             {@link TextModule.Builder} would be
          *             {@code TUITextModule.Builder.class}.
          * @param name The unique name of this module.
          */
@@ -606,7 +654,7 @@ public abstract class TUIModule {
          * Constructs an empty {@link TUIModule.Builder}. Used for copying.
          * @param type The type of the module. This is usually defined
          *             by the inheriting class (e.g., {@code type} for
-         *             {@link TUITextModule.Builder} would be
+         *             {@link TextModule.Builder} would be
          *             {@code TUITextModule.Builder.class}.
          */
         protected Builder(Class<B> type) {
@@ -938,13 +986,13 @@ public abstract class TUIModule {
         }
 
         /**
-         * The {@link TUIApplicationModule} this module is tied to.
+         * The {@link ApplicationModule} this module is tied to.
          * An application module is primarily used for TUI input storage,
          * as well as for providing a clean way to enter/exit the TUI.
          *
-         * @return The {@link TUIApplicationModule} that this module is tied to.
+         * @return The {@link ApplicationModule} that this module is tied to.
          */
-        public TUIApplicationModule getApplication() {
+        public ApplicationModule getApplication() {
             return this.application;
         }
 
@@ -983,7 +1031,7 @@ public abstract class TUIModule {
 
         /**
          * Whether ansi is enabled applies to modules who may display text
-         * (e.g., {@link TUITextModule}). If ansi is disabled, only the raw
+         * (e.g., {@link TextModule}). If ansi is disabled, only the raw
          * text is displayed.
          *
          * @return Whether ansi is enabled for this module.
@@ -993,7 +1041,7 @@ public abstract class TUIModule {
         }
 
         /**
-         * Sets the {@link TUIApplicationModule} for this module and recursively
+         * Sets the {@link ApplicationModule} for this module and recursively
          * for its children.
          * <br><br>
          * An application module is primarily used for TUI input storage,
@@ -1005,10 +1053,10 @@ public abstract class TUIModule {
          * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
          * for more fine-grained control.
          *
-         * @param app The {@link TUIApplicationModule} that this module will be tied to.
+         * @param app The {@link ApplicationModule} that this module will be tied to.
          * @return self
          */
-        public B setApplication(TUIApplicationModule app) {
+        public B setApplication(ApplicationModule app) {
             logger.debug("setting app for module \"{}\" to \"{}\"", name, (app == null) ? "null" : app.getName());
             this.updateProperty(Property.APPLICATION, n -> n.setApplicationNonRecursive(app));
 
@@ -1016,11 +1064,11 @@ public abstract class TUIModule {
         }
 
         /**
-         * Sets the {@link TUIApplicationModule} for this module only.
-         * @param app The {@link TUIApplicationModule} that this module will be tied to.
+         * Sets the {@link ApplicationModule} for this module only.
+         * @param app The {@link ApplicationModule} that this module will be tied to.
          * @return self
          */
-        private B setApplicationNonRecursive(TUIApplicationModule app) {
+        private B setApplicationNonRecursive(ApplicationModule app) {
             logger.trace("setting app for module \"{}\" to \"{}\"", name, (app == null) ? "null" : app.getName());
             if(this.application != null && app == null) return self();
             this.application = app;
@@ -1303,7 +1351,7 @@ public abstract class TUIModule {
      * Putting the children inside {@code main} ensures all automatically added children
      * run as expected and are organized.
      * <br><br>
-     * Template also enforces building to a {@link TUIContainerModule}, which improves modularity.
+     * Template also enforces building to a {@link ContainerModule}, which improves modularity.
      * @param <B>
      */
     public abstract static class Template<B extends Template<B>> extends TUIModule.Builder<B> {
@@ -1320,7 +1368,7 @@ public abstract class TUIModule {
          * Putting the children inside {@code main} ensures all automatically added children
          * run as expected and are organized.
          */
-        protected TUIContainerModule.Builder main;
+        protected ContainerModule.Builder main;
 
         /**
          * Creates the new Template and adds {@code main} as the first child.
@@ -1330,7 +1378,7 @@ public abstract class TUIModule {
          */
         public Template(Class<B> type, String name) {
             super(type, name);
-            main = new TUIContainerModule.Builder(name + "-main");
+            main = new ContainerModule.Builder(name + "-main");
             this.addChild(main);
         }
 
@@ -1357,7 +1405,7 @@ public abstract class TUIModule {
         @Override
         protected B deepCopy(B original, Map<TUIModule.Builder<?>, TUIModule.Builder<?>> visited) {
             super.deepCopy(original, visited);
-            main = (TUIContainerModule.Builder) visited.get(original.main);
+            main = (ContainerModule.Builder) visited.get(original.main);
             return self();
         }
 
@@ -1372,14 +1420,14 @@ public abstract class TUIModule {
          * @return The built ContainerModule
          */
         @Override
-        public TUIContainerModule build() {
-            return new TUIContainerModule(self());
+        public ContainerModule build() {
+            return new ContainerModule(self());
         }
     }
 
     /**
      * Stores either the module builder or the name of a module, which abstracts
-     * module retrieving. See usage in {@link TUIModuleFactory.NumberedModuleSelector}
+     * module retrieving. See usage in {@link ModuleFactory.NumberedModuleSelector}
      */
     public final static class NameOrModule {
         private TUIModule.Builder<?> module;
@@ -1408,7 +1456,7 @@ public abstract class TUIModule {
          * @param app The app that a potential name of the module would be a child of.
          * @return The remembered module.
          */
-        public TUIModule.Builder<?> getModule(TUIApplicationModule app) {
+        public TUIModule.Builder<?> getModule(ApplicationModule app) {
             if(module != null) return module;
             else return app.getChild(moduleName);
         }
