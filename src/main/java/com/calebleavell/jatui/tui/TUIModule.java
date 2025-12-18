@@ -194,8 +194,6 @@ public abstract class TUIModule {
         else return null;
     }
 
-    // TODO - explore having a single run() that branches depending on whether runStack is null
-    // TODO - ensure safety when run() is called while a module is currently running
     // TODO - documentation
 
     /**
@@ -323,9 +321,12 @@ public abstract class TUIModule {
      * Note: restarting a module that isn't running does nothing.
      */
     public void restartChild(String moduleName) {
-        getCurrentRunningBranch().forEach(m -> {
-            if(m.getName().equals(moduleName)) m.restart();
-        });
+        for(TUIModule m : getCurrentRunningBranch()) {
+            if(m.getName().equals(moduleName)) {
+                m.restart();
+                break;
+            }
+        }
     }
 
     /**
@@ -484,7 +485,7 @@ public abstract class TUIModule {
      * <p>For TUIModule, this includes: </p>
      * <strong><ul>
      *     <li>name</li>
-     *     <li>application (Note: checks reference equality, not structural equality) </li>
+     *     <li>application (Note: checks structural equality, not reference equality) </li>
      *     <li>children</li>
      *     <li>ansi</li>
      *     <li>scanner</li>
@@ -517,12 +518,20 @@ public abstract class TUIModule {
             if(!children.get(i).structuralEquals(otherChildren.get(i))) return false;
         }
 
-        return (Objects.equals(name, other.name) &&
-                Objects.equals(application, other.application) && // this is intentionally a reference equality check
-                Objects.equals(ansi.toString(), other.ansi.toString()) &&
-                Objects.equals(scanner, other.scanner) &&
-                Objects.equals(printStream, other.printStream) &&
-                enableAnsi == other.enableAnsi);
+        return TUIModule.shallowStructuralEquals(this, other);
+    }
+
+
+    public static boolean shallowStructuralEquals(TUIModule first, TUIModule second) {
+        if(first == second) return true;
+        if(first == null || second == null) return false;
+
+        return (Objects.equals(first.name, second.name) &&
+                TUIModule.shallowStructuralEquals(first.application, second.application) &&
+                Objects.equals(first.ansi.toString(), second.ansi.toString()) &&
+                Objects.equals(first.scanner, second.scanner) &&
+                Objects.equals(first.printStream, second.printStream) &&
+                first.enableAnsi == second.enableAnsi);
     }
 
 
@@ -1293,25 +1302,12 @@ public abstract class TUIModule {
             String secondAnsi = second.ansi != null ? second.ansi.toString() : null;
 
             return (Objects.equals(first.name, second.name) &&
-                    Objects.equals(first.application, second.application) && // intentionally checks by reference
+                    TUIModule.shallowStructuralEquals(first.application, second.application) && // intentionally checks by reference
                     Objects.equals(firstAnsi, secondAnsi) &&
                     Objects.equals(first.scanner, second.scanner) &&
                     Objects.equals(first.printStream, second.printStream) &&
                     Objects.equals(first.propertyUpdateFlags, second.propertyUpdateFlags) &&
                     first.enableAnsi == second.enableAnsi);
-        }
-
-        /**
-         * Returns the name of this module.
-         * For a formatted string of the module hierarchy stemming from this module,
-         * see {@link TUIModule#toTreeString()}. This will require building the
-         * module.
-         *
-         * @return The name of this module.
-         */
-        @Override
-        public String toString() {
-            return this.name;
         }
 
         /**
@@ -1329,6 +1325,19 @@ public abstract class TUIModule {
             if(first == null || second == null) return false;
 
             return first.structuralEquals(second);
+        }
+
+        /**
+         * Returns the name of this module.
+         * For a formatted string of the module hierarchy stemming from this module,
+         * see {@link TUIModule#toTreeString()}. This will require building the
+         * module.
+         *
+         * @return The name of this module.
+         */
+        @Override
+        public String toString() {
+            return this.name;
         }
 
         /**

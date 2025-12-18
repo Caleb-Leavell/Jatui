@@ -309,9 +309,7 @@ public class ApplicationModule extends TUIModule {
         this.onExit = builder.onExit;
 
         for(TUIModule.Builder<?> child : getChildren()) {
-            if(this.getApplication() == null) child.setApplication(this);
-            else child.setApplication(this.getApplication());
-
+            child.setApplication(this);
             child.setPrintStream(this.getPrintStream());
             child.setScanner(this.getScanner());
             child.enableAnsi(this.getAnsiEnabled());

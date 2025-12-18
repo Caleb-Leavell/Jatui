@@ -65,7 +65,7 @@ public class Main {
                     .addSafeHandler("exit-if-negative", s -> {
                         // If it's negative we exit.
                         if(Integer.parseInt(s) < 0) {
-                            confirmExit.build().run();
+                            app.runModuleAsChild(confirmExit);
                         }
                         return null;
                     }, "Error: input integer (your input might be too large)")

@@ -25,12 +25,10 @@ public class Experimentation {
     public static void main(String[] args) throws IOException {
 
         var app = new ApplicationModule.Builder("app").build();
-
-        var text = new TextModule.Builder("txt", "hello!");
-
+        var text = new FunctionModule.Builder("func", () -> System.out.println(app.getCurrentRunningBranch()));
         var home = new ContainerModule.Builder("home");
 
-        home.addChildren(text, home);
+        home.addChildren(text, ModuleFactory.restart("restart-home", app, "home"));
 
         app.setHome(home);
         app.run();

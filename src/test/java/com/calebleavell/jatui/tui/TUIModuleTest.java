@@ -474,11 +474,6 @@ class TUIModuleTest {
     }
 
     @Test
-    void testToString() {
-        // not tested since I want to rework toString and haven't decided how it will be changed
-    }
-
-    @Test
     void testStructuralEquals() {
         // Shared IOCapture for modules that should be equal
         IOCapture ioShared = new IOCapture();

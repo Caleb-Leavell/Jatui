@@ -565,7 +565,7 @@ public class ModuleFactory {
                     return logic.get();
                 } else if(deny.contains(in))
                     return null;
-                else throw new RuntimeException();
+                else throw new RuntimeException(); // this will be caught by the safe handler
             });
 
             return self();
