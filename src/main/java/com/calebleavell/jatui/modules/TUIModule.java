@@ -15,8 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.tui;
+package com.calebleavell.jatui.modules;
 
+import com.calebleavell.jatui.core.DirectedGraphNode;
+import com.calebleavell.jatui.core.RunFrame;
+import com.calebleavell.jatui.templates.NumberedModuleSelector;
 import org.fusesource.jansi.Ansi;
 
 import java.io.PrintStream;
@@ -29,7 +32,9 @@ import static org.fusesource.jansi.Ansi.ansi;
 /**
  * The abstract class for all TUIModules.
  * <br><br>
- * A TUIModule is an immutable, analyzable runtime unit of a TUI that can have children and be run.
+ * A TUIModule is the basic runtime unit of a TUI that can have children and be run.
+ * It is immutable for structural properties (e.g, scanner, ansi, etc.), but mutable for
+ * runtime state (e.g., currentRunningChild).
  * <br>
  * Use {@link TUIModule.Builder} to construct a TUIModule (note: all concrete subclasses will have their own builder).
  * <br><br>
@@ -44,7 +49,7 @@ public abstract class TUIModule {
      * <strong>It is strongly discouraged to close this Scanner, as it would close the scanner
      * for all modules using it and potentially kill input for the entire TUI.</strong>
      **/
-    static final Scanner DEFAULT_SCANNER = new Scanner(System.in);
+    public static final Scanner DEFAULT_SCANNER = new Scanner(System.in);
 
     /** The standard message for when a module isn't named **/
     public static final String UNNAMED_ERROR = "[ERROR: This module was never named!]";
@@ -142,11 +147,10 @@ public abstract class TUIModule {
      */
     protected boolean restart = false;
 
+    /**
+     * TODO
+     */
     private Deque<RunFrame> runStack = null;
-
-    protected Deque<RunFrame> getRunStack() {
-        return runStack;
-    }
 
     /**
      * @return {@link TUIModule#name}
@@ -194,21 +198,21 @@ public abstract class TUIModule {
         else return null;
     }
 
-    // TODO - documentation
-
     /**
-     * Sets terminated to false, then linearly runs children. <br>
-     * If there is a child currently running, you can access it via {@link TUIModule#getCurrentRunningChild()}. <br>
+     *
      */
     public void run() {
-        logger.debug("Running children for module \"{}\"", name);
+        logger.debug("Running children for module \"{}\"", name); // TODO - update this and add more
 
-        Deque<RunFrame> localStack = new ArrayDeque<>();
-        this.runStack = localStack;
+        this.runStack = new ArrayDeque<>();
 
         this.shallowRun(new RunFrame(null, null, null));
 
-        while (!localStack.isEmpty()) {
+        this.run(runStack);
+    }
+
+    private void run(Deque<RunFrame> runStack) {
+        while (!runStack.isEmpty()) {
             RunFrame frame = runStack.pop();
             TUIModule module = frame.module;
             TUIModule parent = frame.parent;
@@ -217,24 +221,28 @@ public abstract class TUIModule {
             if(module == null) continue;
 
             switch(state) {
-                case RunFrame.State.BEGIN -> {
-                    if(parent != null) parent.currentRunningChild = module;
-                    module.shallowRun(frame);
-                }
-                case RunFrame.State.END -> {
-                    if(parent != null) parent.currentRunningChild = frame.displacedChild; // usually null
-                    if(module.restart) {
-                        module.restart = false;
-                        module.terminate();
-                        runStack.push(new RunFrame(module, parent, RunFrame.State.BEGIN, frame.displacedChild));
-                    } else {
-                        module.runStack = null;
-                    }
-                }
+                case RunFrame.State.BEGIN -> beginRun(runStack, frame);
+                case RunFrame.State.END -> endRun(runStack, frame);
                 default -> {
                     throw new UnsupportedOperationException("Only BEGIN and END are valid RunFrame states.");
                 }
             }
+        }
+    }
+
+    private void beginRun(Deque<RunFrame> runStack, RunFrame frame) {
+        if(frame.parent != null) frame.parent.currentRunningChild = frame.module;
+        frame.module.shallowRun(frame);
+    }
+
+    private void endRun(Deque<RunFrame> runStack, RunFrame frame) {
+        if(frame.parent != null) frame.parent.currentRunningChild = frame.displacedChild; // usually null
+        if(frame.module.restart) {
+            frame.module.restart = false;
+            frame.module.terminate();
+            runStack.push(new RunFrame(frame.module, frame.parent, RunFrame.State.BEGIN, frame.displacedChild));
+        } else {
+            frame.module.runStack = null;
         }
     }
 
@@ -1356,27 +1364,21 @@ public abstract class TUIModule {
      * calls it as follows:
      * <pre><code>MyTemplate = new MyTemplate("template").addChild(child, 2)</code></pre>
      * <br>
-     * That would potentially put the new child inside the automatically added children.
+     * This adds the child at index 2, potentially puts the new child inside the automatically added children
+     * and breaking the atomicity of the template (i.e., that it runs as intended <i>before</i> user-added logic
+     * runs).
      * Putting the children inside {@code main} ensures all automatically added children
      * run as expected and are organized.
      * <br><br>
      * Template also enforces building to a {@link ContainerModule}, which improves modularity.
-     * @param <B>
+     * @param <B> The class extending this (e.g., {@code class MyTemplate extends TUIModule.Template<MyTemplate>}).
      */
     public abstract static class Template<B extends Template<B>> extends TUIModule.Builder<B> {
 
         /**
          * A container for separating children essential to the function of the class
-         * from children added after instantiation.
-         * <br>
-         * For example, suppose MyTemplate extends Template, and a user
-         * calls it as follows:
-         * <pre><code>MyTemplate = new MyTemplate("template").addChild(child, 2)</code></pre>
-         * <br>
-         * That would potentially put the new child inside the automatically added children.
-         * Putting the children inside {@code main} ensures all automatically added children
-         * run as expected and are organized.
-         */
+         * from children added after instantiation. See {@link TUIModule} for intuition.
+         **/
         protected ContainerModule.Builder main;
 
         /**
@@ -1436,7 +1438,7 @@ public abstract class TUIModule {
 
     /**
      * Stores either the module builder or the name of a module, which abstracts
-     * module retrieving. See usage in {@link ModuleFactory.NumberedModuleSelector}
+     * module retrieving. See usage in {@link NumberedModuleSelector}
      */
     public final static class NameOrModule {
         private TUIModule.Builder<?> module;

@@ -15,9 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.tui;
+package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.IOCapture;
+import com.calebleavell.jatui.core.DirectedGraphNode;
+import com.calebleavell.jatui.modules.*;
+import com.calebleavell.jatui.util.IOCapture;
 
 import org.fusesource.jansi.Ansi;
 import org.junit.jupiter.api.Nested;

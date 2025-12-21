@@ -15,11 +15,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.calebleavell.jatui.tui.*;
+import com.calebleavell.jatui.modules.*;
+import com.calebleavell.jatui.templates.ConfirmationPrompt;
+import com.calebleavell.jatui.templates.LineBuilder;
+import com.calebleavell.jatui.templates.NumberedModuleSelector;
 
 import java.util.Random;
 
-import static com.calebleavell.jatui.tui.TextModule.OutputType.*;
+import static com.calebleavell.jatui.modules.TextModule.OutputType.*;
 
 import static org.fusesource.jansi.Ansi.*;
 
@@ -47,7 +50,7 @@ public class Main {
         // It will be called later in the actual app.
         // If the user confirms they want to exit, the app terminates;
         // otherwise, the app restarts
-        var confirmExit = new ModuleFactory.ConfirmationPrompt("confirm-exit",
+        var confirmExit = new ConfirmationPrompt("confirm-exit",
                 "Are you sure you want to exit (y/n)? ")
                 .setApplication(app)
                 .addOnConfirm(app::terminate)
@@ -74,7 +77,7 @@ public class Main {
                     .addSafeHandler("generated-number", Main::getRandomInt),
             // Text Modules that display the generated number
             // This can be done with TUITextModule.Builder, but TextBuilder facilitates chaining text modules.
-            new ModuleFactory.LineBuilder("generated-number-display")
+            new LineBuilder("generated-number-display")
                     .addText("Generated Number: ")
                     // We create a copy of moduleOutput, declared above
                     // We update the name and set the text as the name of module "generated-number",
@@ -86,7 +89,7 @@ public class Main {
                     .newLine(),
             // TUIModuleFactory provides NumberedModuleSelector, which displays a numbered list of
             // text, asks for user input, and runs the module corresponding to the choice of the user.
-            new ModuleFactory.NumberedModuleSelector("selector", app)
+            new NumberedModuleSelector("selector", app)
                     // This choice restarts the app
                     .addModule("Generate another number", ModuleFactory.restart("restart", app))
                     // TUIModuleFactory also provides Terminate, which returns a TUIFunctionModule builder
@@ -98,6 +101,8 @@ public class Main {
         // Set the application home and run
         app.setHome(randomNumberGenerator);
         app.run();
+
+        System.out.println(app.toTreeString());
     }
 
     // best practice to declare a single Random instance statically

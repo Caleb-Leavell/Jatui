@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui;
+package com.calebleavell.jatui.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

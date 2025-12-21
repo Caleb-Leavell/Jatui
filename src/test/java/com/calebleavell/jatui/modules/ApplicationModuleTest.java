@@ -15,9 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.tui;
+package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.IOCapture;
+import com.calebleavell.jatui.modules.*;
+import com.calebleavell.jatui.templates.LineBuilder;
+import com.calebleavell.jatui.util.IOCapture;
 import org.fusesource.jansi.Ansi;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -68,7 +70,7 @@ class ApplicationModuleTest {
             ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .addChildren(
                             new TextInputModule.Builder("input", "What is your name? "),
-                            new ModuleFactory.LineBuilder("output")
+                            new LineBuilder("output")
                                     .addText("Hello, ").addModuleOutput("input").addText("!").newLine())
                     .enableAnsi(false)
                     .setScanner(io.getScanner())
@@ -93,7 +95,7 @@ class ApplicationModuleTest {
             ApplicationModule app = new ApplicationModule.Builder("test-app")
                     .addChildren(
                             new FunctionModule.Builder("5+5", () -> 5 + 5),
-                            new ModuleFactory.LineBuilder("output").addModuleOutput("5+5").newLine()
+                            new LineBuilder("output").addModuleOutput("5+5").newLine()
                     )
                     .enableAnsi(false)
                     .setScanner(io.getScanner())

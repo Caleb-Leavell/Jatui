@@ -15,7 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.tui;
+package com.calebleavell.jatui.modules;
+
+import com.calebleavell.jatui.core.RunFrame;
 
 /**
  * Not only does this class improve modularity by housing other modules,
@@ -24,7 +26,7 @@ package com.calebleavell.jatui.tui;
 public class ContainerModule extends TUIModule {
 
     /**
-     * Simply logs the run and calls the super-method provided by {@link TUIModule#run}.
+     * Simply logs the run and calls the super-method provided by {@link TUIModule#run()}.
      */
     @Override
     public void shallowRun(RunFrame frame) {

@@ -15,7 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.tui;
+package com.calebleavell.jatui.modules;
+
+import com.calebleavell.jatui.core.DirectedGraphNode;
+import com.calebleavell.jatui.core.RunFrame;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -473,7 +476,7 @@ public class TextInputModule extends TUIModule {
 
         public ContainerModule build() {
             if(handlerType == HandlerType.HANDLER || handlerType == HandlerType.SAFE_HANDLER) {
-                for(TUIModule.Builder<?> child : main.children) {
+                for(TUIModule.Builder<?> child : main.getChildren()) {
                     child.setName(""); //prevent duplicate name warning
                 }
             }

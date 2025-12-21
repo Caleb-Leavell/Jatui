@@ -15,11 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.calebleavell.jatui.tui.*;
+import com.calebleavell.jatui.modules.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class Experimentation {
     public static void main(String[] args) throws IOException {

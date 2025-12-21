@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.calebleavell.jatui.tui;
+package com.calebleavell.jatui.modules;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -58,7 +58,7 @@ public class ApplicationModule extends TUIModule {
     private final Map<String, Integer> nameFrequencyMap = new HashMap<>();
 
     /**
-     * Overrides {@link TUIModule#run}. <br>
+     * Overrides {@link TUIModule#run()}. <br>
      * Checks and logs name duplicates, runs children (where "home" is the first child),
      * and then runs {@link ApplicationModule#onExit} if not disabled.
      */
