@@ -59,28 +59,7 @@ public class ModuleFactory {
     }
 
     /**
-     * Returns a Function Module that calls another module's run method.
-     *
-     * @param name        The name of the module to be returned
-     * @param moduleToRun The module to run (it will run when this module is run)
-     * @return The Function Module that calls another module's run method
-     */
-    public static FunctionModule.Builder run(String name, TUIModule.Builder<?> moduleToRun) {
-        return new FunctionModule.Builder(name, () -> moduleToRun.build().run());
-    }
-
-    /**
-     * Returns a Function Module that calls another module's run method.
-     *
-     * @param name        The name of the module to be returned
-     * @param moduleToRun The module to run (it will run when this module is run)
-     * @return The Function Module that calls another module's run method
-     */
-    public static FunctionModule.Builder run(String name, TUIModule moduleToRun) {
-        return new FunctionModule.Builder(name, moduleToRun::run);
-    }
-
-    /**
+     * // TODO - update documentation
      * Returns a Function Module that finds the child of a parent by name then runs it.
      * Will do nothing if the parent's module tree does not have a child with the given name.
      *
@@ -91,11 +70,13 @@ public class ModuleFactory {
      */
     public static FunctionModule.Builder run(String name, TUIModule parentModule, String moduleToRun) {
         return new FunctionModule.Builder(name, () -> {
+            if (parentModule == null || moduleToRun == null) return;
             TUIModule.Builder<?> toRun = parentModule.getChild(moduleToRun);
-            if(toRun != null) toRun.build().run();
+            parentModule.runModuleAsChild(toRun);
         });
     }
 
+    // TODO - document
     public static FunctionModule.Builder restart(String name, TUIModule moduleToRestart) {
         return new FunctionModule.Builder(name, () -> {
             if(moduleToRestart != null) moduleToRestart.restart();

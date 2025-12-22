@@ -249,7 +249,7 @@ public abstract class TUIModule {
     }
 
     public void shallowRun(RunFrame frame) {
-        logger.trace("Running children for module \"{}\"", frame.module.name);
+        logger.trace("Running children for module \"{}\"", this.name);
         runStack.push(new RunFrame(this, frame.parent, RunFrame.State.END, frame.displacedChild));
 
         for(TUIModule.Builder<?> child : children.reversed()) {

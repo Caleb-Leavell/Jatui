@@ -180,74 +180,6 @@ class ModuleFactoryTest {
     }
 
     @Test
-    void testRunBuilder() {
-        String output;
-
-        try(IOCapture io = new IOCapture()) {
-            TextModule.Builder text = new TextModule.Builder("text", "output")
-                    .setPrintStream(io.getPrintStream())
-                    .enableAnsi(false);
-
-            FunctionModule.Builder runText = ModuleFactory.run("run-text", text);
-
-            runText.build().run();
-
-            output = io.getOutput();
-        }
-
-        assertEquals(String.format("output%n"), output);
-    }
-
-    @Test
-    void testRunModule() {
-        String output;
-
-        try(IOCapture io = new IOCapture()) {
-            TextModule text = new TextModule.Builder("text", "output")
-                    .setPrintStream(io.getPrintStream())
-                    .enableAnsi(false)
-                    .build();
-
-            FunctionModule.Builder runText = ModuleFactory.run("run-text", text);
-
-            runText.build().run();
-
-            output = io.getOutput();
-        }
-
-        assertEquals(String.format("output%n"), output);
-    }
-
-    @Test
-    void testRunNameParent() {
-        String output;
-
-        try(IOCapture io = new IOCapture()) {
-
-            ContainerModule parent = new ContainerModule.Builder("parent")
-                    .addChildren(
-                            new TextModule.Builder("text-1", "first"),
-                            new ContainerModule.Builder("group")
-                                    .addChildren(
-                                            new TextModule.Builder("text-2", "second"),
-                                            new TextModule.Builder("text-3", "third")
-                                    ),
-                            new TextModule.Builder("text-4", "fourth"))
-                    .setPrintStream(io.getPrintStream())
-                    .enableAnsi(false)
-                    .build();
-
-            FunctionModule.Builder runText = ModuleFactory.run("run-group", parent, "group");
-
-            runText.build().run();
-
-            output = io.getOutput();
-        }
-
-        assertEquals(String.format("second%nthird%n"), output);
-    }
-
-    @Test
     void testRunNameParent_ParentIsApplication() {
         String output;
 
@@ -256,7 +188,10 @@ class ModuleFactoryTest {
             ApplicationModule app = new ApplicationModule.Builder("app")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
+                    .setOnExit(ModuleFactory.empty("exit"))
                     .build();
+
+            FunctionModule.Builder runText = ModuleFactory.run("run-group", app, "group");
 
             ContainerModule.Builder home = new ContainerModule.Builder("parent")
                     .addChildren(
@@ -266,18 +201,16 @@ class ModuleFactoryTest {
                                             new TextModule.Builder("text-2", "second"),
                                             new TextModule.Builder("text-3", "third")
                                     ),
+                            runText,
                             new TextModule.Builder("text-4", "fourth"));
 
             app.setHome(home);
-
-            FunctionModule.Builder runText = ModuleFactory.run("run-group", app, "group");
-
-            runText.build().run();
+            app.run();
 
             output = io.getOutput();
         }
 
-        assertEquals(String.format("second%nthird%n"), output);
+        assertEquals(String.format("first%nsecond%nthird%nsecond%nthird%nfourth%n"), output);
     }
 
     @Test
