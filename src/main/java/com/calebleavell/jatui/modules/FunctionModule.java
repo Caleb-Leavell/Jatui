@@ -36,7 +36,7 @@ public class FunctionModule extends TUIModule {
      *  provided by {@link TUIModule#run()}
      */
     @Override
-    public void shallowRun(RunFrame frame) {
+    public void shallowRun() {
         logger.info("Running TUIFunctionModule \"{}\"", getName());
         Object output = function.get();
         if(getApplication() != null)
@@ -45,8 +45,6 @@ public class FunctionModule extends TUIModule {
             logger.warn("Output \"{}\" produced by TUIFunctionModule \"{}\" but no application exists to store it", output, getName());
         else
             logger.debug("No output produced by TUIFunctionModule \"{}\" and no application exists", getName());
-
-        super.shallowRun(frame);
     }
 
     /**

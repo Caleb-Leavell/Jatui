@@ -64,14 +64,14 @@ public class ApplicationModule extends TUIModule {
      */
     @Override
     public void run() {
-        boolean doExit = !this.restart; // copy restart into local variable because super.run will set it to false
-        checkForNameDuplicates();
-
         logger.info("Running TUIApplicationModule \"{}\"", getName());
-        super.run();
 
-        if(doExit) onExit.build().run();
+        checkForNameDuplicates();
+        super.run();
+        onExit.build().run();
     }
+
+    public void shallowRun() {};
 
     /**
      * Checks every child attached to this application and logs an error

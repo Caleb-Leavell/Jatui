@@ -146,7 +146,7 @@ public abstract class TUIModule {
     protected boolean restart = false;
 
     /**
-     * TODO
+     * The stack that maintains the schedule order for running modules. The scheduler is implemented in {@link TUIModule#run()}.
      */
     private Deque<RunFrame> runStack = null;
 
@@ -196,19 +196,32 @@ public abstract class TUIModule {
         else return null;
     }
 
+
     /**
-     *
+     * Runs this module as a "source", meaning a new scheduling stack is created.
+     * It will run all children from this module.
+     * <br>
+     * For most use cases, only the top-level module will need to be run via this method
+     * (most likely an {@link ApplicationModule}). If you need to manually run a module that is
+     * a child of another module that will be running, use {@link TUIModule#runModuleAsChild(Builder)}
+     * or {@link ModuleFactory#run(String, TUIModule, String)}. This ensures a unified scheduler across
+     * all running modules.
      */
     public void run() {
         logger.debug("Running module \"{}\" as a source (creating new run stack)", name);
 
         this.runStack = new ArrayDeque<>();
 
-        this.shallowRun(new RunFrame(null, null, null));
+        this.mainRun(new RunFrame(null, null, null));
 
         this.run(runStack);
     }
 
+    /**
+     * Helper for {@link TUIModule#run()}. Iterates through the runStack.
+     *
+     * @param runStack The stack of modules to run. It needs a local copy because the instance field will be set to null right before the final check.
+     */
     private void run(Deque<RunFrame> runStack) {
         while (!runStack.isEmpty()) {
             RunFrame frame = runStack.pop();
@@ -218,20 +231,39 @@ public abstract class TUIModule {
             if(module == null) continue;
 
             switch(state) {
-                case RunFrame.State.BEGIN -> beginRun(runStack, frame);
-                case RunFrame.State.END -> endRun(runStack, frame);
+                case RunFrame.State.BEGIN -> {
+                    logger.trace("Beginning run for module \"{}\"", frame.module.name);
+                    if(frame.parent != null) frame.parent.currentRunningChild = frame.module;
+                    frame.module.mainRun(frame);
+                }
+                case RunFrame.State.END -> endRun(frame);
                 default -> throw new UnsupportedOperationException("Only \"BEGIN\" and \"END\" are valid RunFrame states.");
             }
         }
     }
 
-    private void beginRun(Deque<RunFrame> runStack, RunFrame frame) {
-        logger.trace("Beginning run for module \"{}\"", frame.module.name);
-        if(frame.parent != null) frame.parent.currentRunningChild = frame.module;
-        frame.module.shallowRun(frame);
+    public abstract void shallowRun();
+
+    /**
+     * Linearly schedules all children to run, and then schedules itself to end its run.
+     * This is the method that will be overridden to define concrete module runtime logic.
+     *
+     * @param frame The relevant data for running, including
+     */
+    private void mainRun(RunFrame frame) {
+        logger.trace("Running children for module \"{}\"", this.name);
+        runStack.push(new RunFrame(this, frame.parent, RunFrame.State.END, frame.displacedChild));
+
+        this.shallowRun();
+
+        for(TUIModule.Builder<?> child : children.reversed()) {
+            TUIModule toRun = child.build();
+            toRun.runStack = runStack;
+            runStack.push(new RunFrame(toRun, this, RunFrame.State.BEGIN));
+        }
     }
 
-    private void endRun(Deque<RunFrame> runStack, RunFrame frame) {
+    private void endRun(RunFrame frame) {
         logger.trace("Ending run for module \"{}\"", frame.module.name);
         if(frame.parent != null) frame.parent.currentRunningChild = frame.displacedChild; // usually null
         if(frame.module.restart) {
@@ -240,17 +272,6 @@ public abstract class TUIModule {
             runStack.push(new RunFrame(frame.module, frame.parent, RunFrame.State.BEGIN, frame.displacedChild));
         } else {
             frame.module.runStack = null;
-        }
-    }
-
-    public void shallowRun(RunFrame frame) {
-        logger.trace("Running children for module \"{}\"", this.name);
-        runStack.push(new RunFrame(this, frame.parent, RunFrame.State.END, frame.displacedChild));
-
-        for(TUIModule.Builder<?> child : children.reversed()) {
-            TUIModule toRun = child.build();
-            toRun.runStack = runStack;
-            runStack.push(new RunFrame(toRun, this, RunFrame.State.BEGIN));
         }
     }
 

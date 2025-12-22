@@ -29,9 +29,8 @@ public class ContainerModule extends TUIModule {
      * Simply logs the run and calls the super-method provided by {@link TUIModule#run()}.
      */
     @Override
-    public void shallowRun(RunFrame frame) {
+    public void shallowRun() {
         logger.info("Running TUIContainerModule \"{}\"", getName());
-        super.shallowRun(frame);
     }
     /**
      * Builds a TUIContainerModule based on the state of {@code builder}

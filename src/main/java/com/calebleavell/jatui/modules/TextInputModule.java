@@ -32,7 +32,7 @@ public class TextInputModule extends TUIModule {
     public final static String INVALID = "Error: Invalid Input";
 
     @Override
-    public void shallowRun(RunFrame frame) {
+    public void shallowRun() {
         logger.info("Running TUITextInputModule {}", getName());
         displayText.build().run();
         logger.info("collecting input...");
@@ -41,8 +41,6 @@ public class TextInputModule extends TUIModule {
 
         ApplicationModule app = getApplication();
         if(app != null) app.updateInput(this, input);
-
-        super.shallowRun(frame);
     }
 
     public String getInput() {

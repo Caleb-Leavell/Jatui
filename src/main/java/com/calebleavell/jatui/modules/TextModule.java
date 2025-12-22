@@ -35,7 +35,7 @@ public class TextModule extends TUIModule {
     }
 
     @Override
-    public void shallowRun(RunFrame frame) {
+    public void shallowRun() {
         logger.info("Running TUITextModule {}", getName());
         if(getAnsiEnabled()) {
             logger.debug("printing ansi for {}", getName());
@@ -70,8 +70,6 @@ public class TextModule extends TUIModule {
             logger.trace("newline for {}", getName());
             getPrintStream().println();
         }
-
-        super.shallowRun(frame);
     }
 
     String getText() {
