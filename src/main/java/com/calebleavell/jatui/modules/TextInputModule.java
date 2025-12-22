@@ -224,7 +224,6 @@ public class TextInputModule extends TUIModule {
         public Builder addSafeHandler(String name, Function<String, ?> logic) {
             logger.trace("adding safe handler \"{}\" via inputted logic", name);
             this.addSafeHandler(name, logic, "Error: Invalid Input");
-            handlerNum++;
             return self();
         }
 

@@ -202,7 +202,7 @@ public abstract class TUIModule {
      *
      */
     public void run() {
-        logger.debug("Running children for module \"{}\"", name); // TODO - update this and add more
+        logger.debug("Running module \"{}\" as a source (creating new run stack)", name);
 
         this.runStack = new ArrayDeque<>();
 
@@ -224,18 +224,20 @@ public abstract class TUIModule {
                 case RunFrame.State.BEGIN -> beginRun(runStack, frame);
                 case RunFrame.State.END -> endRun(runStack, frame);
                 default -> {
-                    throw new UnsupportedOperationException("Only BEGIN and END are valid RunFrame states.");
+                    throw new UnsupportedOperationException("Only \"BEGIN\" and \"END\" are valid RunFrame states.");
                 }
             }
         }
     }
 
     private void beginRun(Deque<RunFrame> runStack, RunFrame frame) {
+        logger.trace("Beginning run for module \"{}\"", frame.module.name);
         if(frame.parent != null) frame.parent.currentRunningChild = frame.module;
         frame.module.shallowRun(frame);
     }
 
     private void endRun(Deque<RunFrame> runStack, RunFrame frame) {
+        logger.trace("Ending run for module \"{}\"", frame.module.name);
         if(frame.parent != null) frame.parent.currentRunningChild = frame.displacedChild; // usually null
         if(frame.module.restart) {
             frame.module.restart = false;
@@ -247,6 +249,7 @@ public abstract class TUIModule {
     }
 
     public void shallowRun(RunFrame frame) {
+        logger.trace("Running children for module \"{}\"", frame.module.name);
         runStack.push(new RunFrame(this, frame.parent, RunFrame.State.END, frame.displacedChild));
 
         for(TUIModule.Builder<?> child : children.reversed()) {
@@ -261,6 +264,7 @@ public abstract class TUIModule {
      * @param module The module to run as the child of this module.
      */
     public void runModuleAsChild(TUIModule.Builder<?> module) {
+        logger.trace("Running module \"{}\" as child of \"{}\"", module.name, this.name);
         if(runStack == null) return; // if this module isn't running, then it can't run another module as it's child
 
         TUIModule previous = this.currentRunningChild;
