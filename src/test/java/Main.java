@@ -122,7 +122,7 @@ public class Main {
      * Example of a template. This template creates a rectangle when run.
      * (Note, this template isn't used in the demo app. Further documentation on templating will come in the future.)
      */
-    public static class Rect extends TUIModule.Template<Rect> {
+    public static class Rect extends ModuleTemplate<Rect> {
         int x;
         int y;
 

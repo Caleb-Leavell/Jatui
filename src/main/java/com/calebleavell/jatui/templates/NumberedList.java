@@ -1,13 +1,14 @@
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
+import com.calebleavell.jatui.modules.ModuleTemplate;
 import com.calebleavell.jatui.modules.TUIModule;
 
 import java.util.Objects;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
-public class NumberedList extends TUIModule.Template<NumberedList> {
+public class NumberedList extends ModuleTemplate<NumberedList> {
     private int start = 1;
     private int step = 1;
     private int i = 0;

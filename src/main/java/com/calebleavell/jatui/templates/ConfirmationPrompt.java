@@ -1,13 +1,14 @@
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
+import com.calebleavell.jatui.modules.ModuleTemplate;
 import com.calebleavell.jatui.modules.TUIModule;
 import com.calebleavell.jatui.modules.TextInputModule;
 
 import java.util.*;
 import java.util.function.Supplier;
 
-public class ConfirmationPrompt extends TUIModule.Template<ConfirmationPrompt> {
+public class ConfirmationPrompt extends ModuleTemplate<ConfirmationPrompt> {
 
     private final Set<String> confirm = new HashSet<>(List.of("yes", "y"));
     private final Set<String> deny = new HashSet<>(List.of("no", "n"));

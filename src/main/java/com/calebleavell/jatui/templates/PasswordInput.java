@@ -1,6 +1,7 @@
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
+import com.calebleavell.jatui.modules.ModuleTemplate;
 import com.calebleavell.jatui.modules.TUIModule;
 import com.calebleavell.jatui.modules.ContainerModule;
 import com.calebleavell.jatui.modules.FunctionModule;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class PasswordInput extends TUIModule.Template<PasswordInput> {
+public class PasswordInput extends ModuleTemplate<PasswordInput> {
     String displayText;
     private Supplier<char[]> passwordSupplier;
 

@@ -189,7 +189,7 @@ public class TextInputModule extends TUIModule {
         }
     }
 
-    protected static class InputHandlers extends TUIModule.Template<InputHandlers> {
+    protected static class InputHandlers extends ModuleTemplate<InputHandlers> {
 
         protected Builder inputModule;
 
@@ -286,7 +286,7 @@ public class TextInputModule extends TUIModule {
 
     }
 
-    protected static class InputHandler extends TUIModule.Template<InputHandler> {
+    protected static class InputHandler extends ModuleTemplate<InputHandler> {
 
         protected Builder inputModule;
 

@@ -2,6 +2,7 @@ package com.calebleavell.jatui.templates;
 
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
+import com.calebleavell.jatui.modules.ModuleTemplate;
 import com.calebleavell.jatui.modules.TUIModule;
 import com.calebleavell.jatui.modules.TextModule;
 import org.fusesource.jansi.Ansi;
@@ -24,7 +25,7 @@ import static org.fusesource.jansi.Ansi.ansi;
  *     .newLine(); // end of line 2
  * </code></pre>
  */
-public class LineBuilder extends TUIModule.Template<LineBuilder> {
+public class LineBuilder extends ModuleTemplate<LineBuilder> {
     private TextModule.Builder current;
     protected int iterator;
 

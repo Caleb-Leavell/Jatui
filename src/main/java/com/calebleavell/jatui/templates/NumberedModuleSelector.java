@@ -1,16 +1,14 @@
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
-import com.calebleavell.jatui.modules.TUIModule;
-import com.calebleavell.jatui.modules.ApplicationModule;
-import com.calebleavell.jatui.modules.TextInputModule;
+import com.calebleavell.jatui.modules.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSelector> {
-    private final List<TUIModule.NameOrModule> modules = new ArrayList<>();
+public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelector> {
+    private final List<NameOrModule> modules = new ArrayList<>();
     private ApplicationModule app;
     private NumberedList list;
 
@@ -21,7 +19,7 @@ public class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSel
         TextInputModule.Builder collectInput = new TextInputModule.Builder(name + "-input", "Your choice: ")
                 .addSafeHandler(name + "-goto-module", input -> {
                     int index = Integer.parseInt(input);
-                    TUIModule.NameOrModule nameOrModule = modules.get(index - 1);
+                    NameOrModule nameOrModule = modules.get(index - 1);
                     TUIModule.Builder<?> toRun = nameOrModule.getModule(app);
                     if(toRun == null) logger.error("nameOrModule returned null module for NumberedModuleSelector \"{}\"", getName());
                     else app.runModuleAsChild(toRun);
@@ -48,7 +46,7 @@ public class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSel
 
     @Override
     public void shallowCopy(NumberedModuleSelector original) {
-        for(TUIModule.NameOrModule m : original.modules) {
+        for(NameOrModule m : original.modules) {
             this.modules.add(m.getCopy());
         }
         this.app = original.app;
@@ -56,7 +54,7 @@ public class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSel
         super.shallowCopy(original);
     }
 
-    private NumberedModuleSelector addModule(String displayText, TUIModule.NameOrModule module){
+    private NumberedModuleSelector addModule(String displayText, NameOrModule module){
         logger.trace("adding module with displayText \"{}\" to NumberedModuleSelector \"{}\"", displayText, getName());
         this.modules.add(module);
         list.addListText(displayText);
@@ -64,11 +62,11 @@ public class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSel
     }
 
     public NumberedModuleSelector addModule(String displayText, String moduleName) {
-        return addModule(displayText, new TUIModule.NameOrModule(moduleName));
+        return addModule(displayText, new NameOrModule(moduleName));
     }
 
     public NumberedModuleSelector addModule(String displayText, TUIModule.Builder<?> module) {
-        return addModule(displayText, new TUIModule.NameOrModule(module));
+        return addModule(displayText, new NameOrModule(module));
     }
 
     public NumberedModuleSelector addModule(String moduleName) {
@@ -113,8 +111,8 @@ public class NumberedModuleSelector extends TUIModule.Template<NumberedModuleSel
         if(first.modules.size() != second.modules.size()) return false;
 
         for(int i = 0; i < first.modules.size(); i ++) {
-            TUIModule.NameOrModule firstNameOrModule = first.modules.get(i);
-            TUIModule.NameOrModule secondNameOrModule = second.modules.get(i);
+            NameOrModule firstNameOrModule = first.modules.get(i);
+            NameOrModule secondNameOrModule = second.modules.get(i);
 
             if(firstNameOrModule == secondNameOrModule) continue;
             else if(firstNameOrModule == null || secondNameOrModule == null) return false;
