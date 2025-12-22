@@ -101,8 +101,6 @@ public class Main {
         // Set the application home and run
         app.setHome(randomNumberGenerator);
         app.run();
-
-        System.out.println(app.toTreeString());
     }
 
     // best practice to declare a single Random instance statically

@@ -411,15 +411,16 @@ public class TextInputModule extends TUIModule {
                     return null;
                 }
                 String input = app.getInput(inputModule.getName(), String.class);
-                logger.info("running logic on safe handler \"{}\" with input \"{}\"", name, input);
+                logger.debug("running logic on safe handler \"{}\" with input \"{}\"", name, input);
                 T converted;
                 try {
                     converted = logic.apply(input);
                 }
-                catch(Exception e) {
-                    logger.info("caught exception \"{}\" for safe handler \"{}\": \"{}\"", e.getClass().getSimpleName(), name, e.getMessage());
-                    logger.info("running exception handler for safe handler \"{}\"", name);
+                catch(RuntimeException e) {
+                    logger.debug("caught exception \"{}\" for safe handler \"{}\": \"{}\"", e.getClass().getSimpleName(), name, e.getMessage());
+                    logger.trace("running exception handler for safe handler \"{}\"", name);
                     exceptionHandler.accept(input);
+                    // revert to last
                     return app.getInput(name);
                 }
                 return converted;
