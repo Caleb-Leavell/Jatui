@@ -19,8 +19,6 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
     private Consumer<String> exceptionHandler;
     private String moduleName;
 
-    private static Set<String> handlerNames = new HashSet<>();
-
     protected enum HandlerType {
         MODULE,
         HANDLER,
@@ -166,8 +164,6 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
         if(TUIModule.Builder.usedNames.get(name) >= 2)
             logger.error("Duplicate names detected: at least {} module builders have same name as built Input Handler \"{}\"",
                     TUIModule.Builder.usedNames.get(name) - 1, name);
-
-        handlerNames.add(name);
     }
 
     /**
@@ -217,18 +213,9 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
         main.clearChildren();
 
         switch(handlerType) {
-            case MODULE -> {
-                addHandler(module);
-                break;
-            }
-            case HANDLER -> {
-                addHandler(moduleName, logic);
-                break;
-            }
-            case SAFE_HANDLER -> {
-                addSafeHandler(moduleName, logic, exceptionHandler);
-                break;
-            }
+            case MODULE -> addHandler(module);
+            case HANDLER -> addHandler(moduleName, logic);
+            case SAFE_HANDLER -> addSafeHandler(moduleName, logic, exceptionHandler);
         }
 
         return super.build();

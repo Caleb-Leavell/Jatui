@@ -17,7 +17,6 @@
 
 import com.calebleavell.jatui.modules.*;
 import com.calebleavell.jatui.templates.ConfirmationPrompt;
-import com.calebleavell.jatui.templates.InputHandler;
 import com.calebleavell.jatui.templates.LineBuilder;
 import com.calebleavell.jatui.templates.NumberedModuleSelector;
 

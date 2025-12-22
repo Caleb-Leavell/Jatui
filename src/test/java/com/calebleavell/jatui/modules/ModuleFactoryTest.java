@@ -17,11 +17,9 @@
 
 package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.modules.*;
 import com.calebleavell.jatui.util.IOCapture;
 import org.junit.jupiter.api.Test;
 
-import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

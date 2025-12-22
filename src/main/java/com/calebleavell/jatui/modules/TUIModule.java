@@ -19,7 +19,6 @@ package com.calebleavell.jatui.modules;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
 import com.calebleavell.jatui.core.RunFrame;
-import com.calebleavell.jatui.templates.NumberedModuleSelector;
 import org.fusesource.jansi.Ansi;
 
 import java.io.PrintStream;
@@ -40,7 +39,6 @@ import static org.fusesource.jansi.Ansi.ansi;
  * <br><br>
  * Use {@link ContainerModule} as the minimal implementation for this class. <br>
  * <br>
- * This class contains {@link TUIModule.Builder}, {@link TUIModule.Template}, and {@link TUIModule.NameOrModule} as subclasses. <br>
  */
 public abstract class TUIModule {
 
@@ -215,7 +213,6 @@ public abstract class TUIModule {
         while (!runStack.isEmpty()) {
             RunFrame frame = runStack.pop();
             TUIModule module = frame.module;
-            TUIModule parent = frame.parent;
             RunFrame.State state = frame.state;
 
             if(module == null) continue;
@@ -223,9 +220,7 @@ public abstract class TUIModule {
             switch(state) {
                 case RunFrame.State.BEGIN -> beginRun(runStack, frame);
                 case RunFrame.State.END -> endRun(runStack, frame);
-                default -> {
-                    throw new UnsupportedOperationException("Only \"BEGIN\" and \"END\" are valid RunFrame states.");
-                }
+                default -> throw new UnsupportedOperationException("Only \"BEGIN\" and \"END\" are valid RunFrame states.");
             }
         }
     }
@@ -660,7 +655,7 @@ public abstract class TUIModule {
          * @param type The type of the module. This is usually defined
          *             by the inheriting class (e.g., {@code type} for
          *             {@link TextModule.Builder} would be
-         *             {@code TUITextModule.Builder.class}.
+         *             {@code TUITextModule.Builder.class}).
          * @param name The unique name of this module.
          */
         public Builder(Class<B> type, String name) {
@@ -676,7 +671,7 @@ public abstract class TUIModule {
          * @param type The type of the module. This is usually defined
          *             by the inheriting class (e.g., {@code type} for
          *             {@link TextModule.Builder} would be
-         *             {@code TUITextModule.Builder.class}.
+         *             {@code TUITextModule.Builder.class}).
          */
         protected Builder(Class<B> type) {
             this.type = type;
@@ -952,7 +947,7 @@ public abstract class TUIModule {
         }
 
         /**
-         *
+         * TODO - document this
          * @param name
          * @param type
          * @return

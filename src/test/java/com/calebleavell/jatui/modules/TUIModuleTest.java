@@ -18,7 +18,6 @@
 package com.calebleavell.jatui.modules;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
-import com.calebleavell.jatui.modules.*;
 import com.calebleavell.jatui.util.IOCapture;
 
 import org.fusesource.jansi.Ansi;
@@ -44,9 +43,7 @@ class TUIModuleTest {
 
     public static FunctionModule.Builder checkRunning(String name, TUIModule parent) {
         FunctionModule.Builder checkRunning = new FunctionModule.Builder(name, () -> {});
-        checkRunning.setFunction(() -> {
-            return parent.getCurrentRunningBranch().getLast().structuralEquals(checkRunning.build());
-        });
+        checkRunning.setFunction(() -> parent.getCurrentRunningBranch().getLast().structuralEquals(checkRunning.build()));
         return checkRunning;
     }
 

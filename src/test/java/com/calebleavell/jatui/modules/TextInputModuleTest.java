@@ -17,13 +17,9 @@
 
 package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.modules.*;
 import com.calebleavell.jatui.util.IOCapture;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -106,7 +102,7 @@ class TextInputModuleTest {
         @Test
         void testCopy() {
             TextInputModule.Builder original = new TextInputModule.Builder("input", "input: ")
-                    .addHandler("logic", s -> 5);
+                    .addHandler("logic", _ -> 5);
 
             TextInputModule.Builder copy = original.getCopy();
 
@@ -143,7 +139,7 @@ class TextInputModuleTest {
             try(IOCapture io = new IOCapture("a")) {
                 TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
                         .setScanner(io.getScanner())
-                        .addHandler("logic", s -> 5);
+                        .addHandler("logic", _ -> 5);
 
                 app.setHome(input);
 
@@ -161,8 +157,8 @@ class TextInputModuleTest {
                 TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
                         .setScanner(io.getScanner())
                         .addSafeHandler("logic",
-                                s -> {throw new RuntimeException("force throw");},
-                                s -> app.updateInput("logic", 5));
+                                _ -> {throw new RuntimeException("force throw");},
+                                _ -> app.updateInput("logic", 5));
 
                 app.setHome(input);
 

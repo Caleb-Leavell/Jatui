@@ -29,7 +29,7 @@ public class TextInputModule extends TUIModule {
     private String input;
     private final TUIModule.Builder<?> displayText;
 
-    public final static String INVALID = "Error: input was invalid";
+    public final static String INVALID = "Error: Invalid Input";
 
     @Override
     public void shallowRun(RunFrame frame) {
@@ -210,7 +210,7 @@ public class TextInputModule extends TUIModule {
 
         public Builder addSafeHandler(String name, Function<String, ?> logic, String exceptionMessage) {
             logger.trace("adding safe handler \"{}\" via inputted logic and exception message", name);
-            handlers.addChild(new InputHandler(this.name + "-" + handlerNum, this.name).setHandler(name, logic, o -> {
+            handlers.addChild(new InputHandler(this.name + "-" + handlerNum, this.name).setHandler(name, logic, _ -> {
                 ApplicationModule app = this.getApplication();
                 if(app == null) return;
                 this.getPrintStream().println(exceptionMessage);
@@ -223,7 +223,7 @@ public class TextInputModule extends TUIModule {
 
         public Builder addSafeHandler(String name, Function<String, ?> logic) {
             logger.trace("adding safe handler \"{}\" via inputted logic", name);
-            this.addSafeHandler(name, logic, "Error: Invalid Input");
+            this.addSafeHandler(name, logic, INVALID);
             return self();
         }
 

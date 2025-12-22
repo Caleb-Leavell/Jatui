@@ -17,8 +17,6 @@
 
 package com.calebleavell.jatui.modules;
 
-import static org.fusesource.jansi.Ansi.ansi;
-
 /**
  * Provides abstractions for common TUI patterns.
  */
