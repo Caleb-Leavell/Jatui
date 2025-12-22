@@ -292,8 +292,10 @@ public abstract class TUIModule {
      * @param module The module to run as the child of this module.
      */
     public void runModuleAsChild(TUIModule.Builder<?> module) {
-        logger.trace("Running module \"{}\" as child of \"{}\"", module.name, this.name);
         if(runStack == null) return; // if this module isn't running, then it can't run another module as it's child
+        if(module == null) return;
+
+        logger.trace("Running module \"{}\" as child of \"{}\"", module.name, this.name);
 
         TUIModule previous = this.currentRunningChild;
 
