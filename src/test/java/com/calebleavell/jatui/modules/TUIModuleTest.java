@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
- * Using TUIContainerModule as the minimal implementation of this class for testing
+ * Using ContainerModule as the minimal implementation of this class for testing
  */
 class TUIModuleTest {
 

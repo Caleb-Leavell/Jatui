@@ -36,7 +36,7 @@ public class TextModule extends TUIModule {
 
     @Override
     public void shallowRun() {
-        logger.info("Running TUITextModule {}", getName());
+        logger.info("Running TextModule {}", getName());
         if(getAnsiEnabled()) {
             logger.debug("printing ansi for {}", getName());
             getPrintStream().print(getAnsi());
@@ -57,7 +57,7 @@ public class TextModule extends TUIModule {
                 else logger.warn("tried to display output of module \"{}\" but application was null", text);
                 break;
             default:
-                logger.error("TUITextModule has not implemented functionality for outputType \"{}\"", outputType);
+                logger.error("TextModule has not implemented functionality for outputType \"{}\"", outputType);
                 break;
         }
 
@@ -83,7 +83,7 @@ public class TextModule extends TUIModule {
     /**
      * <p>Checks equality for properties given by the builder.</p>
      *
-     * <p>For TUITextModule, this includes: </p>
+     * <p>For TextModule, this includes: </p>
      * <ul>
      *     <li><strong>text</strong></li>
      *     <li><strong>printNewLine</strong></li>
@@ -95,7 +95,7 @@ public class TextModule extends TUIModule {
      *     <li>printStream</li>
      *     <li>enableAnsi</li>
      * </ul>
-     * @param other The TUITextModule to compare
+     * @param other The TextModule to compare
      * @return true if this module equals {@code other} according to builder-provided properties
      *
      * @implNote
@@ -187,7 +187,7 @@ public class TextModule extends TUIModule {
         /**
          * <p>Checks equality for properties given by the builder.</p>
          *
-         * <p>For TUITextModule.Builder, this includes: </p>
+         * <p>For TextModule.Builder, this includes: </p>
          * <ul>
          *     <li><strong>text</strong></li>
          *     <li><strong>printNewLine</strong></li>
@@ -202,8 +202,8 @@ public class TextModule extends TUIModule {
          * </ul>
          * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
          *  but are considered in equals().
-         * @param first The first TUITextModule.Builder to compare
-         * @param second The second TUITextModule.Builder to compare
+         * @param first The first TextModule.Builder to compare
+         * @param second The second TextModule.Builder to compare
          * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
          *
          * @implNote
@@ -222,7 +222,7 @@ public class TextModule extends TUIModule {
 
         @Override
         public TextModule build() {
-            logger.trace("Building TUITextModule {}", getName());
+            logger.trace("Building TextModule {}", getName());
             return new TextModule(self());
         }
     }

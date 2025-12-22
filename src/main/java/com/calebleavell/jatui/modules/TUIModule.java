@@ -39,6 +39,7 @@ import static org.fusesource.jansi.Ansi.ansi;
  * <br><br>
  * Use {@link ContainerModule} as the minimal implementation for this class. <br>
  * <br>
+ * <Strong>TUIModule (and Jatui in general) is <i>not</i> thread-safe and is intended to be managed on a single thread.</Strong>
  */
 public abstract class TUIModule {
 
@@ -183,7 +184,7 @@ public abstract class TUIModule {
      * Recursively searches for a child and returns it as T, if it exists as type T.
      *
      * @param name The name of the child to search for.
-     * @param type The type of the child to search for <br> (e.g., {@code TUIContainerModule.Builder.class})
+     * @param type The type of the child to search for <br> (e.g., {@code ContainerModule.Builder.class})
      * @return The child as T, if it exists.
      * @param <T> The type of the child
      */
@@ -226,15 +227,16 @@ public abstract class TUIModule {
         while (!runStack.isEmpty()) {
             RunFrame frame = runStack.pop();
             TUIModule module = frame.module;
+            TUIModule parent = frame.parent;
             RunFrame.State state = frame.state;
 
             if(module == null) continue;
 
             switch(state) {
                 case RunFrame.State.BEGIN -> {
-                    logger.trace("Beginning run for module \"{}\"", frame.module.name);
-                    if(frame.parent != null) frame.parent.currentRunningChild = frame.module;
-                    frame.module.mainRun(frame);
+                    logger.trace("Beginning run for module \"{}\"", module.name);
+                    if(parent != null) parent.currentRunningChild = module;
+                    module.mainRun(frame);
                 }
                 case RunFrame.State.END -> endRun(frame);
                 default -> throw new UnsupportedOperationException("Only \"BEGIN\" and \"END\" are valid RunFrame states.");
@@ -242,13 +244,18 @@ public abstract class TUIModule {
         }
     }
 
+    /**
+     * The module-specific logic to run.
+     * @implSpec The children of this module are automatically run after this, so there is no need to
+     * implement logic that handles scheduling the behavior of children.
+     */
     public abstract void shallowRun();
 
     /**
      * Linearly schedules all children to run, and then schedules itself to end its run.
      * This is the method that will be overridden to define concrete module runtime logic.
      *
-     * @param frame The relevant data for running, including
+     * @param frame The relevant data for running
      */
     private void mainRun(RunFrame frame) {
         logger.trace("Running children for module \"{}\"", this.name);
@@ -263,6 +270,11 @@ public abstract class TUIModule {
         }
     }
 
+    /**
+     * Finishes the run for a module, including restarting if needed and resetting both the {@link TUIModule#currentRunningChild}
+     * for the parent and the {@link TUIModule#runStack} for the module.
+     * @param frame The relevant data for running
+     */
     private void endRun(RunFrame frame) {
         logger.trace("Ending run for module \"{}\"", frame.module.name);
         if(frame.parent != null) frame.parent.currentRunningChild = frame.displacedChild; // usually null
@@ -555,7 +567,7 @@ public abstract class TUIModule {
         if(first == null || second == null) return false;
 
         return (Objects.equals(first.name, second.name) &&
-                TUIModule.shallowStructuralEquals(first.application, second.application) &&
+                TUIModule.shallowStructuralEquals(first.application, second.application) && // intentionally only checks shallow equality to avoid infinite recursion
                 Objects.equals(first.ansi.toString(), second.ansi.toString()) &&
                 Objects.equals(first.scanner, second.scanner) &&
                 Objects.equals(first.printStream, second.printStream) &&
@@ -676,7 +688,7 @@ public abstract class TUIModule {
          * @param type The type of the module. This is usually defined
          *             by the inheriting class (e.g., {@code type} for
          *             {@link TextModule.Builder} would be
-         *             {@code TUITextModule.Builder.class}).
+         *             {@code TextModule.Builder.class}).
          * @param name The unique name of this module.
          */
         public Builder(Class<B> type, String name) {
@@ -692,7 +704,7 @@ public abstract class TUIModule {
          * @param type The type of the module. This is usually defined
          *             by the inheriting class (e.g., {@code type} for
          *             {@link TextModule.Builder} would be
-         *             {@code TUITextModule.Builder.class}).
+         *             {@code TextModule.Builder.class}).
          */
         protected Builder(Class<B> type) {
             this.type = type;
@@ -968,11 +980,12 @@ public abstract class TUIModule {
         }
 
         /**
-         * TODO - document this
-         * @param name
-         * @param type
-         * @return
-         * @param <T>
+         * Finds a child matching the name and class type.
+         * It is recommended to name all modules uniquely so this returns a unique module every time.
+         *
+         * @param name The name of the child
+         * @param type the type of builder to search for (e.g., {@code TextModule.class})
+         * @return The first found child (DFS), or <i><strong>null</strong></i> if none is found of the correct type.
          */
         public <T extends TUIModule.Builder<?>> T getChild(String name, Class<T> type) {
             TUIModule.Builder<?> child = getChild(name);
@@ -1330,7 +1343,7 @@ public abstract class TUIModule {
             String secondAnsi = second.ansi != null ? second.ansi.toString() : null;
 
             return (Objects.equals(first.name, second.name) &&
-                    TUIModule.shallowStructuralEquals(first.application, second.application) && // intentionally checks by reference
+                    TUIModule.shallowStructuralEquals(first.application, second.application) && // intentionally only checks shallow equality to avoid infinite recursion
                     Objects.equals(firstAnsi, secondAnsi) &&
                     Objects.equals(first.scanner, second.scanner) &&
                     Objects.equals(first.printStream, second.printStream) &&

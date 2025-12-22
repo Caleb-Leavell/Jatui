@@ -33,7 +33,7 @@ public class TextInputModule extends TUIModule {
 
     @Override
     public void shallowRun() {
-        logger.info("Running TUITextInputModule {}", getName());
+        logger.info("Running TextInputModule {}", getName());
         displayText.build().run();
         logger.info("collecting input...");
         input = getScanner().nextLine();
@@ -50,7 +50,7 @@ public class TextInputModule extends TUIModule {
     /**
      * <p>Checks equality for properties given by the builder.</p>
      *
-     * <p>For TUITextInputModule, this includes: </p>
+     * <p>For TextInputModule, this includes: </p>
      * <ul>
      *     <li><strong>displayText</strong> (Note: this checks structural equality, not reference equality)</li>
      *     <li>name</li>
@@ -61,7 +61,7 @@ public class TextInputModule extends TUIModule {
      *     <li>enableAnsi</li>
      * </ul>
      * <p>Note: Runtime properties (e.g., input, inputMap, currentRunningChild, terminated), are not considered.</p>
-     * @param other The TUITextInputModule to compare
+     * @param other The TextInputModule to compare
      * @return true if this module equals {@code other} according to builder-provided properties
      *
      * @implNote
@@ -186,7 +186,7 @@ public class TextInputModule extends TUIModule {
          * @return self
          */
         public Builder addHandler(FunctionModule.Builder handler) {
-            logger.trace("adding handler via TUIFunctionModule \"{}\"", handler.getName());
+            logger.trace("adding handler via FunctionModule \"{}\"", handler.getName());
             handlers.addChild(new InputHandler(this.name + "-" + handlerNum, this.name).setHandler(handler));
             handlerNum ++;
             return self();
@@ -227,7 +227,7 @@ public class TextInputModule extends TUIModule {
 
         @Override
         public TextInputModule build() {
-            logger.trace("Building TUITextInputModule {}", getName());
+            logger.trace("Building TextInputModule {}", getName());
 
             // remove the display text from the children since we need it to run before the parent module
             // it's a child in the first place so that things like setApplication() affect it as well

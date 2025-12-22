@@ -19,11 +19,11 @@ This library is currently in **beta**, and while it's stable and tested, it's mi
 Here's a simple "Hello, World!" app to get started:
 
 ```Java
-// declare a TUIApplicationModule to house our app
-TUIApplicationModule app = new TUIApplicationModule("app").build();
+// declare a ApplicationModule to house our app
+ApplicationModule app = new ApplicationModule("app").build();
 
 // define the actual application structure
-TUITextModule.Builder helloWorld = new TUITextModule.Builder("hello-world", "Hello, World!");
+TextModule.Builder helloWorld = new TextModule.Builder("hello-world", "Hello, World!");
 
 // set the app home and run
 app.setHome(helloWorld);
@@ -92,18 +92,18 @@ Jatui aims to solve this problem by providing a declarative modularization frame
 ```Java
 public static void main(String[] args) {
         // Application object
-        TUIApplicationModule app = new TUIApplicationModule.Builder("app").build();
+        ApplicationModule app = new ApplicationModule.Builder("app").build();
 
-        // Builder for a TUITextModule that displays the output of another module, and is bold with gold text.
-        var moduleOutput = new TUITextModule.Builder("module-output-template", "template")
+        // Builder for a TextModule that displays the output of another module, and is bold with gold text.
+        var moduleOutput = new TextModule.Builder("module-output-template", "template")
                 .setOutputType(DISPLAY_MODULE_OUTPUT)
                 .setAnsi(ansi().bold().fgRgb(220, 180, 0));
 
         // We declare the "scene" in a ContainerModule so that it's nicely compartmentalized and reusable if needed.
-        var randomNumberGenerator = new TUIContainerModule.Builder("random-number-generator")
+        var randomNumberGenerator = new ContainerModule.Builder("random-number-generator")
                 .addChildren(
                         // Input Module that gets the maximum number
-                        new TUITextInputModule.Builder("input", "Maximum Number (or -1 to exit): ")
+                        new TextInputModule.Builder("input", "Maximum Number (or -1 to exit): ")
                                 // safe handler to check for negative input.
                                 .addSafeHandler("exit-if-negative", s -> {
                                     // If it's negative we exit.
@@ -115,16 +115,16 @@ public static void main(String[] args) {
                                 // safe handler that references the logic for generating a random integer
                                 .addSafeHandler("generated-number", Main::getRandomInt),
                         // Text Modules that display the generated number
-                        new TUIModuleFactory.LineBuilder("generated-number-display")
+                        new LineBuilder("generated-number-display")
                                 .addText("Generated Number: ")
                                 .addText(moduleOutput.getCopy()
                                         .setName("display-generated-number")
                                         .setText("generated-number"))
                                 .newLine(),
                         // prompt the user to generate another number or exit
-                        new TUIModuleFactory.NumberedModuleSelector("selector", app)
+                        new NumberedModuleSelector("selector", app)
                                 .addScene("Generate another number", "random-number-generator")
-                                .addScene("Exit", TUIModuleFactory.terminate("terminate-app", app)));
+                                .addScene("Exit", terminate("terminate-app", app)));
 
 
         // Set the application home and run

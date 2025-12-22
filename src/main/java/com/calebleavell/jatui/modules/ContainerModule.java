@@ -30,10 +30,10 @@ public class ContainerModule extends TUIModule {
      */
     @Override
     public void shallowRun() {
-        logger.info("Running TUIContainerModule \"{}\"", getName());
+        logger.info("Running ContainerModule \"{}\"", getName());
     }
     /**
-     * Builds a TUIContainerModule based on the state of {@code builder}
+     * Builds a ContainerModule based on the state of {@code builder}
      * @param builder The {@link ContainerModule.Builder} that is building the application module.
      */
     public ContainerModule(TUIModule.Builder<?> builder) {
@@ -65,11 +65,11 @@ public class ContainerModule extends TUIModule {
 
         /**
          * Builds a new {@link ApplicationModule}.
-         * @return The built TUIApplicationModule
+         * @return The built ApplicationModule
          */
         @Override
         public ContainerModule build() {
-            logger.trace("Building TUIContainerModule \"{}\"", getName());
+            logger.trace("Building ContainerModule \"{}\"", getName());
             return new ContainerModule(self());
         }
     }

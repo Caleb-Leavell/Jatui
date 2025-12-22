@@ -37,14 +37,14 @@ public class FunctionModule extends TUIModule {
      */
     @Override
     public void shallowRun() {
-        logger.info("Running TUIFunctionModule \"{}\"", getName());
+        logger.info("Running FunctionModule \"{}\"", getName());
         Object output = function.get();
         if(getApplication() != null)
             getApplication().updateInput(this, output);
         else if(output != null)
-            logger.warn("Output \"{}\" produced by TUIFunctionModule \"{}\" but no application exists to store it", output, getName());
+            logger.warn("Output \"{}\" produced by FunctionModule \"{}\" but no application exists to store it", output, getName());
         else
-            logger.debug("No output produced by TUIFunctionModule \"{}\" and no application exists", getName());
+            logger.debug("No output produced by FunctionModule \"{}\" and no application exists", getName());
     }
 
     /**
@@ -117,7 +117,7 @@ public class FunctionModule extends TUIModule {
          * @return self
          */
         public Builder setFunction(Supplier<?> function) {
-            logger.debug("setting function for TUIFunctionModule builder \"{}\"", getName());
+            logger.debug("setting function for FunctionModule builder \"{}\"", getName());
             this.function = function;
             return self();
         }
@@ -129,7 +129,7 @@ public class FunctionModule extends TUIModule {
          * @return self
          */
         public Builder setFunction(Runnable function) {
-            logger.debug("setting function for TUIFunctionModule builder \"{}\" based on a Runnable", getName());
+            logger.debug("setting function for FunctionModule builder \"{}\" based on a Runnable", getName());
             if(function == null) this.function = null;
             else {
                 this.function = () -> {
@@ -173,7 +173,7 @@ public class FunctionModule extends TUIModule {
          */
         @Override
         public FunctionModule build() {
-            logger.trace("Building TUIFunctionModule \"{}\"", getName());
+            logger.trace("Building FunctionModule \"{}\"", getName());
             return new FunctionModule(self());
         }
     }

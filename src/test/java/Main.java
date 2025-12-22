@@ -21,6 +21,7 @@ import com.calebleavell.jatui.templates.LineBuilder;
 import com.calebleavell.jatui.templates.NumberedModuleSelector;
 
 import java.util.Random;
+import java.util.Scanner;
 
 import static com.calebleavell.jatui.modules.TextModule.OutputType.*;
 
@@ -35,7 +36,7 @@ public class Main {
         // Application object
         ApplicationModule app = new ApplicationModule.Builder("app").build();
 
-        // Builder for a TUITextModule that displays the output of another module, and is bold with gold text.
+        // Builder for a TextModule that displays the output of another module, and is bold with gold text.
         // Since we've declared the builder here, we can copy it anywhere we want and update what we need.
         // It's generally a good idea to start abstracting modules away like this when they have complex
         // information attached to them (e.g. here it has the output type and ansi)
@@ -76,7 +77,7 @@ public class Main {
                     // The input module will provide getRandomInt with the input it collected
                     .addSafeHandler("generated-number", Main::getRandomInt),
             // Text Modules that display the generated number
-            // This can be done with TUITextModule.Builder, but TextBuilder facilitates chaining text modules.
+            // This can be done with TextModule.Builder, but TextBuilder facilitates chaining text modules.
             new LineBuilder("generated-number-display")
                     .addText("Generated Number: ")
                     // We create a copy of moduleOutput, declared above
@@ -87,16 +88,18 @@ public class Main {
                             .setName("display-generated-number")
                             .setText("generated-number"))
                     .newLine(),
-            // TUIModuleFactory provides NumberedModuleSelector, which displays a numbered list of
+            // The templates package provides NumberedModuleSelector, which displays a numbered list of
             // text, asks for user input, and runs the module corresponding to the choice of the user.
             new NumberedModuleSelector("selector", app)
                     // This choice restarts the app
                     .addModule("Generate another number", ModuleFactory.restart("restart", app))
-                    // TUIModuleFactory also provides Terminate, which returns a TUIFunctionModule builder
+                    // The templates package also provides Terminate, which returns a FunctionModule builder
                     // that, when run, simply terminates the module that was inputted into Terminate().
                     // So here, it's terminating app.
                     .addModule("Exit", confirmExit));
 
+        Scanner myScanner = new Scanner(System.in);
+        myScanner.close();
 
         // Set the application home and run
         app.setHome(randomNumberGenerator);

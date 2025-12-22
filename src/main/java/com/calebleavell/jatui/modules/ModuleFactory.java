@@ -22,7 +22,7 @@ package com.calebleavell.jatui.modules;
  */
 public class ModuleFactory {
     /**
-     * Returns an empty ContainerModule - simply wraps <pre><code>new TUIContainerModule.Builder([name])</code></pre>
+     * Returns an empty ContainerModule - simply wraps <pre><code>new ContainerModule.Builder([name])</code></pre>
      * to allow for code that consistently uses TUIModuleFactory if desired.
      * @param name The name of the module
      * @return The empty ContainerModule

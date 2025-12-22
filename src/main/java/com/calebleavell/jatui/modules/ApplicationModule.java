@@ -61,17 +61,20 @@ public class ApplicationModule extends TUIModule {
      * Overrides {@link TUIModule#run()}. <br>
      * Checks and logs name duplicates, runs children (where "home" is the first child),
      * and then runs {@link ApplicationModule#onExit} if not disabled.
+     * @implNote overrides run instead of shallowRun to ensure onExit runs exactly once per run, regardless of
+     * restarting or termination.
      */
     @Override
     public void run() {
-        logger.info("Running TUIApplicationModule \"{}\"", getName());
+        logger.info("Running ApplicationModule \"{}\"", getName());
 
         checkForNameDuplicates();
         super.run();
         onExit.build().run();
     }
 
-    public void shallowRun() {};
+    @Override
+    public void shallowRun() {/* no additional behavior needed in shallowRun */}
 
     /**
      * Checks every child attached to this application and logs an error
@@ -271,7 +274,7 @@ public class ApplicationModule extends TUIModule {
     /**
      * <p>Checks equality for properties given by the builder.</p>
      *
-     * <p>For TUIApplicationModule, this includes: </p>
+     * <p>For ApplicationModule, this includes: </p>
      * <ul>
      *     <li><strong>onExit</strong> (Note: checks structural equality, not reference equality)</li>
      *     <li>name</li>
@@ -282,7 +285,7 @@ public class ApplicationModule extends TUIModule {
      *     <li>enableAnsi</li>
      * </ul>
      * <p>Note: Runtime properties (e.g., inputMap, currentRunningChild, terminated), are not considered.</p>
-     * @param other The TUIApplicationModule to compare
+     * @param other The ApplicationModule to compare
      * @return true if this module equals {@code other} according to builder-provided properties
      *
      * @implNote
@@ -434,11 +437,11 @@ public class ApplicationModule extends TUIModule {
          * the {@code application}, {@code printStream}, {@code scanner}, and {@code ansiEnabled} for all children,
          * including {@code home}. It will <strong>not</strong> update ansi. It will also not update any properties that
          * have been locked.
-         * @return The built TUIApplicationModule
+         * @return The built ApplicationModule
          */
         @Override
         public ApplicationModule build() {
-            logger.trace("Building TUIApplicationModule \"{}\"", getName());
+            logger.trace("Building ApplicationModule \"{}\"", getName());
             return new ApplicationModule(self());
         }
     }
