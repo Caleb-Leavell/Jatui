@@ -226,7 +226,7 @@ class ModuleFactoryTest {
                     .addChildren(
                             ModuleFactory.counter("counter", app),
                             new TextModule.Builder("display", "counter")
-                                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT),
+                                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE),
                             new FunctionModule.Builder("exit-if-greater-than-10", () -> {
                                 int n = app.getInput("counter", Integer.class);
 
@@ -262,7 +262,7 @@ class ModuleFactoryTest {
                     .addChildren(
                             ModuleFactory.counter("counter", app, 5, 2),
                             new TextModule.Builder("display", "counter")
-                                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT),
+                                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE),
                             new FunctionModule.Builder("exit-if-greater-than-10", () -> {
                                 int n = app.getInput("counter", Integer.class);
 

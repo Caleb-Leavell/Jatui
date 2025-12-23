@@ -17,10 +17,6 @@
 
 package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.modules.ApplicationModule;
-import com.calebleavell.jatui.modules.ContainerModule;
-import com.calebleavell.jatui.modules.FunctionModule;
-import com.calebleavell.jatui.modules.TextModule;
 import com.calebleavell.jatui.util.IOCapture;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -77,7 +73,7 @@ class TextModuleTest {
                     .addChildren(
                             new FunctionModule.Builder("func", () -> 5),
                             new TextModule.Builder("test", "func")
-                                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                                     .setPrintStream(io.getPrintStream())
                                     .enableAnsi(false)
                     );
@@ -101,25 +97,25 @@ class TextModuleTest {
     @Test
     void testEquals() {
         TextModule first = new TextModule.Builder("name", "text")
-                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .printNewLine(false)
                 .enableAnsi(false) // setting one super field to non-default to ensure that's handled as well
                 .build();
 
         TextModule second = new TextModule.Builder("name", "text")
-                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .printNewLine(false)
                 .enableAnsi(false)
                 .build();
 
         TextModule third = new TextModule.Builder("name", "text")
-                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .printNewLine(false)
                 .enableAnsi(false)
                 .build();
 
         TextModule fourth = new TextModule.Builder("name", "other-text")
-                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .printNewLine(false)
                 .enableAnsi(false)
                 .build();
@@ -130,12 +126,12 @@ class TextModuleTest {
                 .build();
 
         TextModule sixth = new TextModule.Builder("name", "text")
-                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .enableAnsi(false)
                 .build();
 
         TextModule seventh = new TextModule.Builder("name", "text")
-                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .printNewLine(false)
                 .build();
 
@@ -158,7 +154,7 @@ class TextModuleTest {
         @Test
         void testShallowCopy() {
             TextModule.Builder original = new TextModule.Builder("name", "text")
-                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                     .printNewLine(false)
                     .enableAnsi(false); // setting one super field to non-default to ensure that's handled as well
 
@@ -202,14 +198,14 @@ class TextModuleTest {
             TextModule.Builder text = new TextModule.Builder("text", "Test Text");
 
             before = text.getOutputType();
-            text.setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT);
+            text.setOutputType(TextModule.OutputType.DISPLAY_APP_STATE);
             after = text.getOutputType();
             text.build().run();
 
 
             assertAll(
                     () -> assertEquals(TextModule.OutputType.DISPLAY_TEXT, before),
-                    () -> assertEquals(TextModule.OutputType.DISPLAY_MODULE_OUTPUT, after)
+                    () -> assertEquals(TextModule.OutputType.DISPLAY_APP_STATE, after)
             );
         }
 
@@ -252,22 +248,22 @@ class TextModuleTest {
         @Test
         void testShallowStructuralStructuralEquals() {
             TextModule.Builder first = new TextModule.Builder("name", "text")
-                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                     .printNewLine(false)
                     .enableAnsi(false); // setting one super field to non-default to ensure that's handled as well
 
             TextModule.Builder second = new TextModule.Builder("name", "text")
-                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                     .printNewLine(false)
                     .enableAnsi(false);
 
             TextModule.Builder third = new TextModule.Builder("name", "text")
-                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                     .printNewLine(false)
                     .enableAnsi(false);
 
             TextModule.Builder fourth = new TextModule.Builder("name", "other-text")
-                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                     .printNewLine(false)
                     .enableAnsi(false);
 
@@ -276,11 +272,11 @@ class TextModuleTest {
                     .enableAnsi(false);
 
             TextModule.Builder sixth = new TextModule.Builder("name", "text")
-                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                     .enableAnsi(false);
 
             TextModule.Builder seventh = new TextModule.Builder("name", "text")
-                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                     .printNewLine(false);
 
             assertAll(
@@ -300,7 +296,7 @@ class TextModuleTest {
         @Test
         void testBuild() {
             TextModule.Builder builder = new TextModule.Builder("text", "Test Text")
-                    .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                     .printNewLine(false);
 
             TextModule first = builder.build();
@@ -308,7 +304,7 @@ class TextModuleTest {
 
             assertAll(
                     () -> assertEquals("Test Text", first.getText()),
-                    () -> assertEquals(TextModule.OutputType.DISPLAY_MODULE_OUTPUT, first.getOutputType()),
+                    () -> assertEquals(TextModule.OutputType.DISPLAY_APP_STATE, first.getOutputType()),
                     () -> assertFalse(first.getPrintNewLine()),
                     () -> assertTrue(first.equals(second))
             );

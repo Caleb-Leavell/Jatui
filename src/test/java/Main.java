@@ -41,7 +41,7 @@ public class Main {
         // It's generally a good idea to start abstracting modules away like this when they have complex
         // information attached to them (e.g. here it has the output type and ansi)
         var moduleOutput = new TextModule.Builder("module-output-template", "template")
-                .setOutputType(DISPLAY_MODULE_OUTPUT)
+                .setOutputType(DISPLAY_APP_STATE)
                 // We set the ansi to a nice gold color.
                 // Setting the ansi automatically locks it from being set again,
                 // but you can unlock it with .unlockProperty(SET_ANSI)

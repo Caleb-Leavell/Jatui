@@ -17,23 +17,51 @@
 
 package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.core.DirectedGraphNode;
-import com.calebleavell.jatui.core.RunFrame;
+import org.fusesource.jansi.Ansi;
 
+import java.io.PrintStream;
 import java.util.Objects;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
+/**
+ * Handles the displaying of text. Usually this means displaying to console ({@link System#out}), but
+ * {@link TUIModule.Builder#setPrintStream(PrintStream)} can be used to output to other places as well.
+ */
 public class TextModule extends TUIModule {
+
+    /** The text to either display directly or the input identifier fetch the input from for the {@link ApplicationModule}. **/
     private final String text;
+
+    /** Whether to print a new line after the text is outputted. **/
     private final boolean printNewLine;
+
+    /** The {@link OutputType} of the text to display, which includes pure output or fetching application state. **/
     private final OutputType outputType;
 
+    /**
+     * Defines the behavior of the {@link TextModule}, specifically whether
+     * it displays raw text or fetches application state.
+     */
     public enum OutputType {
-            DISPLAY_TEXT,
-            DISPLAY_MODULE_OUTPUT
+        /** Displays the text provided by {@link TextModule.Builder#setText(String)} **/
+        DISPLAY_TEXT,
+        /** Displays the application state, where the input identifier is provided by {@link TextModule.Builder#setText(String)} **/
+        DISPLAY_APP_STATE
     }
 
+    /**
+     * Outputs text via the behavior given by {@link OutputType}.
+     * If {@code application} is null and {@link OutputType} is
+     * {@link OutputType#DISPLAY_APP_STATE}, nothing is outputted and a warning
+     * is logged.
+     * <br>
+     * Also displays the ansi provided by {@link TUIModule.Builder#setAnsi(Ansi)} unless
+     * disabled via {@link TUIModule.Builder#enableAnsi(boolean)}.
+     * The ansi gets reset at the end of the run.
+     * <br>
+     * Prints a new line unless disabled via {@link TextModule.Builder#printNewLine(boolean)}.
+     */
     @Override
     public void shallowRun() {
         logger.info("Running TextModule {}", getName());
@@ -46,12 +74,12 @@ public class TextModule extends TUIModule {
 
         switch(outputType) {
             case DISPLAY_TEXT:
-                logger.info("displaying text for \"{}\": \"{}\"", getName(), text);
+                logger.debug("displaying text for \"{}\": \"{}\"", getName(), text);
                 getPrintStream().print(text);
                 break;
-            case DISPLAY_MODULE_OUTPUT:
+            case DISPLAY_APP_STATE:
                 if (getApplication() != null) {
-                    logger.info("displaying output of module \"{}\" for \"{}\": \"{}\"", text, getName(), getApplication().getInput(text));
+                    logger.debug("displaying output of module \"{}\" for \"{}\": \"{}\"", text, getName(), getApplication().getInput(text));
                     getPrintStream().print(getApplication().getInput(text));
                 }
                 else logger.warn("tried to display output of module \"{}\" but application was null", text);
@@ -72,35 +100,30 @@ public class TextModule extends TUIModule {
         }
     }
 
+    /**
+     * Get the text that defines how this module outputs.
+     * @return text
+     */
     String getText() {
         return text;
     }
 
+    /**
+     * Get the {@link OutputType} that defines the behavior of this module.
+     * @return the output type of this module.
+     */
     OutputType getOutputType() {return outputType;}
 
+    /**
+     * If {@code printNewLine} is true, this module prints a new line after outputting.
+     * @return printNewLine
+     */
     boolean getPrintNewLine() {return printNewLine;}
 
     /**
-     * <p>Checks equality for properties given by the builder.</p>
-     *
-     * <p>For TextModule, this includes: </p>
-     * <ul>
-     *     <li><strong>text</strong></li>
-     *     <li><strong>printNewLine</strong></li>
-     *     <li><strong>outputType</strong></li>
-     *     <li>name</li>
-     *     <li>application</li>
-     *     <li>ansi</li>
-     *     <li>scanner</li>
-     *     <li>printStream</li>
-     *     <li>enableAnsi</li>
-     * </ul>
-     * @param other The TextModule to compare
-     * @return true if this module equals {@code other} according to builder-provided properties
-     *
-     * @implNote
-     * This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
-     *  This method is merely for checking structural equality, which is generally only necessary for manual testing.
+     * Checks equality for properties given by the builder. For {@link TextModule}, this includes
+     * {@code text}, {@code printNewLine}, and {@code outputType},
+     * as well as other requirements provided by {@link TUIModule#structuralEquals(TUIModule)}.
      */
     public boolean equals(TextModule other) {
         if(this == other) return true;
@@ -112,6 +135,12 @@ public class TextModule extends TUIModule {
                 && super.structuralEquals(other);
     }
 
+    /**
+     * Constructs a new {@link TextModule} based on the configuration of the {@link TextModule.Builder}.
+     * Copies {@code text}, {@code printNewLine}, and {@code outputType} from the builder.
+     *
+     * @param builder The builder to construct the new module from.
+     */
     public TextModule(Builder builder) {
         super(builder);
         this.text = builder.text;
@@ -119,9 +148,20 @@ public class TextModule extends TUIModule {
         this.outputType = builder.outputType;
     }
 
+    /**
+     * Builder for {@link TextInputModule}.
+     * <br><br>
+     * Required fields: {@code name}, {@code text} <br>
+     * Optional fields (with default values): {@code printNewLine}, {@code outputType}
+     **/
     public static class Builder extends TUIModule.Builder<Builder> {
+        /** The text to either display directly or the input identifier fetch the input from for the {@link ApplicationModule}. **/
         protected String text;
+
+        /** Whether to print a new line after the text is outputted. **/
         protected boolean printNewLine = true;
+
+        /** The {@link OutputType} of the text to display, which includes pure output or fetching application state. **/
         protected OutputType outputType = OutputType.DISPLAY_TEXT;
 
         public Builder(String name, String text) {
@@ -144,6 +184,11 @@ public class TextModule extends TUIModule {
         }
 
 
+        /**
+         * Copies {@code text}, {@code printNewLine}, and {@code outputType},
+         * and delegates to {@link TUIModule.Builder#shallowCopy(TUIModule.Builder)}.
+         * @param original The builder to copy from.
+         */
         @Override
         public void shallowCopy(Builder original) {
             this.text = original.text;
@@ -152,62 +197,74 @@ public class TextModule extends TUIModule {
             super.shallowCopy(original);
         }
 
+        /**
+         * If true, this module prints a new line after outputting.
+         * @param printNewLine Whether to print a new line after outputting.
+         * @return self
+         */
         public Builder printNewLine(boolean printNewLine) {
             this.printNewLine = printNewLine;
             return self();
         }
 
+        /**
+         * If {@code printNewLine} is true, this module prints a new line after outputting.
+         * @return printNewLine
+         */
         public boolean getPrintNewLine() {
             return printNewLine;
         }
 
+        /**
+         * Set the {@link OutputType} that defines the behavior of this module.
+         * @param type the output type of this module.
+         * @return self
+         */
         public Builder setOutputType(OutputType type) {
             this.outputType = type;
             return self();
         }
 
+        /**
+         * Get the {@link OutputType} that defines the behavior of this module.
+         * @return the output type of this module.
+         */
         public OutputType getOutputType() {
             return outputType;
         }
 
+        /**
+         * Set the text that defines how this module outputs.
+         * @param text What to output.
+         * @return self.
+         */
         public Builder setText(String text) {
             this.text = text;
             return self();
         }
 
+        /**
+         * Append to the text that's already been configured for this builder.
+         * @param text What to append to the existing text.
+         * @return self
+         */
         public Builder append(String text) {
             this.text += text;
             return self();
         }
 
+        /**
+         * Get the text that defines how this module outputs.
+         * @return What to output.
+         */
         public String getText() {
             return text;
         }
 
         /**
-         * <p>Checks equality for properties given by the builder.</p>
-         *
-         * <p>For TextModule.Builder, this includes: </p>
-         * <ul>
-         *     <li><strong>text</strong></li>
-         *     <li><strong>printNewLine</strong></li>
-         *     <li><strong>outputType</strong></li>
-         *     <li>name</li>
-         *     <li>application</li>
-         *     <li>children</li>
-         *     <li>ansi</li>
-         *     <li>scanner</li>
-         *     <li>printStream</li>
-         *     <li>enableAnsi</li>
-         * </ul>
-         * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
-         *  but are considered in equals().
-         * @param first The first TextModule.Builder to compare
-         * @param second The second TextModule.Builder to compare
-         * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-         *
-         * @implNote
-         * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+         * Checks equality for properties given by the builder. For {@link TextModule}, this includes
+         * {@code text}, {@code printNewLine}, and {@code outputType},
+         * as well as other requirements provided by {@link TUIModule#structuralEquals(TUIModule)}.
          */
         public boolean shallowStructuralEquals(TextModule.Builder first, TextModule.Builder second) {
             if(first == second) return true;
@@ -219,7 +276,10 @@ public class TextModule extends TUIModule {
                     && super.shallowStructuralEquals(first, second);
         }
 
-
+        /**
+         * Builds a new {@link TextModule} based on the configuration of this builder.
+         * @return The new {@link TextModule}.
+         */
         @Override
         public TextModule build() {
             logger.trace("Building TextModule {}", getName());

@@ -76,7 +76,7 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
 
     public LineBuilder addModuleOutput(String moduleName, Ansi ansi) {
         this.addText(new TextModule.Builder(main.getName() + "-" + iterator, moduleName)
-                .setOutputType(TextModule.OutputType.DISPLAY_MODULE_OUTPUT)
+                .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .printNewLine(false)
                 .setAnsi(ansi));
         return self();

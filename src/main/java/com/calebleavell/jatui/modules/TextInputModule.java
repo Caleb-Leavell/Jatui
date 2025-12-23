@@ -141,12 +141,12 @@ public class TextInputModule extends TUIModule {
 
         /**
          * Copies {@code handlerNum} and delegates to {@link TUIModule.Builder#shallowCopy(TUIModule.Builder)}.
-         * @param copyFrom The builder to copy from
+         * @param original The builder to copy from
          */
         @Override
-        protected void shallowCopy(Builder copyFrom) {
-            this.handlerNum = copyFrom.handlerNum;
-            super.shallowCopy(copyFrom);
+        protected void shallowCopy(Builder original) {
+            this.handlerNum = original.handlerNum;
+            super.shallowCopy(original);
         }
 
         /**
