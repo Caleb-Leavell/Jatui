@@ -22,6 +22,11 @@ import com.calebleavell.jatui.core.RunFrame;
 
 import java.util.function.Supplier;
 
+/**
+ * Handles arbitrary logic execution for the application by executing a {@link Supplier} when the module is run.
+ * If tied to an {@link ApplicationModule}, whatever the supplier returns is updated in the app's inputMap and can
+ * be accessed via {@link ApplicationModule#getInput(String)}.
+ */
 public class FunctionModule extends TUIModule {
 
     /**

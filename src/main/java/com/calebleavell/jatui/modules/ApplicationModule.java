@@ -117,6 +117,8 @@ public class ApplicationModule extends TUIModule {
      *  name of the module that supplied the input (it may also just be the
      *  provided name of the input if {@link ApplicationModule#forceUpdateInput(String, Object)}
      *  is used.
+     *  <br><br>
+     *  Also see {@link ApplicationModule#getInput(String, Class)} and {@link ApplicationModule#getInputOrDefault(String, Class, Object)}
      * @return The input corresponding to {@code inputName}, or null if it doesn't exist.
      */
     public Object getInput(String inputName) {
@@ -157,7 +159,7 @@ public class ApplicationModule extends TUIModule {
     public <T> T getInputOrDefault(String inputName, Class<T> type, T defaultValue) {
         Object value = inputMap.get(inputName);
         if(value == null) return defaultValue;
-        if(type.isInstance(value)) return type.cast(inputMap.get(inputName));
+        if(type.isInstance(value)) return type.cast(value);
         else return defaultValue;
     }
 
@@ -272,28 +274,8 @@ public class ApplicationModule extends TUIModule {
     }
 
     /**
-     * <p>Checks equality for properties given by the builder.</p>
-     *
-     * <p>For ApplicationModule, this includes: </p>
-     * <ul>
-     *     <li><strong>onExit</strong> (Note: checks structural equality, not reference equality)</li>
-     *     <li>name</li>
-     *     <li>application</li>
-     *     <li>ansi</li>
-     *     <li>scanner</li>
-     *     <li>printStream</li>
-     *     <li>enableAnsi</li>
-     * </ul>
-     * <p>Note: Runtime properties (e.g., inputMap, currentRunningChild, terminated), are not considered.</p>
-     * @param other The ApplicationModule to compare
-     * @return true if this module equals {@code other} according to builder-provided properties
-     *
-     * @implNote
-     * This method intentionally does not override {@link Object#equals(Object)} so that things like HashMaps still check by method reference.
-     * This method is merely for checking structural equality, which is generally only necessary for manual testing.
-     * Also, There is no need for an structuralEquals method that overrides {@link TUIModule.Builder#structuralEquals(TUIModule.Builder, TUIModule.Builder)} in {@link ApplicationModule.Builder} due to the fact that onExit is a
-     * child within the Builder, but not in the built module. This ensures property propagation is applied to onExit before building, but
-     * after building it is run last.
+     * Checks equality for properties given by the builder. For {@link ApplicationModule}, this includes
+     * {@code onExit}, as well as other requirements provided by {@link TUIModule#structuralEquals(TUIModule)}.
      */
     public boolean structuralEquals(ApplicationModule other) {
         if(this == other) return true;
