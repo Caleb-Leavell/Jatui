@@ -40,7 +40,7 @@ public class Main {
         // Since we've declared the builder here, we can copy it anywhere we want and update what we need.
         // It's generally a good idea to start abstracting modules away like this when they have complex
         // information attached to them (e.g. here it has the output type and ansi)
-        var moduleOutput = new TextModule.Builder("module-output-template", "template")
+        TextModule.Builder moduleOutput = new TextModule.Builder("module-output-template", "template")
                 .setOutputType(DISPLAY_APP_STATE)
                 // We set the ansi to a nice gold color.
                 // Setting the ansi automatically locks it from being set again,
@@ -51,15 +51,17 @@ public class Main {
         // It will be called later in the actual app.
         // If the user confirms they want to exit, the app terminates;
         // otherwise, the app restarts
-        var confirmExit = new ConfirmationPrompt("confirm-exit",
+        ConfirmationPrompt confirmExit = new ConfirmationPrompt("confirm-exit",
                 "Are you sure you want to exit (y/n)? ")
                 .setApplication(app)
                 .addOnConfirm(app::terminate)
                 .addOnDeny(app::restart);
 
         // We declare the "scene" in a ContainerModule so that it's nicely compartmentalized and reusable if needed.
-        var randomNumberGenerator = new ContainerModule.Builder("random-number-generator");
+        ContainerModule.Builder randomNumberGenerator = new ContainerModule.Builder("random-number-generator");
         randomNumberGenerator.addChildren(
+            new TextModule.Builder("title", "=== Random Number Generator ===")
+                    .setAnsi(ansi().bold().fgRgb(200, 255, 255)),
             // Input Module that gets the maximum number
             new TextInputModule.Builder("get-random-number", "Maximum Number (or -1 to exit): ")
                     // We declare a safe handler to check for negative input.
@@ -98,9 +100,6 @@ public class Main {
                     // So here, it's terminating app.
                     .addModule("Exit", confirmExit));
 
-        Scanner myScanner = new Scanner(System.in);
-        myScanner.close();
-
         // Set the application home and run
         app.setHome(randomNumberGenerator);
         app.run();
@@ -124,16 +123,16 @@ public class Main {
      * (Note, this template isn't used in the demo app. Further documentation on templating will come in the future.)
      */
     public static class Rect extends ModuleTemplate<Rect> {
-        int x;
-        int y;
+        int width;
+        int height;
 
         String cell = ".";
 
-        public Rect(String name, int x, int y) {
+        public Rect(String name, int width, int height) {
             super(Rect.class, name);
 
-            this.x = x;
-            this.y = y;
+            this.width = width;
+            this.height = height;
 
             main.addChild(new FunctionModule.Builder("func", () -> logger.info("test")));
         }
@@ -149,8 +148,8 @@ public class Main {
 
         @Override
         public void shallowCopy(Rect original) {
-            this.x = original.x;
-            this.y = original.y;
+            this.width = original.width;
+            this.height = original.height;
             cell = original.cell;
             super.shallowCopy(original);
         }
@@ -164,10 +163,10 @@ public class Main {
         public ContainerModule build() {
             main.clearChildren(); // this prevents the children from duplicating every time.
 
-            for(int i = 0; i < y; i ++) {
-                TextModule.Builder row = new TextModule.Builder(name + "-" + y, "");
+            for(int i = 0; i < height; i ++) {
+                TextModule.Builder row = new TextModule.Builder(name + "-" + height, "");
 
-                for(int j = 0; j < x; j ++) {
+                for(int j = 0; j < width; j ++) {
                     row.append(cell);
                 }
 
