@@ -182,7 +182,7 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      */
     public LineBuilder newLine() {
         if (current == null) {
-            this.addText(""); // create an empty TextModule if none exists
+            this.addText("");
         }
         logger.trace("adding newline to LineBuilder \"{}\"", getName());
         current.printNewLine(true);
