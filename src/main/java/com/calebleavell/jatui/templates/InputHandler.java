@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2025 Caleb Leavell
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
@@ -5,23 +22,83 @@ import com.calebleavell.jatui.modules.*;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Handles management of the application state by running logic
+ * on saved inputs from the application.
+ * <br><br>
+ * Example Usage:
+ * <pre><code>
+ *       InputHandler handler = new InputHandler("handler-name", "input_identifier")
+ *                     .setHandler("return_value_identifier",
+ *                             // run main logic on input
+ *                             s -> {
+ *                         if(!s.equals("valid_input")) throw new RuntimeException("invalid input!!");
+ *                         else return 10;
+ *                     },
+ *                             // handle the RuntimeException thrown above (optional)
+ *                             s -> {
+ *                         app.restart();
+ *                     })
+ * </code></pre>
+ *
+ * <strong>Note: </strong> You will likely want to use the wrapper methods provided by
+ * {@link TextInputModule.Builder} (e.g, {@link TextInputModule.Builder#addSafeHandler(String, Function, String)})
+ * if interfacing with user input. This class should be
+ * used if more fine-grained control is required, or if implementing a custom {@link ModuleTemplate}
+ * that works closely with application state.
+ */
 public class InputHandler extends ModuleTemplate<InputHandler> {
 
+    /** the name of the app state to read **/
     protected String inputName;
 
+    /** The type of the handler (as provided by {@link HandlerType}) **/
     protected InputHandler.HandlerType handlerType;
+
+    /**
+     * The module tha provides logic if {@link InputHandler#handlerType} is
+     * {@link HandlerType#MODULE}.
+     * **/
     private FunctionModule.Builder module;
+
+    /**
+     * The logic that runs on input if {@link InputHandler#handlerType}
+     * is {@link HandlerType#HANDLER} or {@link HandlerType#SAFE_HANDLER}.
+     **/
     private Function<String, ?> logic;
+
+    /**
+     * Handles instances of {@link RuntimeException} thrown by {@link InputHandler#logic}
+     * if {@link InputHandler#handlerType} is {@link HandlerType#SAFE_HANDLER}.
+     **/
     private Consumer<String> exceptionHandler;
+
+    /**
+     * The name of the {@link FunctionModule} to create and thus the identifier
+     * of the returned value for {@link InputHandler#logic} if {@link InputHandler#handlerType}
+     * is {@link HandlerType#HANDLER} or {@link HandlerType#SAFE_HANDLER}.
+     **/
     private String moduleName;
 
+    /**
+     * Specifies how to build the handler.
+     */
     protected enum HandlerType {
+        /**
+         * Builds the module with the provided {@link FunctionModule} as the logic runner.
+         * Set via {@link InputHandler#setHandler(FunctionModule.Builder)}.
+         **/
         MODULE,
+
+        /** Builds the module with logic provided by {@link InputHandler#setHandler(String, Function)}. **/
         HANDLER,
+
+        /** Builds the module with logic provided by {@link InputHandler#setHandler(String, Function, Consumer)}. **/
         SAFE_HANDLER
     }
 
@@ -43,51 +120,113 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
     protected InputHandler createInstance() {
         return new InputHandler();
     }
-
+    /**
+     * Copies {@code inputName}, {@code handlerType},  {@code module},
+     * {@code logic}, {@code exceptionHandler}, and {@code moduleName},
+     * and delegates to {@link TUIModule.Builder#shallowCopy(TUIModule.Builder)}.
+     * @param original The builder to copy from.
+     */
     @Override
-    protected void shallowCopy(InputHandler other) {
-        super.shallowCopy(other);
-        this.inputName = other.inputName;
-        this.handlerType = other.handlerType;
-        if(other.module != null) this.module = other.module.getCopy();
-        this.logic = other.logic;
-        this. exceptionHandler = other.exceptionHandler;
-        this.moduleName = other.moduleName;
+    protected void shallowCopy(InputHandler original) {
+        super.shallowCopy(original);
+        this.inputName = original.inputName;
+        this.handlerType = original.handlerType;
+        if(original.module != null) this.module = original.module.getCopy();
+        this.logic = original.logic;
+        this.exceptionHandler = original.exceptionHandler;
+        this.moduleName = original.moduleName;
     }
 
-    public String getInputName(String inputName) {
+    /**
+     * {@code inputName} is the name of the app state to read.
+     * @return {@code inputName}.
+     **/
+    public String getInputName() {
         return this.inputName;
     }
 
+    /**
+     * {@code inputName} is the name of the app state to read.
+     * @return self.
+     **/
     public InputHandler setInputName(String inputName) {
         this.inputName = inputName;
         return self();
     }
 
+    /**
+     * {@code module} is the name of the {@link FunctionModule} to create and thus the identifier
+     * of the returned value for {@link InputHandler#logic} if {@link InputHandler#handlerType}
+     * is {@link HandlerType#HANDLER} or {@link HandlerType#SAFE_HANDLER}.
+     *
+     * @return {@code module}.
+     **/
     protected FunctionModule.Builder getModule() {
         return module;
     }
 
+    /**
+     * {@code logic} is the logic that runs on input if {@link InputHandler#handlerType}
+     * is {@link HandlerType#HANDLER} or {@link HandlerType#SAFE_HANDLER}.
+     *
+     * @return {@code logic}.
+     **/
     protected Function<String, ?> getLogic() {
         return logic;
     }
 
+    /**
+     * {@code exceptionHandler} handles instances of {@link RuntimeException} thrown by {@link InputHandler#logic}
+     * if {@link InputHandler#handlerType} is {@link HandlerType#SAFE_HANDLER}.
+     *
+     * @return {@code exceptionHandler}.
+     **/
     protected Consumer<String> getExceptionHandler() {
         return exceptionHandler;
     }
 
+    /**
+     * {@code moduleName} is the name of the {@link FunctionModule} to create and thus the identifier
+     * of the returned value for {@link InputHandler#logic} if {@link InputHandler#handlerType}
+     * is {@link HandlerType#HANDLER} or {@link HandlerType#SAFE_HANDLER}.
+     *
+     * @return {@code moduleName}.
+     **/
     protected String getModuleName() {
         return moduleName;
     }
 
-    // note that handler does not get added as a child until this module is built
-    // so property updates won't be propagated to it from this module
+    /**
+     * Configure the logic for this {@link InputHandler}. This overload
+     * does so via a {@link FunctionModule}, but logic can be directly inputted
+     * via {@link InputHandler#setHandler(String, Function)} or similar. The app input
+     * is not injected into {@code handler} for this overload and must be handled manually.
+     * <br><br>
+     * Note that {@code handler} does not get added as a child until the module is built,
+     * so property updates (e.g., {@link TUIModule.Builder#setApplication(ApplicationModule)})
+     * won't propagate to it from this module.
+     *
+     * @param handler The module defining the logic for the handler.
+     * @return self
+     */
     public InputHandler setHandler(FunctionModule.Builder handler) {
         this.handlerType = InputHandler.HandlerType.MODULE;
         this.module = handler;
         return self();
     }
 
+    /**
+     * Configure the logic for this {@link InputHandler}. The app input
+     * is injected into to {@code logic} and updated at {@code name}.
+     *
+     * @param name The name of the {@link FunctionModule} that will be built, and thus the input
+     *             identifier for {@link ApplicationModule#getInput(String)} for what {@code logic}
+     *             returns.
+     * @param logic The {@link Function} that runs on the input collected from
+     *              {@link ApplicationModule#getInput(String, Class)} and returns some value
+     *              with the identifier provided by {@code name}.
+     * @return self
+     */
     public InputHandler setHandler(String name, Function<String, ?> logic) {
         this.handlerType = InputHandler.HandlerType.HANDLER;
         this.moduleName = name;
@@ -95,6 +234,20 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
         return self();
     }
 
+    /**
+     * Configure the logic for this {@link InputHandler}. The app input
+     * is injected into to {@code logic} and updated at {@code name}.
+     *
+     * @param name The name of the {@link FunctionModule} that will be built, and thus the input
+     *             identifier for {@link ApplicationModule#getInput(String)} for what {@code logic}
+     *             returns.
+     * @param logic The {@link Function} that runs on the input collected from
+     *              {@link ApplicationModule#getInput(String, Class)} and returns some value
+     *              with the identifier provided by {@code name}.
+     * @param exceptionHandler Fallback logic if a {@link RuntimeException} is thrown during
+     *                         execution of {@code logic}.
+     * @return self
+     */
     public InputHandler setHandler(String name, Function<String, ?> logic, Consumer<String> exceptionHandler) {
         this.handlerType = InputHandler.HandlerType.SAFE_HANDLER;
         this.moduleName = name;
@@ -104,20 +257,41 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
     }
 
     /**
-     * Adds a function module to execute after input is collected. <br>
+     * Adds a {@link FunctionModule} to execute after input is collected. <br>
      * <b>Note:</b> this module will not update application or other properties for {@code handler};
      * this must be done manually.
+     * <br><br>
+     * This is the lazy mutator that is called at build-time and configured via
+     * {@link InputHandler#setHandler(FunctionModule.Builder)}.
+     * <br><br>
+     * Also checks for name duplicates.
      *
      * @param handler The Function Module builder to execute after input is collected
      * @return self
      */
     private InputHandler addHandler(FunctionModule.Builder handler) {
         main.addChild(handler);
-        checkForHandlerDuplicates(handler.getName(), handler);
+        checkForHandlerDuplicates(handler.getName());
         return self();
     }
 
-    private <T> InputHandler addHandler(String name, Function<String, T> logic) {
+    /**
+     * Adds a {@link FunctionModule} with name given by {@code name} to execute after input is collected.
+     * The module collects input from the application via {@link InputHandler#inputName}.
+     * It then runs {@code logic} on the input and returns to the application with
+     * identifier given by {@code name}. Does <i>not</i> handle exceptions.
+     * <br><br>
+     * This is the lazy mutator that is called at build-time and configured via
+     * {@link InputHandler#setHandler(String, Function)}.
+     * <br><br>
+     * Also checks for name duplicates.
+     *
+     * @param name The name of the {@link FunctionModule} to construct and the identifier for
+     *             what {@code logic} returns to the application.
+     * @param logic The logic to run on the input.
+     * @return self
+     */
+    private InputHandler addHandler(String name, Function<String, ?> logic) {
         FunctionModule.Builder handler = new FunctionModule.Builder(name, () -> {
             ApplicationModule app = this.getApplication();
             if(app == null) {
@@ -129,10 +303,28 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
             return logic.apply(input);
         }).setApplication(getApplication());
         main.addChild(handler);
-        checkForHandlerDuplicates(name, handler);
+        checkForHandlerDuplicates(name);
         return self();
     }
 
+    /**
+     * Adds a {@link FunctionModule} with name given by {@code name} to execute after input is collected.
+     * The module collects input from the application via {@link InputHandler#inputName}.
+     * It then runs {@code logic} on the input and returns to the application with
+     * identifier given by {@code name}. {@code excptionHandler} catches
+     * {@link RuntimeException} if that is thrown by {@code logic}.
+     * <br><br>
+     * This is the lazy mutator that is called at build-time and configured via
+     * {@link InputHandler#setHandler(String, Function)}.
+     * <br><br>
+     * Also checks for name duplicates.
+     *
+     * @param name The name of the {@link FunctionModule} to construct and the identifier for
+     *             what {@code logic} returns to the application.
+     * @param logic The logic to run on the input.
+     * @param exceptionHandler The logic to run if {@link RuntimeException} is thrown by {@code logic}.
+     * @return self
+     */
     private <T> InputHandler addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
         FunctionModule.Builder handler = new FunctionModule.Builder(name, () -> {
             ApplicationModule app = this.getApplication();
@@ -156,41 +348,26 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
             return converted;
         }).setApplication(getApplication());
         main.addChild(handler);
-        checkForHandlerDuplicates(name, handler);
+        checkForHandlerDuplicates(name);
         return self();
     }
 
-    protected static void checkForHandlerDuplicates(String name, TUIModule.Builder<?> handler) {
+    /**
+     * Logs an error at build-time if multiple modules have names that
+     * collide with the name of the input to handle.
+     *
+     * @param name The name of the input that's being handled.
+     */
+    private void checkForHandlerDuplicates(String name) {
         if(TUIModule.Builder.usedNames.get(name) >= 2)
-            logger.error("Duplicate names detected: at least {} module builders have same name as built Input Handler \"{}\"",
-                    TUIModule.Builder.usedNames.get(name) - 1, name);
+            logger.error("Duplicate names detected: Input Handler \"{}\" is attempting to handle \"{}\", but {} modules have that name.",
+                    this.name, name, TUIModule.Builder.usedNames.get(name) - 1);
     }
 
     /**
-     * <p>Checks equality for properties given by the builder.</p>
-     *
-     * <p>For InputHandlers, this includes: </p>
-     * <ul>
-     *     <li><strong>inputModule</strong> <i>(Note: this checks shallow structural equality, and doesn't check children.)</i></li>
-     *     <li><strong>handlerType</strong>
-     *     <li><strong>moduleName</strong>
-     *     <li>name</li>
-     *     <li>application</li>
-     *     <li>children</li>
-     *     <li>ansi</li>
-     *     <li>scanner</li>
-     *     <li>printStream</li>
-     *     <li>enableAnsi</li>
-     * </ul>
-     *
-     * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
-     *  but are considered in equals()
-     * @param first The first InputHandlers to compare
-     * @param second The second InputHandlers to compare
-     * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-     *
-     * @implNote
-     * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+     * Checks equality for properties given by the builder. For {@link InputHandler}, this includes
+     * {@code inputName}, {@code handlerType}, and {@code moduleName},
+     * as well as other requirements provided by {@link TUIModule#structuralEquals(TUIModule)}.
      */
     public boolean shallowStructuralEquals(InputHandler first, InputHandler second) {
         if(first == second) return true;
@@ -203,6 +380,12 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
                 super.shallowStructuralEquals(first, second);
     }
 
+    /**
+     * Builds a new {@link InputHandler} based on this configuration of this builder.
+     * Adds the handling logic based on how it was set, e.g., via {@link InputHandler#setHandler(String, Function, Consumer)}.
+     *
+     * @return The built {@link InputHandler}.
+     */
     public ContainerModule build() {
         if(handlerType == InputHandler.HandlerType.HANDLER || handlerType == InputHandler.HandlerType.SAFE_HANDLER) {
             for(TUIModule.Builder<?> child : main.getChildren()) {
