@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+// TODO - documentation
 public class PasswordInput extends ModuleTemplate<PasswordInput> {
     String displayText;
     private Supplier<char[]> passwordSupplier;

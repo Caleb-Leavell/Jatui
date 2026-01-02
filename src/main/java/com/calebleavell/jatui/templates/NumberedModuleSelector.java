@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+// TODO - documentation
 public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelector> {
     private final List<NameOrModule> modules = new ArrayList<>();
     private ApplicationModule app;

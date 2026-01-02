@@ -51,7 +51,7 @@ public class Main {
         // This is a module that confirms if the user wants to exit.
         // It will be called later in the actual app.
         // If the user confirms they want to exit, the app terminates;
-        // otherwise, the app restarts
+        // otherwise, the app restarts.
         ConfirmationPrompt confirmExit = new ConfirmationPrompt("confirm-exit",
                 "Are you sure you want to exit (y/n)? ")
                 .setApplication(app)

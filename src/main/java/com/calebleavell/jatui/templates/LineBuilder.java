@@ -26,11 +26,11 @@ import org.fusesource.jansi.Ansi;
 import java.util.Objects;
 
 import static org.fusesource.jansi.Ansi.ansi;
-
 /**
- * <p>LineBuilder simplifies chaining text together that is meant to live on the same line.</p>
- * <p>Ansi is supported with method overloads.</p>
- * <p><strong>Usage:</strong>
+ * LineBuilder simplifies chaining text together that is meant to live on the same line.
+ * Ansi is supported with method overloads (e.g., {@link LineBuilder#addText(String, Ansi)}).
+ * <br><br>
+ * <strong>Usage:</strong>
  * <pre><code>
  * LineBuilder text = new LineBuilder("name")
  *     .addText("Regular text: ")
@@ -42,7 +42,18 @@ import static org.fusesource.jansi.Ansi.ansi;
  * </code></pre>
  */
 public class LineBuilder extends ModuleTemplate<LineBuilder> {
+
+    /**
+     * A reference of the most recently added text is saved
+     * to call {@link TextModule.Builder#printNewLine(boolean)} if
+     * {@link LineBuilder#newLine()} is called.
+     */
     private TextModule.Builder current;
+
+    /**
+     * Appended to the name of every new {@link TextModule} and incremented.
+     * The name of every text module follows "[{@code LineBuilder name}]-main-[{@code iterator}]".
+     */
     protected int iterator;
 
     public LineBuilder(String name) {
@@ -63,7 +74,12 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
         return new LineBuilder();
     }
 
-
+    /**
+     * Copies the reference to the most recently added module and the naming
+     * iterator,
+     * and delegates to {@link TUIModule.Builder#shallowCopy(TUIModule.Builder)}.
+     * @param original The builder to copy from.
+     */
     @Override
     public void shallowCopy(LineBuilder original) {
         this.current = original.current.getCopy();
@@ -71,6 +87,12 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
         super.shallowCopy(original);
     }
 
+    /**
+     * Adds {@code text} as a child of this module.
+     * @param text The {@link TextModule} to add.
+     * @return self
+     * @implNote Adds {@code text} as a child of {@code main} rather than directly to this module.
+     */
     public LineBuilder addText(TextModule.Builder text) {
         logger.trace("adding text to LineBuilder \"{}\" that displays \"{}\" (output type is \"{}\")", getName(), text.getText(), text.getOutputType());
         main.addChild(text);
@@ -79,6 +101,14 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
         return self();
     }
 
+    /**
+     * Adds a new {@link TextModule} as a child of this module.
+     * To print a new line after this text, call {@link LineBuilder#newLine()}.
+     *
+     * @param text The text to add.
+     * @param ansi The {@link Ansi} that this text may use. Ansi is reset automatically after {@code text} is displayed.
+     * @return self.
+     */
     public LineBuilder addText(String text, Ansi ansi) {
         this.addText(new TextModule.Builder(main.getName() + "-" + iterator, text)
                 .setAnsi(ansi)
@@ -86,10 +116,27 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
         return self();
     }
 
+    /**
+     * Adds a new {@link TextModule} as a child of this module.
+     * To print a new line after this text, call {@link LineBuilder#newLine()}.
+     *
+     * @param text The text to add.
+     * @return self.
+     */
     public LineBuilder addText(String text) {
         return addText(text, ansi());
     }
 
+    /**
+     * Displays the output of the module with name {@code moduleName}.
+     * More precisely, it displays the application state that is accessed
+     * at {@link com.calebleavell.jatui.modules.ApplicationModule#getInput(String)}.
+     *
+     * @param moduleName The input identifier for the application state (likely the name of another module).
+     * @param ansi The {@link Ansi} that this text may use. Ansi is reset automatically after text is displayed.
+     * @return self
+     * @implNote Wraps {@link TextModule.OutputType#DISPLAY_APP_STATE}.
+     */
     public LineBuilder addModuleOutput(String moduleName, Ansi ansi) {
         this.addText(new TextModule.Builder(main.getName() + "-" + iterator, moduleName)
                 .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
@@ -98,44 +145,58 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
         return self();
     }
 
+    /**
+     * Displays the output of the module with name {@code moduleName}.
+     * More precisely, it displays the application state that is accessed
+     * at {@link com.calebleavell.jatui.modules.ApplicationModule#getInput(String)}.
+     *
+     * @param moduleName The input identifier for the application state (likely the name of another module).
+     * @return self
+     * @implNote Wraps {@link TextModule.OutputType#DISPLAY_APP_STATE}.
+     */
     public LineBuilder addModuleOutput(String moduleName) {
         return this.addModuleOutput(moduleName, ansi());
     }
 
+    /**
+     * Prints an os-defined newline after the last text added.
+     * This method must be called <i>after</i> the text is added
+     * to this module.
+     * <br><br>
+     * Example:
+     * <pre><code>
+     * LineBuilder text = new LineBuilder("name")
+     *     .addText("Hello, ")
+     *     .addText("World!")
+     *     .newLine();
+     *
+     * text.build().run();
+     *
+     * // output: "Hello, World!\n"
+     * </code></pre>
+     * @return self
+     */
     public LineBuilder newLine() {
         logger.trace("adding newline to LineBuilder \"{}\"", getName());
         if(current != null) current.printNewLine(true);
+        else throw new IllegalStateException("Tried to call newLine to \"" + this.getName() + "\" but no text has been added.");
         return self();
     }
 
+    /**
+     * {@code current} is a reference of the most recently added text is saved
+     * to call {@link TextModule.Builder#printNewLine(boolean)} if
+     * {@link LineBuilder#newLine()} is called.
+     * @return current;
+     */
     protected TextModule.Builder getCurrent() {
         return current;
     }
 
     /**
-     * <p>Checks equality for properties given by the builder.</p>
-     *
-     * <p>For LineBuilder, this includes: </p>
-     * <ul>
-     *     <li><strong>current</strong> (the most recent text module added) </li>
-     *     <li><strong>iterator</strong> (the number of text modules added so far) </li>
-     *     <li>name</li>
-     *     <li>application</li>
-     *     <li>children</li>
-     *     <li>ansi</li>
-     *     <li>scanner</li>
-     *     <li>printStream</li>
-     *     <li>enableAnsi</li>
-     * </ul>
-     *
-     * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
-     *  but are considered in equals()
-     * @param first The first NumberedList to compare
-     * @param second The second NumberedList to compare
-     * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-     *
-     * @implNote
-     * This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+     * Checks equality for properties given by the builder. For {@link LineBuilder}, this includes
+     * {@code current} and {@code iterator},
+     * as well as other requirements provided by {@link TUIModule.Builder#shallowStructuralEquals(TUIModule.Builder, TUIModule.Builder)}.
      */
     @Override
     public boolean shallowStructuralEquals(LineBuilder first, LineBuilder second) {

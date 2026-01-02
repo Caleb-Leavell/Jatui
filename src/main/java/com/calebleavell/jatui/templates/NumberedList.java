@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
+// TODO - documentation
 /**
  * Handles displaying a list of text as a numbered list.
  * <br><br>
