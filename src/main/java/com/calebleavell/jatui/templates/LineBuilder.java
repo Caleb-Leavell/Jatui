@@ -23,6 +23,7 @@ import com.calebleavell.jatui.modules.TUIModule;
 import com.calebleavell.jatui.modules.TextModule;
 import org.fusesource.jansi.Ansi;
 
+import java.io.PrintStream;
 import java.util.Objects;
 
 import static org.fusesource.jansi.Ansi.ansi;
@@ -159,27 +160,32 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
     }
 
     /**
-     * Prints an os-defined newline after the last text added.
-     * This method must be called <i>after</i> the text is added
-     * to this module.
+     * Prints an os-defined newline.
      * <br><br>
      * Example:
      * <pre><code>
      * LineBuilder text = new LineBuilder("name")
+     *     .newLine()
      *     .addText("Hello, ")
      *     .addText("World!")
      *     .newLine();
      *
      * text.build().run();
      *
-     * // output: "Hello, World!\n"
+     * // output: "\nHello, World!\n"
      * </code></pre>
      * @return self
+     * @implNote If text has been added, it sets the most recently added {@link TextModule}
+     * to print a newline. If not, it adds a new empty {@link TextModule} and sets
+     * it to print a newline. {@link TextModule} uses {@link PrintStream#println()}.
+     *
      */
     public LineBuilder newLine() {
+        if (current == null) {
+            this.addText(""); // create an empty TextModule if none exists
+        }
         logger.trace("adding newline to LineBuilder \"{}\"", getName());
-        if(current != null) current.printNewLine(true);
-        else throw new IllegalStateException("Tried to call newLine to \"" + this.getName() + "\" but no text has been added.");
+        current.printNewLine(true);
         return self();
     }
 
