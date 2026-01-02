@@ -61,7 +61,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
     protected InputHandler.HandlerType handlerType;
 
     /**
-     * The module tha provides logic if {@link InputHandler#handlerType} is
+     * The module that provides logic if {@link InputHandler#handlerType} is
      * {@link HandlerType#MODULE}.
      * **/
     private FunctionModule.Builder module;
@@ -311,7 +311,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      * Adds a {@link FunctionModule} with name given by {@code name} to execute after input is collected.
      * The module collects input from the application via {@link InputHandler#inputName}.
      * It then runs {@code logic} on the input and returns to the application with
-     * identifier given by {@code name}. {@code excptionHandler} catches
+     * identifier given by {@code name}. {@code exceptionHandler} catches
      * {@link RuntimeException} if that is thrown by {@code logic}.
      * <br><br>
      * This is the lazy mutator that is called at build-time and configured via
@@ -385,6 +385,8 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      * Adds the handling logic based on how it was set, e.g., via {@link InputHandler#setHandler(String, Function, Consumer)}.
      *
      * @return The built {@link InputHandler}.
+     *
+     * @implNote Clears the children first to ensure consistency when building multiple times.
      */
     public ContainerModule build() {
         if(handlerType == InputHandler.HandlerType.HANDLER || handlerType == InputHandler.HandlerType.SAFE_HANDLER) {

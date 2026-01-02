@@ -25,17 +25,21 @@ import java.util.Objects;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
+/**
+ * Handles displaying a list of text as a numbered list.
+ * <br><br>
+ * Example usage:
+ * <pre><code>
+ *
+ * </code></pre>
+ */
 public class NumberedList extends ModuleTemplate<NumberedList> {
     private int start = 1;
     private int step = 1;
     private int i = 0;
 
-    public NumberedList(String name, String... listText) {
-
+    public NumberedList(String name) {
         super(NumberedList.class, name);
-        for(String text : listText) {
-            this.addListText(text);
-        }
     }
 
     protected NumberedList() {
@@ -70,6 +74,11 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
                         .newLine());
         i ++;
         return this;
+    }
+
+    public NumberedList addListText(String... listText) {
+        for(String text : listText) this.addListText(text);
+        return self();
     }
 
     public NumberedList setStart(int start) {

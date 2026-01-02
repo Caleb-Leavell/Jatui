@@ -27,9 +27,10 @@ class NumberedListTest {
 
     @Test
     void testCopy() {
-        NumberedList original = new NumberedList("list", "item1", "item2")
+        NumberedList original = new NumberedList("list")
                 .setStart(5)
-                .setStep(3);
+                .setStep(3)
+                .addListText("item1", "item2");
 
         NumberedList copy = original.getCopy();
 
@@ -37,12 +38,30 @@ class NumberedListTest {
     }
 
     @Test
-    void testAddListText() {
+    void testAddListTextSingle() {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            NumberedList list = new NumberedList("list", "item1")
-                    .addListText("item2")
+            NumberedList list = new NumberedList("list")
+                    .addListText("item1")
+                    .setPrintStream(io.getPrintStream())
+                    .enableAnsi(false);
+
+            list.build().run();
+
+            output = io.getOutput();
+        }
+
+        assertEquals(String.format("[1] item1%n"), output);
+    }
+
+    @Test
+    void testAddListTextMultiple() {
+        String output;
+
+        try(IOCapture io = new IOCapture()) {
+            NumberedList list = new NumberedList("list")
+                    .addListText("item1", "item2")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
 
@@ -117,33 +136,40 @@ class NumberedListTest {
 
     @Test
     void testShallowShallowStructuralEquals() {
-        NumberedList list1 = new NumberedList("list", "text1", "text2")
+        NumberedList list1 = new NumberedList("list")
                 .setStart(5)
-                .setStep(2);
+                .setStep(2)
+                .addListText("text1", "text2");
 
-        NumberedList list2 = new NumberedList("list", "text1", "text2")
+        NumberedList list2 = new NumberedList("list")
                 .setStart(5)
-                .setStep(2);
+                .setStep(2)
+                .addListText("text1", "text2");
 
-        NumberedList list3 = new NumberedList("list", "text1", "text2")
+        NumberedList list3 = new NumberedList("list")
                 .setStart(5)
-                .setStep(2);
+                .setStep(2)
+                .addListText("text1", "text2");
 
-        NumberedList list4 = new NumberedList("list", "text1", "text2", "text3")
+        NumberedList list4 = new NumberedList("list")
                 .setStart(5)
-                .setStep(2);
+                .setStep(2)
+                .addListText("text1", "text2", "text3");
 
-        NumberedList list5 = new NumberedList("list", "text1", "text2")
+        NumberedList list5 = new NumberedList("list")
                 .setStart(6)
-                .setStep(2);
+                .setStep(2)
+                .addListText("text1", "text2");
 
-        NumberedList list6 = new NumberedList("list", "text1", "text2")
+        NumberedList list6 = new NumberedList("list")
                 .setStart(5)
-                .setStep(3);
+                .setStep(3)
+                .addListText("text1", "text2");
 
-        NumberedList list7 = new NumberedList("rename-super-name", "text1", "text2")
+        NumberedList list7 = new NumberedList("rename-super-name")
                 .setStart(5)
-                .setStep(2);
+                .setStep(2)
+                .addListText("text1", "text2");
 
         assertAll(
                 () -> assertTrue(list1.structuralEquals(list1)),
