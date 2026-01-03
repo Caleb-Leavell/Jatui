@@ -167,7 +167,7 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
 
         return  Objects.equals(first.start, second.start) &&
                 Objects.equals(first.step, second.step) &&
-                Objects.equals(first.i, second.i) &&
+                first.i == second.i &&
                 super.shallowStructuralEquals(first, second);
     }
 }

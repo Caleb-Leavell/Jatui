@@ -253,7 +253,7 @@ class NumberedModuleSelectorTest {
                 )
                 .build();
 
-        ApplicationModule app2 = new ApplicationModule.Builder("app")
+        ApplicationModule app2 = new ApplicationModule.Builder("app2")
                 .addChildren(
                         new TextModule.Builder("text", "Hello, World!"),
                         new TextInputModule.Builder("input", "input: ")

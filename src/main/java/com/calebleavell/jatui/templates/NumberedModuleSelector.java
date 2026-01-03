@@ -27,12 +27,11 @@ import java.util.Objects;
 // TODO - documentation
 public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelector> {
     private final List<NameOrModule> modules = new ArrayList<>();
-    private ApplicationModule app;
     private NumberedList list;
 
     public NumberedModuleSelector(String name, ApplicationModule app) {
         super(NumberedModuleSelector.class, name);
-        this.app = app;
+        this.setApplication(app);
         list = new NumberedList(name + "-list");
         TextInputModule.Builder collectInput = new TextInputModule.Builder(name + "-input", "Your choice: ")
                 .addSafeHandler(name + "-goto-module", input -> {
@@ -67,7 +66,6 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
         for(NameOrModule m : original.modules) {
             this.modules.add(m.getCopy());
         }
-        this.app = original.app;
         this.list = original.list.getCopy();
         super.shallowCopy(original);
     }
@@ -135,13 +133,12 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
             if(firstNameOrModule == secondNameOrModule) continue;
             else if(firstNameOrModule == null || secondNameOrModule == null) return false;
 
-            TUIModule.Builder<?> firstModule = firstNameOrModule.getModule(this.app);
-            TUIModule.Builder<?> secondModule = secondNameOrModule.getModule(this.app);
+            TUIModule.Builder<?> firstModule = firstNameOrModule.getModule(this.getApplication());
+            TUIModule.Builder<?> secondModule = secondNameOrModule.getModule(this.getApplication());
 
             if(!TUIModule.Builder.structuralEquals(firstModule, secondModule)) return false;
         }
 
-        return Objects.equals(first.app, second.app) &&
-                super.shallowStructuralEquals(first, second);
+        return super.shallowStructuralEquals(first, second);
     }
 }
