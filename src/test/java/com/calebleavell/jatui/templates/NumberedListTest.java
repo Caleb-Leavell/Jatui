@@ -27,7 +27,7 @@ class NumberedListTest {
 
     @Test
     void testCopy() {
-        NumberedList original = new NumberedList("list")
+        NumberedList original = NumberedList.builder("list")
                 .setStart(5)
                 .setStep(3)
                 .addListText("item1", "item2");
@@ -42,7 +42,7 @@ class NumberedListTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            NumberedList list = new NumberedList("list")
+            NumberedList list = NumberedList.builder("list")
                     .addListText("item1")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
@@ -60,7 +60,7 @@ class NumberedListTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            NumberedList list = new NumberedList("list")
+            NumberedList list = NumberedList.builder("list")
                     .addListText("item1", "item2")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
@@ -78,7 +78,7 @@ class NumberedListTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            NumberedList list = new NumberedList("list")
+            NumberedList list = NumberedList.builder("list")
                     .setStart(5)
                     .addListText("item1")
                     .addListText("item2")
@@ -98,7 +98,7 @@ class NumberedListTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            NumberedList list = new NumberedList("list")
+            NumberedList list = NumberedList.builder("list")
                     .setStep(3)
                     .addListText("item1")
                     .addListText("item2")
@@ -118,7 +118,7 @@ class NumberedListTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            NumberedList list = new NumberedList("list")
+            NumberedList list = NumberedList.builder("list")
                     .setStart(5)
                     .setStep(3)
                     .addListText("item1")
@@ -136,37 +136,37 @@ class NumberedListTest {
 
     @Test
     void testShallowShallowStructuralEquals() {
-        NumberedList list1 = new NumberedList("list")
+        NumberedList list1 = NumberedList.builder("list")
                 .setStart(5)
                 .setStep(2)
                 .addListText("text1", "text2");
 
-        NumberedList list2 = new NumberedList("list")
+        NumberedList list2 = NumberedList.builder("list")
                 .setStart(5)
                 .setStep(2)
                 .addListText("text1", "text2");
 
-        NumberedList list3 = new NumberedList("list")
+        NumberedList list3 = NumberedList.builder("list")
                 .setStart(5)
                 .setStep(2)
                 .addListText("text1", "text2");
 
-        NumberedList list4 = new NumberedList("list")
+        NumberedList list4 = NumberedList.builder("list")
                 .setStart(5)
                 .setStep(2)
                 .addListText("text1", "text2", "text3");
 
-        NumberedList list5 = new NumberedList("list")
+        NumberedList list5 = NumberedList.builder("list")
                 .setStart(6)
                 .setStep(2)
                 .addListText("text1", "text2");
 
-        NumberedList list6 = new NumberedList("list")
+        NumberedList list6 = NumberedList.builder("list")
                 .setStart(5)
                 .setStep(3)
                 .addListText("text1", "text2");
 
-        NumberedList list7 = new NumberedList("rename-super-name")
+        NumberedList list7 = NumberedList.builder("rename-super-name")
                 .setStart(5)
                 .setStep(2)
                 .addListText("text1", "text2");

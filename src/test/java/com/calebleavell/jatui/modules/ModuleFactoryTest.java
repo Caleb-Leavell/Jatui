@@ -52,17 +52,17 @@ class ModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("exit"))
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            ContainerModule.Builder home = new ContainerModule.Builder("home")
+            ContainerModule.Builder home = ContainerModule.builder("home")
                     .addChildren(
-                            new TextModule.Builder("text-1", "first"),
+                            TextModule.builder("text-1", "first"),
                             ModuleFactory.terminate("terminate-app", app),
-                            new TextModule.Builder("text-2", "second")
+                            TextModule.builder("text-2", "second")
                     );
 
             app.setHome(home);
@@ -79,22 +79,22 @@ class ModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("exit"))
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            ContainerModule.Builder home = new ContainerModule.Builder("home")
+            ContainerModule.Builder home = ContainerModule.builder("home")
                     .addChildren(
-                            new TextModule.Builder("text-1", "first"),
-                            new ContainerModule.Builder("group")
+                            TextModule.builder("text-1", "first"),
+                            ContainerModule.builder("group")
                                     .addChildren(
-                                            new TextModule.Builder("text-2", "second"),
+                                            TextModule.builder("text-2", "second"),
                                             ModuleFactory.terminate("terminate-group", "group", app),
-                                            new TextModule.Builder("text-3", "third")
+                                            TextModule.builder("text-3", "third")
                                     ),
-                            new TextModule.Builder("text-4", "fourth")
+                            TextModule.builder("text-4", "fourth")
                     );
 
             app.setHome(home);
@@ -111,23 +111,23 @@ class ModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture("a\nb\nc\nd")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("exit"))
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            ContainerModule.Builder home = new ContainerModule.Builder("home")
+            ContainerModule.Builder home = ContainerModule.builder("home")
                     .addChildren(
-                            new TextModule.Builder("text-1", "first"),
-                            new TextInputModule.Builder("get-input", "input: ")
+                            TextModule.builder("text-1", "first"),
+                            TextInputModule.builder("get-input", "input: ")
                                     .addSafeHandler("exit-if-d", s -> {
                                         if(s.equals("d")) app.terminate();
                                         return null;
                                     }),
                             ModuleFactory.restart("restart-app", app),
-                            new TextModule.Builder("text-2", "second")
+                            TextModule.builder("text-2", "second")
                     );
 
             app.setHome(home);
@@ -144,28 +144,28 @@ class ModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture("a\nb\nc\nd")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("exit"))
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            ContainerModule.Builder home = new ContainerModule.Builder("home")
+            ContainerModule.Builder home = ContainerModule.builder("home")
                     .addChildren(
-                            new TextModule.Builder("text-1", "first"),
-                            new ContainerModule.Builder("group")
+                            TextModule.builder("text-1", "first"),
+                            ContainerModule.builder("group")
                                     .addChildren(
-                                            new TextModule.Builder("text-2", "second"),
-                                            new TextInputModule.Builder("get-input", "input: ")
+                                            TextModule.builder("text-2", "second"),
+                                            TextInputModule.builder("get-input", "input: ")
                                                     .addSafeHandler("exit-if-d", s -> {
                                                         if(s.equals("d")) app.terminate();
                                                         return null;
                                                     }),
                                             ModuleFactory.restart("restart-group", app, "group"),
-                                            new TextInputModule.Builder("test-3", "third")
+                                            TextInputModule.builder("test-3", "third")
                                     ),
-                            new TextModule.Builder("text-4", "fourth")
+                            TextModule.builder("text-4", "fourth")
                     );
 
             app.setHome(home);
@@ -183,7 +183,7 @@ class ModuleFactoryTest {
 
         try(IOCapture io = new IOCapture()) {
 
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setOnExit(ModuleFactory.empty("exit"))
@@ -191,16 +191,16 @@ class ModuleFactoryTest {
 
             FunctionModule.Builder runText = ModuleFactory.run("run-group", app, "group");
 
-            ContainerModule.Builder home = new ContainerModule.Builder("parent")
+            ContainerModule.Builder home = ContainerModule.builder("parent")
                     .addChildren(
-                            new TextModule.Builder("text-1", "first"),
-                            new ContainerModule.Builder("group")
+                            TextModule.builder("text-1", "first"),
+                            ContainerModule.builder("group")
                                     .addChildren(
-                                            new TextModule.Builder("text-2", "second"),
-                                            new TextModule.Builder("text-3", "third")
+                                            TextModule.builder("text-2", "second"),
+                                            TextModule.builder("text-3", "third")
                                     ),
                             runText,
-                            new TextModule.Builder("text-4", "fourth"));
+                            TextModule.builder("text-4", "fourth"));
 
             app.setHome(home);
             app.run();
@@ -216,18 +216,18 @@ class ModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setOnExit(ModuleFactory.empty("exit"))
                     .build();
 
-            ContainerModule.Builder printToTen = new ContainerModule.Builder("print-to-ten")
+            ContainerModule.Builder printToTen = ContainerModule.builder("print-to-ten")
                     .addChildren(
                             ModuleFactory.counter("counter", app),
-                            new TextModule.Builder("display", "counter")
+                            TextModule.builder("display", "counter")
                                     .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE),
-                            new FunctionModule.Builder("exit-if-greater-than-10", () -> {
+                            FunctionModule.builder("exit-if-greater-than-10", () -> {
                                 int n = app.getInput("counter", Integer.class);
 
                                 if(n >= 10) {
@@ -252,18 +252,18 @@ class ModuleFactoryTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setOnExit(ModuleFactory.empty("exit"))
                     .build();
 
-            ContainerModule.Builder printToTen = new ContainerModule.Builder("print-to-ten")
+            ContainerModule.Builder printToTen = ContainerModule.builder("print-to-ten")
                     .addChildren(
                             ModuleFactory.counter("counter", app, 5, 2),
-                            new TextModule.Builder("display", "counter")
+                            TextModule.builder("display", "counter")
                                     .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE),
-                            new FunctionModule.Builder("exit-if-greater-than-10", () -> {
+                            FunctionModule.builder("exit-if-greater-than-10", () -> {
                                 int n = app.getInput("counter", Integer.class);
 
                                 if(n >= 15) {

@@ -22,13 +22,13 @@ package com.calebleavell.jatui.modules;
  */
 public class ModuleFactory {
     /**
-     * Returns an empty {@link ContainerModule} - simply wraps <pre><code>new ContainerModule.Builder([name])</code></pre>
+     * Returns an empty {@link ContainerModule} - simply wraps <pre><code>ContainerModule.builder([name])</code></pre>
      * to allow for code that consistently uses ModuleFactory if desired.
      * @param name The name of the module
      * @return The empty {@link ContainerModule}
      */
     public static ContainerModule.Builder empty(String name) {
-        return new ContainerModule.Builder(name);
+        return ContainerModule.builder(name);
     }
 
     /**
@@ -39,7 +39,7 @@ public class ModuleFactory {
      * @return The {@link FunctionModule} that terminates the inputted module
      */
     public static FunctionModule.Builder terminate(String name, TUIModule moduleToTerminate) {
-        return new FunctionModule.Builder(name, moduleToTerminate::terminate);
+        return FunctionModule.builder(name, moduleToTerminate::terminate);
     }
 
     /**
@@ -52,7 +52,7 @@ public class ModuleFactory {
      * @return The {@link FunctionModule} that terminates the module corresponding to {@code moduleToTerminate}
      */
     public static FunctionModule.Builder terminate(String name, String moduleToTerminate, TUIModule parent) {
-        return new FunctionModule.Builder(name, () -> parent.terminateChild(moduleToTerminate));
+        return FunctionModule.builder(name, () -> parent.terminateChild(moduleToTerminate));
     }
 
     /**
@@ -72,7 +72,7 @@ public class ModuleFactory {
      * ensure there is only one scheduler.
      */
     public static FunctionModule.Builder run(String name, TUIModule parent, String moduleToRun) {
-        return new FunctionModule.Builder(name, () -> {
+        return FunctionModule.builder(name, () -> {
             if (parent == null || moduleToRun == null) return;
             TUIModule.Builder<?> toRun = parent.getChild(moduleToRun);
             if(toRun == null) return;
@@ -89,7 +89,7 @@ public class ModuleFactory {
      * @return The {@link FunctionModule} that will restart {@code moduleToRestart} when run.
      */
     public static FunctionModule.Builder restart(String name, TUIModule moduleToRestart) {
-        return new FunctionModule.Builder(name, () -> {
+        return FunctionModule.builder(name, () -> {
             if(moduleToRestart != null) moduleToRestart.restart();
         });
     }
@@ -106,7 +106,7 @@ public class ModuleFactory {
      * on the behavior of the implementation of that method.
      */
     public static FunctionModule.Builder restart(String name, TUIModule parent, String moduleToRestart) {
-        return new FunctionModule.Builder(name, () -> {
+        return FunctionModule.builder(name, () -> {
             if(parent == null) return;
             parent.restartChild(moduleToRestart);
         });
@@ -139,7 +139,7 @@ public class ModuleFactory {
      * @return The Function Module that increments a counter
      */
     public static FunctionModule.Builder counter(String name, ApplicationModule app, int begin, int step) {
-        return new FunctionModule.Builder(name, () -> {
+        return FunctionModule.builder(name, () -> {
             Integer counter = app.getInput(name, Integer.class);
             if(counter != null)  return counter + step;
             else return begin;

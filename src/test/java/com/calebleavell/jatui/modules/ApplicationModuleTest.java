@@ -17,8 +17,7 @@
 
 package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.modules.*;
-import com.calebleavell.jatui.templates.LineBuilder;
+import com.calebleavell.jatui.templates.TextChain;
 import com.calebleavell.jatui.util.IOCapture;
 import org.fusesource.jansi.Ansi;
 import org.junit.jupiter.api.Nested;
@@ -34,7 +33,7 @@ class ApplicationModuleTest {
         String expected = lines("Exiting...");
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("test-app")
+            ApplicationModule app = ApplicationModule.builder("test-app")
                     .enableAnsi(false)
                     .setPrintStream(io.getPrintStream())
                     .build();
@@ -48,8 +47,8 @@ class ApplicationModuleTest {
         String expected = lines("Hello, World!", "Exiting...");
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("test-app")
-                    .addChildren(new TextModule.Builder("hello-world", "Hello, World!"))
+            ApplicationModule app = ApplicationModule.builder("test-app")
+                    .addChildren(TextModule.builder("hello-world", "Hello, World!"))
                     .enableAnsi(false)
                     .setPrintStream(io.getPrintStream())
                     .build();
@@ -67,10 +66,10 @@ class ApplicationModuleTest {
         );
 
         try(IOCapture io = new IOCapture("Bob")) {
-            ApplicationModule app = new ApplicationModule.Builder("test-app")
+            ApplicationModule app = ApplicationModule.builder("test-app")
                     .addChildren(
-                            new TextInputModule.Builder("input", "What is your name? "),
-                            new LineBuilder("output")
+                            TextInputModule.builder("input", "What is your name? "),
+                            TextChain.builder("output")
                                     .addText("Hello, ").addModuleOutput("input").addText("!").newLine())
                     .enableAnsi(false)
                     .setScanner(io.getScanner())
@@ -92,10 +91,10 @@ class ApplicationModuleTest {
         );
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("test-app")
+            ApplicationModule app = ApplicationModule.builder("test-app")
                     .addChildren(
-                            new FunctionModule.Builder("5+5", () -> 5 + 5),
-                            new LineBuilder("output").addModuleOutput("5+5").newLine()
+                            FunctionModule.builder("5+5", () -> 5 + 5),
+                            TextChain.builder("output").addModuleOutput("5+5").newLine()
                     )
                     .enableAnsi(false)
                     .setScanner(io.getScanner())
@@ -109,7 +108,7 @@ class ApplicationModuleTest {
 
     @Test
     void testResetMemory() {
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
+        ApplicationModule app = ApplicationModule.builder("app").build();
 
         app.forceUpdateInput("input-1", 5);
         app.forceUpdateInput("input-2", "input");
@@ -131,9 +130,9 @@ class ApplicationModuleTest {
         String expected = "Bob";
 
         try(IOCapture io = new IOCapture(expected)) {
-            ApplicationModule app = new ApplicationModule.Builder("test-app")
+            ApplicationModule app = ApplicationModule.builder("test-app")
                     .addChildren(
-                            new TextInputModule.Builder("input", "What is your name? "))
+                            TextInputModule.builder("input", "What is your name? "))
                     .enableAnsi(false)
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
@@ -155,9 +154,9 @@ class ApplicationModuleTest {
         int expected = 5;
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("test-app")
+            ApplicationModule app = ApplicationModule.builder("test-app")
                     .addChildren(
-                            new FunctionModule.Builder("input", () -> expected))
+                            FunctionModule.builder("input", () -> expected))
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .build();
@@ -175,7 +174,7 @@ class ApplicationModuleTest {
 
     @Test
     void getInputOrDefault() {
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
+        ApplicationModule app = ApplicationModule.builder("app").build();
 
         app.forceUpdateInput("input", 5);
 
@@ -189,7 +188,7 @@ class ApplicationModuleTest {
 
     @Test
     void testUpdateInput_no_module() {
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
+        ApplicationModule app = ApplicationModule.builder("app").build();
         app.updateInput("input", 5);
         assertNull(app.getInput("input"));
     }
@@ -198,7 +197,7 @@ class ApplicationModuleTest {
     void testUpdateInput_module_name() {
         int expected = 5;
 
-        ApplicationModule app = new ApplicationModule.Builder("app")
+        ApplicationModule app = ApplicationModule.builder("app")
                 .addChild(ModuleFactory.empty("input"))
                 .build();
         app.updateInput("input", expected);
@@ -213,7 +212,7 @@ class ApplicationModuleTest {
 
         ContainerModule.Builder input = ModuleFactory.empty("input");
 
-        ApplicationModule app = new ApplicationModule.Builder("app")
+        ApplicationModule app = ApplicationModule.builder("app")
                 .addChild(input)
                 .build();
         app.updateInput(input.build(), expected);
@@ -230,14 +229,14 @@ class ApplicationModuleTest {
         );
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("test-app")
+            ApplicationModule app = ApplicationModule.builder("test-app")
                     .setAnsi(ansi().bold()) // set to non-default value to test against home ansi
                     .setPrintStream(io.getPrintStream())
                     .setScanner(io.getScanner()) //also set to test against home ansi
                     .enableAnsi(false)
                     .build();
 
-            TextModule.Builder home = new TextModule.Builder("home", "Hello, World!");
+            TextModule.Builder home = TextModule.builder("home", "Hello, World!");
 
             app.setHome(home);
             app.run();
@@ -255,8 +254,8 @@ class ApplicationModuleTest {
 
     @Test
     void testGetHome() {
-        ContainerModule.Builder home = new ContainerModule.Builder("home");
-        ApplicationModule app = new ApplicationModule.Builder("test-app").build();
+        ContainerModule.Builder home = ContainerModule.builder("home");
+        ApplicationModule app = ApplicationModule.builder("test-app").build();
         app.setHome(home);
         assertEquals(app.getHome(), home);
     }
@@ -268,20 +267,20 @@ class ApplicationModuleTest {
                 "test exit!");
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("test-app")
+            ApplicationModule app = ApplicationModule.builder("test-app")
                     .setAnsi(ansi().bold()) // all properties set to non-default values to test against the onExit module
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TextModule.Builder onExit = new TextModule.Builder("exit", "test exit!");
+            TextModule.Builder onExit = TextModule.builder("exit", "test exit!");
 
             app.setOnExit(onExit);
 
             // we add this manually after setOnExit to make sure it doesn't get added after the exit
             app.getChildren().add(
-                    new TextModule.Builder("text", "this should come first")
+                    TextModule.builder("text", "this should come first")
                             .setPrintStream(io.getPrintStream())
                             .enableAnsi(false));
 
@@ -301,37 +300,37 @@ class ApplicationModuleTest {
 
     @Test
     void testGetOnExit() {
-        ContainerModule.Builder onExit = new ContainerModule.Builder("exit");
-        ApplicationModule app = new ApplicationModule.Builder("test-app").build();
+        ContainerModule.Builder onExit = ContainerModule.builder("exit");
+        ApplicationModule app = ApplicationModule.builder("test-app").build();
         app.setOnExit(onExit);
         assertEquals(app.getOnExit(), onExit);
     }
 
     @Test
     void structuralEqualsTest() {
-        ContainerModule.Builder exit = new ContainerModule.Builder("exit");
-        ApplicationModule testApp = new ApplicationModule.Builder("test-app").build();
+        ContainerModule.Builder exit = ContainerModule.builder("exit");
+        ApplicationModule testApp = ApplicationModule.builder("test-app").build();
 
-        ApplicationModule app1 = new ApplicationModule.Builder("app")
+        ApplicationModule app1 = ApplicationModule.builder("app")
                 .setApplication(testApp)
                 .setOnExit(exit.getCopy())
                 .build();
 
-        ApplicationModule app2 = new ApplicationModule.Builder("app")
+        ApplicationModule app2 = ApplicationModule.builder("app")
                 .setApplication(testApp)
                 .setOnExit(exit.getCopy())
                 .build();
 
-        ApplicationModule app3 = new ApplicationModule.Builder("app")
+        ApplicationModule app3 = ApplicationModule.builder("app")
                 .setApplication(testApp)
                 .setOnExit(exit.getCopy())
                 .build();
 
-        ApplicationModule app4 = new ApplicationModule.Builder("app")
+        ApplicationModule app4 = ApplicationModule.builder("app")
                 .setOnExit(exit.getCopy())
                 .build();
 
-        ApplicationModule app5 = new ApplicationModule.Builder("app")
+        ApplicationModule app5 = ApplicationModule.builder("app")
                 .setApplication(testApp)
                 .build();
 
@@ -352,9 +351,9 @@ class ApplicationModuleTest {
         @Test
         void getCopyTest() {
 
-            var home = new ContainerModule.Builder("home");
-            var onExit = new ContainerModule.Builder("onExit");
-            ApplicationModule.Builder app = new ApplicationModule.Builder("test-app")
+            var home = ContainerModule.builder("home");
+            var onExit = ContainerModule.builder("onExit");
+            ApplicationModule.Builder app = ApplicationModule.builder("test-app")
                     .setHome(home)
                     .setOnExit(onExit);
 
@@ -369,8 +368,8 @@ class ApplicationModuleTest {
 
         @Test
         void setOnExitTest() {
-            var onExit = new ContainerModule.Builder("onExit");
-            ApplicationModule.Builder app = new ApplicationModule.Builder("test-app")
+            var onExit = ContainerModule.builder("onExit");
+            ApplicationModule.Builder app = ApplicationModule.builder("test-app")
                     .setOnExit(onExit);
 
             assertEquals(app.getOnExit(), onExit);
@@ -378,8 +377,8 @@ class ApplicationModuleTest {
 
         @Test
         void setHomeTest() {
-            var home = new ContainerModule.Builder("home");
-            ApplicationModule.Builder app = new ApplicationModule.Builder("test-app")
+            var home = ContainerModule.builder("home");
+            ApplicationModule.Builder app = ApplicationModule.builder("test-app")
                     .setHome(home);
 
             assertEquals(app.getHome(), home);
@@ -387,13 +386,13 @@ class ApplicationModuleTest {
 
         @Test
         void buildTest_fields_equal() {
-            ApplicationModule setApp = new ApplicationModule.Builder("setApp").build();
+            ApplicationModule setApp = ApplicationModule.builder("setApp").build();
             Ansi ansi = ansi().bold();
-            ContainerModule.Builder home = new ContainerModule.Builder("home");
-            ContainerModule.Builder onExit = new ContainerModule.Builder("exit");
+            ContainerModule.Builder home = ContainerModule.builder("home");
+            ContainerModule.Builder onExit = ContainerModule.builder("exit");
 
             try(IOCapture io = new IOCapture()) {
-                ApplicationModule app = new ApplicationModule.Builder("test-app")
+                ApplicationModule app = ApplicationModule.builder("test-app")
                         .setApplication(setApp)
                         .setAnsi(ansi)
                         .setScanner(io.getScanner())
@@ -416,13 +415,13 @@ class ApplicationModuleTest {
 
         @Test
         void buildTest_equivalent_builds() {
-            ApplicationModule setApp = new ApplicationModule.Builder("setApp").build();
+            ApplicationModule setApp = ApplicationModule.builder("setApp").build();
             Ansi ansi = ansi().bold();
-            ContainerModule.Builder home = new ContainerModule.Builder("home");
-            ContainerModule.Builder onExit = new ContainerModule.Builder("exit");
+            ContainerModule.Builder home = ContainerModule.builder("home");
+            ContainerModule.Builder onExit = ContainerModule.builder("exit");
 
             try(IOCapture io = new IOCapture()) {
-                ApplicationModule.Builder appBuilder = new ApplicationModule.Builder("test-app")
+                ApplicationModule.Builder appBuilder = ApplicationModule.builder("test-app")
                         .setApplication(setApp)
                         .setAnsi(ansi)
                         .setScanner(io.getScanner())

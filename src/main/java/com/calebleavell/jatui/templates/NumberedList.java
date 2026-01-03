@@ -17,7 +17,6 @@
 
 package com.calebleavell.jatui.templates;
 
-import com.calebleavell.jatui.core.DirectedGraphNode;
 import com.calebleavell.jatui.modules.ModuleTemplate;
 import com.calebleavell.jatui.modules.TUIModule;
 
@@ -30,7 +29,7 @@ import static org.fusesource.jansi.Ansi.ansi;
  * <br><br>
  * Example usage:
  * <pre><code>
- *        NumberedList list = new NumberedList("list")
+ *        NumberedList list = NumberedList.builder("list")
  *                 .setStart(4)
  *                 .setStep(2)
  *                 .addListText("item 1", "item 2", "item 3");
@@ -58,6 +57,16 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
 
     public NumberedList(String name) {
         super(NumberedList.class, name);
+    }
+
+    /**
+     * Constructs a new {@link NumberedList} builder.
+     *
+     * @param name The name of the builder.
+     * @return The new builder.
+     */
+    public static NumberedList builder(String name) {
+        return new NumberedList(name);
     }
 
     protected NumberedList() {
@@ -98,7 +107,7 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
         logger.trace("adding list text \"{}\" to {}", listText, getName());
         int currentNum = (i * step) + start;
         main.addChild(
-                new LineBuilder(name + "-" + currentNum)
+                TextChain.builder(name + "-" + currentNum)
                         .addText("[" + currentNum + "] ", ansi().bold())
                         .addText(listText)
                         .newLine());
@@ -112,7 +121,7 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
      * <br>
      * Example:
      * <pre><code>
-     *        NumberedList list = new NumberedList("list")
+     *        NumberedList list = NumberedList.builder("list")
      *                 .addListText("item 1", "item 2", "item 3");
      *
      *         list.build().run();

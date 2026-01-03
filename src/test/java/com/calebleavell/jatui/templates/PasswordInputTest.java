@@ -35,13 +35,13 @@ class PasswordInputTest {
         Supplier<char[]> supplyCorrect = () -> correct;
 
         try(IOCapture io = new IOCapture("my-password")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            PasswordInput myInput = new PasswordInput("pw-input", "password: ", supplyCorrect)
+            PasswordInput myInput = PasswordInput.builder("pw-input", "password: ", supplyCorrect)
                     .storeInputAndMatch();
 
             app.setHome(myInput);
@@ -73,13 +73,13 @@ class PasswordInputTest {
         Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
         try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            PasswordInput myInput = new PasswordInput("pw-input", "password: ", supplyCorrect)
+            PasswordInput myInput = PasswordInput.builder("pw-input", "password: ", supplyCorrect)
                     .storeInput();
 
             app.setHome(myInput);
@@ -108,13 +108,13 @@ class PasswordInputTest {
         Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
         try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password\nwrong-password")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            PasswordInput myInput = new PasswordInput("pw-input", "password: ", supplyCorrect)
+            PasswordInput myInput = PasswordInput.builder("pw-input", "password: ", supplyCorrect)
                     .addOnValidPassword("on-valid", () -> 5);
 
             app.setHome(myInput);
@@ -145,14 +145,14 @@ class PasswordInputTest {
         Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
         try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password\nwrong-password")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
             Runnable addOne = () -> app.forceUpdateInput("on-valid", app.getInputOrDefault("on-valid", Integer.class, 0) + 1);
-            PasswordInput myInput = new PasswordInput("pw-input", "password: ", supplyCorrect)
+            PasswordInput myInput = PasswordInput.builder("pw-input", "password: ", supplyCorrect)
                     .addOnValidPassword(addOne)
                     .addOnValidPassword(addOne);
 
@@ -184,13 +184,13 @@ class PasswordInputTest {
         Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
         try(IOCapture io = new IOCapture("correct-password\nwrong-password\nwrong-password\ncorrect-password")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            PasswordInput myInput = new PasswordInput("pw-input", "password: ", supplyCorrect)
+            PasswordInput myInput = PasswordInput.builder("pw-input", "password: ", supplyCorrect)
                     .addOnInvalidPassword("on-invalid", () -> 5);
 
             app.setHome(myInput);
@@ -221,14 +221,14 @@ class PasswordInputTest {
         Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
         try(IOCapture io = new IOCapture("correct-password\nwrong-password\nwrong-password\ncorrect-password")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
             Runnable addOne = () -> app.forceUpdateInput("on-invalid", app.getInputOrDefault("on-invalid", Integer.class, 0) + 1);
-            PasswordInput myInput = new PasswordInput("pw-input", "password: ", supplyCorrect)
+            PasswordInput myInput = PasswordInput.builder("pw-input", "password: ", supplyCorrect)
                     .addOnInvalidPassword(addOne)
                     .addOnInvalidPassword(addOne);
 
@@ -260,14 +260,14 @@ class PasswordInputTest {
         Supplier<char[]> supplyCorrect = () -> Arrays.copyOf(correct, correct.length);
 
         try(IOCapture io = new IOCapture("correct-password\ncorrect-password\nwrong-password\nwrong-password\ncorrect-password")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
             Runnable addOne = () -> app.forceUpdateInput("output", app.getInputOrDefault("output", Integer.class, 0) + 1);
-            PasswordInput myInput = new PasswordInput("pw-input", "password: ", supplyCorrect)
+            PasswordInput myInput = PasswordInput.builder("pw-input", "password: ", supplyCorrect)
                     .addOnInvalidPassword(addOne)
                     .addOnValidPassword(addOne)
                     .addOnValidPassword(addOne)
@@ -304,7 +304,7 @@ class PasswordInputTest {
 
     @Test
     void testSetName() {
-        PasswordInput input = new PasswordInput("name-1", "text", null);
+        PasswordInput input = PasswordInput.builder("name-1", "text", null);
         input.setName("name-2");
 
         assertAll(
@@ -320,14 +320,14 @@ class PasswordInputTest {
         Supplier<char[]> supplyCorrect = () -> correct;
 
         try(IOCapture io = new IOCapture("input1\ninput2")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setOnExit(ModuleFactory.empty("on-exit"))
                     .build();
 
-            PasswordInput myInput = new PasswordInput("pw-input", "text-1", supplyCorrect)
+            PasswordInput myInput = PasswordInput.builder("pw-input", "text-1", supplyCorrect)
                     .storeInputAndMatch();
 
             app.setHome(myInput);
@@ -350,53 +350,53 @@ class PasswordInputTest {
         Supplier<char[]> first = () -> pw;
         Supplier<char[]> second = () -> pw;
 
-        PasswordInput input1 = new PasswordInput("pw-input", "password: ", first)
+        PasswordInput input1 = PasswordInput.builder("pw-input", "password: ", first)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> {})
                 .storeInputAndMatch();
 
-        PasswordInput input2 = new PasswordInput("pw-input", "password: ", first)
+        PasswordInput input2 = PasswordInput.builder("pw-input", "password: ", first)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> {})
                 .storeInputAndMatch();
 
 
-        PasswordInput input3 = new PasswordInput("pw-input", "password: ", first)
+        PasswordInput input3 = PasswordInput.builder("pw-input", "password: ", first)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> {})
                 .storeInputAndMatch();
 
-        PasswordInput input4 = new PasswordInput("pw-input", "other text: ", first)
+        PasswordInput input4 = PasswordInput.builder("pw-input", "other text: ", first)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> {})
                 .storeInputAndMatch();
 
-        PasswordInput input5 = new PasswordInput("pw-input", "password: ", first)
+        PasswordInput input5 = PasswordInput.builder("pw-input", "password: ", first)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> {})
                 .storeInput();
 
-        PasswordInput input6 = new PasswordInput("pw-input", "password: ", first)
+        PasswordInput input6 = PasswordInput.builder("pw-input", "password: ", first)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> {})
                 .storeIfMatched();
 
-        PasswordInput input7 = new PasswordInput("pw-input", "password: ", second)
+        PasswordInput input7 = PasswordInput.builder("pw-input", "password: ", second)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> {})
                 .storeInputAndMatch();
 
-        PasswordInput input8 = new PasswordInput("pw-input", "password: ", first)
+        PasswordInput input8 = PasswordInput.builder("pw-input", "password: ", first)
                 .addOnInvalidPassword(() -> System.out.println("different"))
                 .addOnValidPassword(() -> {})
                 .storeInputAndMatch();
 
-        PasswordInput input9 = new PasswordInput("pw-input", "password: ", first)
+        PasswordInput input9 = PasswordInput.builder("pw-input", "password: ", first)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> System.out.println("other"))
                 .storeInputAndMatch();
 
-        PasswordInput input10 = new PasswordInput("other-name", "password: ", first)
+        PasswordInput input10 = PasswordInput.builder("other-name", "password: ", first)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> System.out.println("other"))
                 .storeInputAndMatch();
@@ -423,7 +423,7 @@ class PasswordInputTest {
         char[] pw = {'a'};
         Supplier<char[]> sup = () -> pw;
 
-        PasswordInput original = new PasswordInput("pw-input", "password: ", sup)
+        PasswordInput original = PasswordInput.builder("pw-input", "password: ", sup)
                 .addOnInvalidPassword(() -> {})
                 .addOnValidPassword(() -> {})
                 .storeInputAndMatch();

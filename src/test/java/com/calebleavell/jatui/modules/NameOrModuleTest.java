@@ -26,8 +26,8 @@ public class NameOrModuleTest {
 
     @Test
     void testGetModuleFromModule() {
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
-        ContainerModule.Builder container = new ContainerModule.Builder("module");
+        ApplicationModule app = ApplicationModule.builder("app").build();
+        ContainerModule.Builder container = ContainerModule.builder("module");
 
         NameOrModule module = new NameOrModule(container);
 
@@ -36,8 +36,8 @@ public class NameOrModuleTest {
 
     @Test
     void testGetModuleFromName() {
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
-        ContainerModule.Builder container = new ContainerModule.Builder("module");
+        ApplicationModule app = ApplicationModule.builder("app").build();
+        ContainerModule.Builder container = ContainerModule.builder("module");
         app.setHome(container);
 
         NameOrModule module = new NameOrModule("module");
@@ -47,8 +47,8 @@ public class NameOrModuleTest {
 
     @Test
     void testGetCopyFromModule() {
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
-        ContainerModule.Builder container = new ContainerModule.Builder("module");
+        ApplicationModule app = ApplicationModule.builder("app").build();
+        ContainerModule.Builder container = ContainerModule.builder("module");
 
         NameOrModule original = new NameOrModule(container);
         NameOrModule copy = original.getCopy();
@@ -61,8 +61,8 @@ public class NameOrModuleTest {
 
     @Test
     void testGetCopyFromName() {
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
-        ContainerModule.Builder container = new ContainerModule.Builder("module");
+        ApplicationModule app = ApplicationModule.builder("app").build();
+        ContainerModule.Builder container = ContainerModule.builder("module");
         app.setHome(container);
 
         NameOrModule original = new NameOrModule("module");

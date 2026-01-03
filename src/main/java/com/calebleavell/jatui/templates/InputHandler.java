@@ -33,7 +33,7 @@ import java.util.function.Function;
  * <br><br>
  * Example Usage:
  * <pre><code>
- *       InputHandler handler = new InputHandler("handler-name", "input_identifier")
+ *       InputHandler handler = InputHandler.builder("handler-name", "input_identifier")
  *                     .setHandler("return_value_identifier",
  *                             // run main logic on input
  *                             s -> {
@@ -54,7 +54,7 @@ import java.util.function.Function;
  */
 public class InputHandler extends ModuleTemplate<InputHandler> {
 
-    /** the name of the app state to read **/
+    /** The name of the app state to read **/
     protected String inputName;
 
     /** The type of the handler (as provided by {@link HandlerType}) **/
@@ -105,6 +105,17 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
     public InputHandler(String name, String inputName) {
         super(InputHandler.class, name);
         this.inputName = inputName;
+    }
+
+    /**
+     * Constructs a new {@link InputHandler} builder.
+     *
+     * @param name The name of the builder.
+     * @param inputName The name of the app state to read.
+     * @return The new builder.
+     */
+    public static InputHandler builder(String name, String inputName) {
+        return new InputHandler(name, inputName);
     }
 
     protected InputHandler() {
@@ -292,7 +303,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      * @return self
      */
     private InputHandler addHandler(String name, Function<String, ?> logic) {
-        FunctionModule.Builder handler = new FunctionModule.Builder(name, () -> {
+        FunctionModule.Builder handler = FunctionModule.builder(name, () -> {
             ApplicationModule app = this.getApplication();
             if(app == null) {
                 logger.warn("tried to run logic for handler \"{}\" but app was null", name);
@@ -326,7 +337,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      * @return self
      */
     private <T> InputHandler addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
-        FunctionModule.Builder handler = new FunctionModule.Builder(name, () -> {
+        FunctionModule.Builder handler = FunctionModule.builder(name, () -> {
             ApplicationModule app = this.getApplication();
             if(app == null) {
                 logger.warn("tried to run logic for safe handler \"{}\" but app was null", name);

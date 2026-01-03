@@ -18,10 +18,7 @@
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
-import com.calebleavell.jatui.modules.ModuleTemplate;
-import com.calebleavell.jatui.modules.TUIModule;
-import com.calebleavell.jatui.modules.ContainerModule;
-import com.calebleavell.jatui.modules.FunctionModule;
+import com.calebleavell.jatui.modules.*;
 
 import java.io.Console;
 import java.util.ArrayList;
@@ -40,11 +37,23 @@ public class PasswordInput extends ModuleTemplate<PasswordInput> {
     private boolean storeInput = false;
     private boolean storeMatch = false;
 
-    public PasswordInput(String name, String displayText, Supplier<char[]> passwordSupplier) {
+    protected PasswordInput(String name, String displayText, Supplier<char[]> passwordSupplier) {
         super(PasswordInput.class, name);
         this.displayText = displayText;
         this.passwordSupplier = passwordSupplier;
-        main.addChild(new FunctionModule.Builder(name+"-input", createPasswordInput()));
+        main.addChild(FunctionModule.builder(name+"-input", createPasswordInput()));
+    }
+
+    /**
+     * Constructs a new {@link PasswordInput} builder.
+     *
+     * @param name The name of the builder.
+     * @param displayText The text that displays before getting input (e.g., "Are you sure? ").
+     * @param passwordSupplier The provider of the password after to check if the inputted password is valid.
+     * @return The new builder.
+     */
+    public static PasswordInput builder(String name, String displayText, Supplier<char[]> passwordSupplier) {
+        return new PasswordInput(name, displayText, passwordSupplier);
     }
 
     protected PasswordInput() {
@@ -52,7 +61,8 @@ public class PasswordInput extends ModuleTemplate<PasswordInput> {
     }
 
     @Override
-    protected PasswordInput createInstance() {return new PasswordInput();}
+    protected PasswordInput createInstance() {
+        return new PasswordInput();}
 
     /**
      * Cleans any memory that may have been stored from this password input
@@ -87,7 +97,7 @@ public class PasswordInput extends ModuleTemplate<PasswordInput> {
     }
 
     public PasswordInput addOnValidPassword(Runnable onValidPassword) {
-        this.onValidPassword.add(new FunctionModule.Builder("", () -> {
+        this.onValidPassword.add(FunctionModule.builder("", () -> {
             onValidPassword.run();
             return null;
         }));
@@ -95,12 +105,12 @@ public class PasswordInput extends ModuleTemplate<PasswordInput> {
     }
 
     public PasswordInput addOnValidPassword(String name, Supplier<?> onValidPassword) {
-        this.onValidPassword.add(new FunctionModule.Builder(name, onValidPassword));
+        this.onValidPassword.add(FunctionModule.builder(name, onValidPassword));
         return self();
     }
 
     public PasswordInput addOnInvalidPassword(Runnable onInvalidPassword) {
-        this.onInvalidPassword.add(new FunctionModule.Builder("", () -> {
+        this.onInvalidPassword.add(FunctionModule.builder("", () -> {
             onInvalidPassword.run();
             return null;
         }));
@@ -108,7 +118,7 @@ public class PasswordInput extends ModuleTemplate<PasswordInput> {
     }
 
     public PasswordInput addOnInvalidPassword(String name, Supplier<?> onInvalidPassword) {
-        this.onInvalidPassword.add(new FunctionModule.Builder(name, onInvalidPassword));
+        this.onInvalidPassword.add(FunctionModule.builder(name, onInvalidPassword));
         return self();
     }
 

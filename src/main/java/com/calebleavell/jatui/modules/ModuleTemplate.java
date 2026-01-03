@@ -52,7 +52,7 @@ public abstract class ModuleTemplate<B extends ModuleTemplate<B>> extends TUIMod
      */
     public ModuleTemplate(Class<B> type, String name) {
         super(type, name);
-        main = new ContainerModule.Builder(name + "-main");
+        main = ContainerModule.builder(name + "-main");
         this.addChild(main);
     }
 

@@ -149,6 +149,20 @@ public class TextModule extends TUIModule {
     }
 
     /**
+     * Constructs a new {@link TextModule} builder.
+     *
+     * @param name The name of the builder.
+     * @param text The text to either display directly,
+     *             or the input identifier fetch the input from for the {@link ApplicationModule} if {@link Builder#setOutputType(OutputType)}
+     *             is set to {@link TextModule.OutputType#DISPLAY_APP_STATE}.
+     * @return The new builder.
+     */
+    public static Builder builder(String name, String text) {
+        return new Builder(name, text);
+    }
+
+
+    /**
      * Builder for {@link TextInputModule}.
      * <br><br>
      * Required fields: {@code name}, {@code text} <br>
@@ -164,7 +178,7 @@ public class TextModule extends TUIModule {
         /** The {@link OutputType} of the text to display, which includes pure output or fetching application state. **/
         protected OutputType outputType = OutputType.DISPLAY_TEXT;
 
-        public Builder(String name, String text) {
+        protected Builder(String name, String text) {
             super(Builder.class, name);
             this.text = text;
         }

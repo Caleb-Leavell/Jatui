@@ -29,16 +29,16 @@ class NumberedModuleSelectorTest {
 
     @Test
     void testCopy() {
-        ApplicationModule app1 = new ApplicationModule.Builder("app")
+        ApplicationModule app1 = ApplicationModule.builder("app")
                 .addChildren(
-                        new TextModule.Builder("text", "Hello, World!"),
-                        new TextInputModule.Builder("input", "input: ")
+                        TextModule.builder("text", "Hello, World!"),
+                        TextInputModule.builder("input", "input: ")
                 )
                 .build();
 
-        ContainerModule.Builder module = new ContainerModule.Builder("module");
+        ContainerModule.Builder module = ContainerModule.builder("module");
 
-        NumberedModuleSelector original = new NumberedModuleSelector("list", app1)
+        NumberedModuleSelector original = NumberedModuleSelector.builder("list", app1)
                 .addModule("text")
                 .addModule(module)
                 .addModule("the module", module);
@@ -55,22 +55,22 @@ class NumberedModuleSelectorTest {
         String output;
 
         try (IOCapture io = new IOCapture("1")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setOnExit(ModuleFactory.empty("empty"))
                     .build();
 
-            NumberedModuleSelector selector = new NumberedModuleSelector("list", app)
+            NumberedModuleSelector selector = NumberedModuleSelector.builder("list", app)
                     .addModule("goto text module", "text");
 
-            ContainerModule.Builder content = new ContainerModule.Builder("home")
+            ContainerModule.Builder content = ContainerModule.builder("home")
                     .addChildren(
                             selector,
                             ModuleFactory.terminate("terminate-app", app),
-                            new TextModule.Builder("text", "Hello, World!"),
-                            new TextInputModule.Builder("input", "input: ")
+                            TextModule.builder("text", "Hello, World!"),
+                            TextInputModule.builder("input", "input: ")
                     )
                     .enableAnsi(false)
                     .setPrintStream(io.getPrintStream());
@@ -95,18 +95,18 @@ class NumberedModuleSelectorTest {
         String output;
 
         try (IOCapture io = new IOCapture("1")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setOnExit(ModuleFactory.empty("empty"))
                     .build();
 
-            TextModule.Builder text = new TextModule.Builder("text", "Hello, World!")
+            TextModule.Builder text = TextModule.builder("text", "Hello, World!")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            NumberedModuleSelector original = new NumberedModuleSelector("list", app)
+            NumberedModuleSelector original = NumberedModuleSelector.builder("list", app)
                     .addModule("goto text module", text);
 
             app.setHome(original);
@@ -129,22 +129,22 @@ class NumberedModuleSelectorTest {
         String output;
 
         try (IOCapture io = new IOCapture("1")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setOnExit(ModuleFactory.empty("empty"))
                     .build();
 
-            NumberedModuleSelector selector = new NumberedModuleSelector("list", app)
+            NumberedModuleSelector selector = NumberedModuleSelector.builder("list", app)
                     .addModule("text");
 
-            ContainerModule.Builder content = new ContainerModule.Builder("home")
+            ContainerModule.Builder content = ContainerModule.builder("home")
                     .addChildren(
                             selector,
                             ModuleFactory.terminate("terminate-app", app),
-                            new TextModule.Builder("text", "Hello, World!"),
-                            new TextInputModule.Builder("input", "input: ")
+                            TextModule.builder("text", "Hello, World!"),
+                            TextInputModule.builder("input", "input: ")
                     )
                     .enableAnsi(false)
                     .setPrintStream(io.getPrintStream());
@@ -169,18 +169,18 @@ class NumberedModuleSelectorTest {
         String output;
 
         try (IOCapture io = new IOCapture("1")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .setOnExit(ModuleFactory.empty("empty"))
                     .build();
 
-            TextModule.Builder text = new TextModule.Builder("text", "Hello, World!")
+            TextModule.Builder text = TextModule.builder("text", "Hello, World!")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            NumberedModuleSelector original = new NumberedModuleSelector("list", app)
+            NumberedModuleSelector original = NumberedModuleSelector.builder("list", app)
                     .addModule(text);
 
             app.setHome(original);
@@ -202,20 +202,20 @@ class NumberedModuleSelectorTest {
         String output;
 
         try (IOCapture io = new IOCapture("1\n2\n3")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            TextModule.Builder text = new TextModule.Builder("text", "Hello, World!")
+            TextModule.Builder text = TextModule.builder("text", "Hello, World!")
                     .addChild(ModuleFactory.run("run-home", app, "home"))
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            ContainerModule.Builder home = new ContainerModule.Builder("home")
+            ContainerModule.Builder home = ContainerModule.builder("home")
                     .addChildren(
-                            new NumberedModuleSelector("list", app)
+                            NumberedModuleSelector.builder("list", app)
                                     .addModule(text)
                                     .addModule("restart", "home")
                                     .addModule("exit", ModuleFactory.terminate("terminate-app", app))
@@ -246,53 +246,53 @@ class NumberedModuleSelectorTest {
 
     @Test
     void testShallowShallowStructuralEquals() {
-        ApplicationModule app1 = new ApplicationModule.Builder("app")
+        ApplicationModule app1 = ApplicationModule.builder("app")
                 .addChildren(
-                        new TextModule.Builder("text", "Hello, World!"),
-                        new TextInputModule.Builder("input", "input: ")
+                        TextModule.builder("text", "Hello, World!"),
+                        TextInputModule.builder("input", "input: ")
                 )
                 .build();
 
-        ApplicationModule app2 = new ApplicationModule.Builder("app2")
+        ApplicationModule app2 = ApplicationModule.builder("app2")
                 .addChildren(
-                        new TextModule.Builder("text", "Hello, World!"),
-                        new TextInputModule.Builder("input", "input: ")
+                        TextModule.builder("text", "Hello, World!"),
+                        TextInputModule.builder("input", "input: ")
                 )
                 .build();
 
-        ContainerModule.Builder module = new ContainerModule.Builder("module");
+        ContainerModule.Builder module = ContainerModule.builder("module");
 
-        NumberedModuleSelector list1 = new NumberedModuleSelector("list", app1)
+        NumberedModuleSelector list1 = NumberedModuleSelector.builder("list", app1)
                 .addModule("text")
                 .addModule(module)
                 .addModule("the module", module);
 
-        NumberedModuleSelector list2 = new NumberedModuleSelector("list", app1)
+        NumberedModuleSelector list2 = NumberedModuleSelector.builder("list", app1)
                 .addModule("text")
                 .addModule(module)
                 .addModule("the module", module);
 
-        NumberedModuleSelector list3 = new NumberedModuleSelector("list", app1)
+        NumberedModuleSelector list3 = NumberedModuleSelector.builder("list", app1)
                 .addModule("text")
                 .addModule(module)
                 .addModule("the module", module);
 
-        NumberedModuleSelector list4 = new NumberedModuleSelector("list", app2)
+        NumberedModuleSelector list4 = NumberedModuleSelector.builder("list", app2)
                 .addModule("text")
                 .addModule(module)
                 .addModule("the module", module);
 
-        NumberedModuleSelector list5 = new NumberedModuleSelector("list", app1)
+        NumberedModuleSelector list5 = NumberedModuleSelector.builder("list", app1)
                 .addModule("input")
                 .addModule(module)
                 .addModule("the module", module);
 
-        NumberedModuleSelector list6 = new NumberedModuleSelector("list", app1)
+        NumberedModuleSelector list6 = NumberedModuleSelector.builder("list", app1)
                 .addModule("text")
                 .addModule(module)
                 .addModule("other display text", module);
 
-        NumberedModuleSelector list7 = new NumberedModuleSelector("other name", app1)
+        NumberedModuleSelector list7 = NumberedModuleSelector.builder("other name", app1)
                 .addModule("text")
                 .addModule(module)
                 .addModule("the module", module);

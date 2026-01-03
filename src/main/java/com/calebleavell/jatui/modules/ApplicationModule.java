@@ -32,7 +32,7 @@ import java.util.*;
 public class ApplicationModule extends TUIModule {
 
     /** The module that runs by default when the application finishes running **/
-    public static final TUIModule.Builder<?> DEFAULT_EXIT = new TextModule.Builder("exit", "Exiting...")
+    public static final TUIModule.Builder<?> DEFAULT_EXIT = TextModule.builder("exit", "Exiting...")
             .setAnsi(ansi().fgRgb(125, 100, 100));
 
     /**
@@ -304,6 +304,16 @@ public class ApplicationModule extends TUIModule {
     }
 
     /**
+     * Constructs a new {@link ApplicationModule} builder.
+     *
+     * @param name The name of the builder.
+     * @return The new builder.
+     */
+    public static Builder builder(String name) {
+        return new Builder(name);
+    }
+
+    /**
      * Builder for {@link ApplicationModule}.
      * <br><br>
      * Required fields: {@code name} <br>
@@ -331,7 +341,7 @@ public class ApplicationModule extends TUIModule {
          */
         private TUIModule.Builder<?> onExit = DEFAULT_EXIT.getCopy();
 
-        public Builder(String name) {
+        protected Builder(String name) {
             super(Builder.class, name);
             this.children.add(ModuleFactory.empty("home"));
             this.children.add(onExit);
@@ -351,7 +361,7 @@ public class ApplicationModule extends TUIModule {
          */
         @Override
         protected Builder createInstance() {
-            return new ApplicationModule.Builder();
+            return new Builder();
         }
 
         /**

@@ -18,6 +18,7 @@
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
+import com.calebleavell.jatui.modules.ContainerModule;
 import com.calebleavell.jatui.modules.ModuleTemplate;
 import com.calebleavell.jatui.modules.TUIModule;
 import com.calebleavell.jatui.modules.TextInputModule;
@@ -31,7 +32,7 @@ import java.util.function.Supplier;
  * <br><br>
  * Example Usage:
  * <pre><code>
- *             ConfirmationPrompt confirmExit = new ConfirmationPrompt("confirm-exit",
+ *             ConfirmationPrompt confirmExit = ConfirmationPrompt.builder("confirm-exit",
  *                 "Are you sure you want to exit (y/n)? ")
  *                 .setApplication(app)
  *                 .addOnConfirm(app::terminate)
@@ -52,12 +53,22 @@ public class ConfirmationPrompt extends ModuleTemplate<ConfirmationPrompt> {
     /** Increments the name of the denial handlers to ensure they each have a unique name. **/
     private int denyIter = 0;
 
-
-    public ConfirmationPrompt(String name, String displayText) {
+    protected ConfirmationPrompt(String name, String displayText) {
         super(ConfirmationPrompt.class, name);
         main.addChild(
-                new TextInputModule.Builder(name + "-input", displayText)
+                TextInputModule.builder(name + "-input", displayText)
         );
+    }
+
+    /**
+     * Constructs a new {@link ConfirmationPrompt} builder.
+     *
+     * @param name The name of the builder.
+     * @param displayText The text that displays before getting input (e.g., "Are you sure? ").
+     * @return The new builder.
+     */
+    public static ConfirmationPrompt builder(String name, String displayText) {
+        return new ConfirmationPrompt(name, displayText);
     }
 
     protected ConfirmationPrompt() {

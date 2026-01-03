@@ -32,8 +32,8 @@ class FunctionModuleTest {
 
     @Test
     void testRun() {
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
-        FunctionModule.Builder test = new FunctionModule.Builder("test", () -> {
+        ApplicationModule app = ApplicationModule.builder("app").build();
+        FunctionModule.Builder test = FunctionModule.builder("test", () -> {
             return "Test Output";
         });
 
@@ -47,7 +47,7 @@ class FunctionModuleTest {
     @Test
     void testGetFunction() {
         Supplier<Integer> func = () -> 5;
-        FunctionModule test = new FunctionModule.Builder("test", func).build();
+        FunctionModule test = FunctionModule.builder("test", func).build();
         assertEquals(func, test.getFunction());
     }
 
@@ -56,7 +56,7 @@ class FunctionModuleTest {
         @Test
         void testSetFunctionSupplier() {
             Supplier<Integer> func = () -> 5;
-            FunctionModule.Builder test = new FunctionModule.Builder("test", () -> {});
+            FunctionModule.Builder test = FunctionModule.builder("test", () -> {});
 
             test.setFunction(func);
 
@@ -68,8 +68,8 @@ class FunctionModuleTest {
             // can't test function equality since a supplier gets constructed from the runnable
             // so we test correct runnable functionality instead
 
-            ApplicationModule app = new ApplicationModule.Builder("app").build();
-            FunctionModule.Builder test = new FunctionModule.Builder("test", () -> {});
+            ApplicationModule app = ApplicationModule.builder("app").build();
+            FunctionModule.Builder test = FunctionModule.builder("test", () -> {});
 
             List<Integer> testList = new ArrayList<>();
 
@@ -90,7 +90,7 @@ class FunctionModuleTest {
         @Test
         void testShallowCopy() {
             Supplier<Integer> func = () -> 31415;
-            FunctionModule.Builder original = new FunctionModule.Builder("original", func)
+            FunctionModule.Builder original = FunctionModule.builder("original", func)
                     .enableAnsi(false); // this is to ensure the super method is being called
 
             FunctionModule.Builder copy = original.createInstance();
@@ -105,7 +105,7 @@ class FunctionModuleTest {
         @Test
         void testBuild() {
             Supplier<Integer> func = () -> 31415;
-            FunctionModule.Builder builder = new FunctionModule.Builder("original", func)
+            FunctionModule.Builder builder = FunctionModule.builder("original", func)
                     .enableAnsi(false);
 
             FunctionModule first = builder.build();

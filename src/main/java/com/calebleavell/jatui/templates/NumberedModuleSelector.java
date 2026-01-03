@@ -32,8 +32,8 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
     public NumberedModuleSelector(String name, ApplicationModule app) {
         super(NumberedModuleSelector.class, name);
         this.setApplication(app);
-        list = new NumberedList(name + "-list");
-        TextInputModule.Builder collectInput = new TextInputModule.Builder(name + "-input", "Your choice: ")
+        list = NumberedList.builder(name + "-list");
+        TextInputModule.Builder collectInput = TextInputModule.builder(name + "-input", "Your choice: ")
                 .addSafeHandler(name + "-goto-module", input -> {
                     int index = Integer.parseInt(input);
                     NameOrModule nameOrModule = modules.get(index - 1);
@@ -44,6 +44,17 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
                 });
         main.addChild(list);
         main.addChild(collectInput);
+    }
+
+    /**
+     * Constructs a new {@link NumberedModuleSelector} builder.
+     *
+     * @param name The name of the builder.
+     * @param app The {@link ApplicationModule} this module will be tied to.
+     * @return The new builder.
+     */
+    public static NumberedModuleSelector builder(String name, ApplicationModule app) {
+        return new NumberedModuleSelector(name, app);
     }
 
     protected NumberedModuleSelector() {

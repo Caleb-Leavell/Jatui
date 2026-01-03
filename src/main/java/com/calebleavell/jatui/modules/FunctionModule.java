@@ -71,6 +71,28 @@ public class FunctionModule extends TUIModule {
     }
 
     /**
+     * Constructs a new {@link FunctionModule} builder.
+     *
+     * @param name The name of the builder.
+     * @param function The Supplier that will be executed when this module is built and run.
+     * @return The new builder.
+     */
+    public static Builder builder(String name, Supplier<?> function) {
+        return new Builder(name, function);
+    }
+
+    /**
+     * Constructs a new {@link FunctionModule} builder.
+     *
+     * @param name The name of the builder.
+     * @param function The Runnable that will be executed when this module is built and run.
+     * @return The new builder.
+     */
+    public static Builder builder(String name, Runnable function) {
+        return new Builder(name, function);
+    }
+
+    /**
      * Builder for {@link FunctionModule}.
      * <br><br>
      * Required fields: {@code name}, {@code function}
@@ -92,7 +114,7 @@ public class FunctionModule extends TUIModule {
          * @param name The unique name of the module
          * @param function The Supplier that will be executed when this module is built and run.
          */
-        public Builder(String name, Supplier<?> function) {
+        protected Builder(String name, Supplier<?> function) {
             super(Builder.class, name);
             this.function = function;
         }
@@ -103,7 +125,7 @@ public class FunctionModule extends TUIModule {
          * @param name The unique name of the module
          * @param function The Runnable that will be executed when this module is built and run.
          */
-        public Builder(String name, Runnable function) {
+        protected Builder(String name, Runnable function) {
             super(Builder.class, name);
             this.setFunction(function);
         }

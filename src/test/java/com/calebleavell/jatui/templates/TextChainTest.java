@@ -18,22 +18,21 @@
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.modules.*;
-import com.calebleavell.jatui.templates.LineBuilder;
 import com.calebleavell.jatui.util.IOCapture;
 import org.junit.jupiter.api.Test;
 
 import static org.fusesource.jansi.Ansi.ansi;
 import static org.junit.jupiter.api.Assertions.*;
 
-class LineBuilderTest {
+class TextChainTest {
 
     @Test
     void testGetCopy() {
-        LineBuilder original = new LineBuilder("lines")
+        TextChain original = TextChain.builder("lines")
                 .addText("text1")
                 .addText("text2");
 
-        LineBuilder copy = original.getCopy();
+        TextChain copy = original.getCopy();
 
         assertTrue(copy.structuralEquals(original));
     }
@@ -43,8 +42,8 @@ class LineBuilderTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            LineBuilder original = new LineBuilder("lines")
-                    .addText(new TextModule.Builder("text", "Hello, World!"))
+            TextChain original = TextChain.builder("lines")
+                    .addText(TextModule.builder("text", "Hello, World!"))
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
 
@@ -61,7 +60,7 @@ class LineBuilderTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            LineBuilder original = new LineBuilder("lines")
+            TextChain original = TextChain.builder("lines")
                     .addText("Hello, World!", ansi().bold())
                     .setPrintStream(io.getPrintStream());
 
@@ -78,7 +77,7 @@ class LineBuilderTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            LineBuilder original = new LineBuilder("lines")
+            TextChain original = TextChain.builder("lines")
                     .addText("Hello, World!")
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false);
@@ -96,15 +95,15 @@ class LineBuilderTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .setPrintStream(io.getPrintStream())
                     .build();
 
-            ContainerModule.Builder home = new ContainerModule.Builder("home")
+            ContainerModule.Builder home = ContainerModule.builder("home")
                     .addChildren(
-                            new FunctionModule.Builder("five", () -> 5),
-                            new LineBuilder("display-five")
+                            FunctionModule.builder("five", () -> 5),
+                            TextChain.builder("display-five")
                                     .addText("Output: ")
                                     .addModuleOutput("five", ansi().bold())
                                     .newLine()
@@ -124,16 +123,16 @@ class LineBuilderTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
-            ContainerModule.Builder home = new ContainerModule.Builder("home")
+            ContainerModule.Builder home = ContainerModule.builder("home")
                     .addChildren(
-                            new FunctionModule.Builder("five", () -> 5),
-                            new LineBuilder("display-five")
+                            FunctionModule.builder("five", () -> 5),
+                            TextChain.builder("display-five")
                                     .addText("Output: ")
                                     .addModuleOutput("five")
                                     .newLine()
@@ -153,7 +152,7 @@ class LineBuilderTest {
         String output;
 
         try(IOCapture io = new IOCapture()) {
-            LineBuilder original = new LineBuilder("lines")
+            TextChain original = TextChain.builder("lines")
                     .addText("Hello,")
                     .newLine()
                     .addText("World!")
@@ -171,28 +170,28 @@ class LineBuilderTest {
 
     @Test
     void testShallowStructuralStructuralEquals() {
-        LineBuilder lines1 = new LineBuilder("lines")
+        TextChain lines1 = TextChain.builder("lines")
                 .addText("text1")
                 .addText("text2");
 
-        LineBuilder lines2 = new LineBuilder("lines")
+        TextChain lines2 = TextChain.builder("lines")
                 .addText("text1")
                 .addText("text2");
 
-        LineBuilder lines3 = new LineBuilder("lines")
+        TextChain lines3 = TextChain.builder("lines")
                 .addText("text1")
                 .addText("text2");
 
-        LineBuilder lines4 = new LineBuilder("lines")
+        TextChain lines4 = TextChain.builder("lines")
                 .addText("text1_other")
                 .addText("text2");
 
-        LineBuilder lines5 = new LineBuilder("lines")
+        TextChain lines5 = TextChain.builder("lines")
                 .addText("text1")
                 .addText("text2")
                 .addText("text3");
 
-        LineBuilder lines6 = new LineBuilder("other")
+        TextChain lines6 = TextChain.builder("other")
                 .addText("text1")
                 .addText("text2");
 

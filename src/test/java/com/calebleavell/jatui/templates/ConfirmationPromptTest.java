@@ -31,7 +31,7 @@ class ConfirmationPromptTest {
 
     @Test
     void testSetValidConfirm() {
-        ConfirmationPrompt confirm = new ConfirmationPrompt("name", "Are you sure? ")
+        ConfirmationPrompt confirm = ConfirmationPrompt.builder("name", "Are you sure? ")
                 .setValidConfirm("1", "2", "3");
 
         assertEquals(Set.of("1", "2", "3"), confirm.getValidConfirm());
@@ -39,7 +39,7 @@ class ConfirmationPromptTest {
 
     @Test
     void testSetValidDeny() {
-        ConfirmationPrompt deny = new ConfirmationPrompt("name", "Are you sure? ")
+        ConfirmationPrompt deny = ConfirmationPrompt.builder("name", "Are you sure? ")
                 .setValidConfirm("1", "2", "3");
 
         assertEquals(Set.of("1", "2", "3"), deny.getValidConfirm());
@@ -50,14 +50,14 @@ class ConfirmationPromptTest {
         String output;
 
         try(IOCapture io = new IOCapture("yes")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .setPrintStream(io.getPrintStream())
                     .setScanner(io.getScanner())
                     .enableAnsi(false)
                     .build();
 
-            ConfirmationPrompt confirm = new ConfirmationPrompt("confirm", "Are you sure? ")
+            ConfirmationPrompt confirm = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                     .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
 
             app.setHome(confirm);
@@ -74,14 +74,14 @@ class ConfirmationPromptTest {
         String output;
 
         try(IOCapture io = new IOCapture("yes\nyeah")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .setPrintStream(io.getPrintStream())
                     .setScanner(io.getScanner())
                     .enableAnsi(false)
                     .build();
 
-            ConfirmationPrompt confirm = new ConfirmationPrompt("confirm", "Are you sure? ")
+            ConfirmationPrompt confirm = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                     .setValidConfirm("yeah")
                     .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
 
@@ -99,14 +99,14 @@ class ConfirmationPromptTest {
         String output;
 
         try(IOCapture io = new IOCapture("yes\nyeah")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .setPrintStream(io.getPrintStream())
                     .setScanner(io.getScanner())
                     .enableAnsi(false)
                     .build();
 
-            ConfirmationPrompt confirm = new ConfirmationPrompt("confirm", "Are you sure? ")
+            ConfirmationPrompt confirm = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                     .setValidConfirm("yeah")
                     .addOnConfirm(() -> io.getPrintStream().print("confirmed"));
 
@@ -124,14 +124,14 @@ class ConfirmationPromptTest {
         String output;
 
         try(IOCapture io = new IOCapture("yes\nyeah")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .setPrintStream(io.getPrintStream())
                     .setScanner(io.getScanner())
                     .enableAnsi(false)
                     .build();
 
-            ConfirmationPrompt confirm = new ConfirmationPrompt("confirm", "Are you sure? ")
+            ConfirmationPrompt confirm = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                     .setValidConfirm("yeah")
                     .addOnConfirm("on-confirm", () -> "confirmed");
 
@@ -151,14 +151,14 @@ class ConfirmationPromptTest {
         String confirmed2;
 
         try(IOCapture io = new IOCapture("yes\nyeah")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .setPrintStream(io.getPrintStream())
                     .setScanner(io.getScanner())
                     .enableAnsi(false)
                     .build();
 
-            ConfirmationPrompt confirm = new ConfirmationPrompt("confirm", "Are you sure? ")
+            ConfirmationPrompt confirm = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                     .setValidConfirm("yeah")
                     .addOnConfirm("on-confirm-1", () -> "confirmed")
                     .addOnConfirm(() -> io.getPrintStream().print("confirmed"))
@@ -186,14 +186,14 @@ class ConfirmationPromptTest {
         String denied2;
 
         try(IOCapture io = new IOCapture("no\nnah")) {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .setPrintStream(io.getPrintStream())
                     .setScanner(io.getScanner())
                     .enableAnsi(false)
                     .build();
 
-            ConfirmationPrompt confirm = new ConfirmationPrompt("confirm", "Are you sure? ")
+            ConfirmationPrompt confirm = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                     .setValidDeny("nah")
                     .addOnDeny("on-deny-1", () -> "denied")
                     .addOnDeny(() -> io.getPrintStream().print("denied"))
@@ -216,7 +216,7 @@ class ConfirmationPromptTest {
 
     @Test
     void testSetName() {
-        ConfirmationPrompt confirm = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt confirm = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setName("new-confirm-name");
 
         assertAll(
@@ -229,55 +229,55 @@ class ConfirmationPromptTest {
 
     @Test
     void testShallowShallowStructuralEquals() {
-        ConfirmationPrompt prompt1 = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt prompt1 = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm(() -> System.out.println("text"))
                 .addOnDeny(() -> System.out.println("text"));
 
-        ConfirmationPrompt prompt2 = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt prompt2 = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm(() -> System.out.println("text"))
                 .addOnDeny(() -> System.out.println("text"));
 
-        ConfirmationPrompt prompt3 = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt prompt3 = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm(() -> System.out.println("text"))
                 .addOnDeny(() -> System.out.println("text"));
 
-        ConfirmationPrompt prompt4 = new ConfirmationPrompt("confirm", "other text")
+        ConfirmationPrompt prompt4 = ConfirmationPrompt.builder("confirm", "other text")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm(() -> System.out.println("text"))
                 .addOnDeny(() -> System.out.println("text"));
 
-        ConfirmationPrompt prompt5 = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt prompt5 = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps", "new valid confirm")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm(() -> System.out.println("text"))
                 .addOnDeny(() -> System.out.println("text"));
 
-        ConfirmationPrompt prompt6 = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt prompt6 = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not", "new valid deny")
                 .addOnConfirm(() -> System.out.println("text"))
                 .addOnDeny(() -> System.out.println("text"));
 
-        ConfirmationPrompt prompt7 = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt prompt7 = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm("different-on-confirm", () -> 0)
                 .addOnDeny(() -> System.out.println("text"));
 
-        ConfirmationPrompt prompt8 = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt prompt8 = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm(() -> System.out.println("text"))
                 .addOnDeny("different-on-deny", () -> 0);
 
-        ConfirmationPrompt prompt9 = new ConfirmationPrompt("other-name", "Are you sure? ")
+        ConfirmationPrompt prompt9 = ConfirmationPrompt.builder("other-name", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm(() -> System.out.println("text"))
@@ -300,7 +300,7 @@ class ConfirmationPromptTest {
 
     @Test
     void testGetCopy() {
-        ConfirmationPrompt original = new ConfirmationPrompt("confirm", "Are you sure? ")
+        ConfirmationPrompt original = ConfirmationPrompt.builder("confirm", "Are you sure? ")
                 .setValidConfirm("mhm", "perhaps")
                 .setValidDeny("not sure", "probably not")
                 .addOnConfirm(() -> System.out.println("text"))

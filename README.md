@@ -23,7 +23,7 @@ Here's a simple "Hello, World!" app to get started:
 ApplicationModule app = new ApplicationModule("app").build();
 
 // define the actual application structure
-TextModule.Builder helloWorld = new TextModule.Builder("hello-world", "Hello, World!");
+TextModule.Builder helloWorld = TextModule.builder("hello-world", "Hello, World!");
 
 // set the app home and run
 app.setHome(helloWorld);
@@ -92,18 +92,18 @@ Jatui aims to solve this problem by providing a declarative modularization frame
 ```Java
 public static void main(String[] args) {
         // Application object
-        ApplicationModule app = new ApplicationModule.Builder("app").build();
+        ApplicationModule app = ApplicationModule.builder("app").build();
 
         // Builder for a TextModule that displays the output of another module, and is bold with gold text.
-        var moduleOutput = new TextModule.Builder("module-output-template", "template")
+        var moduleOutput = TextModule.builder("module-output-template", "template")
                 .setOutputType(DISPLAY_MODULE_OUTPUT)
                 .setAnsi(ansi().bold().fgRgb(220, 180, 0));
 
         // We declare the "scene" in a ContainerModule so that it's nicely compartmentalized and reusable if needed.
-        var randomNumberGenerator = new ContainerModule.Builder("random-number-generator")
+        var randomNumberGenerator = ContainerModule.builder("random-number-generator")
                 .addChildren(
                         // Input Module that gets the maximum number
-                        new TextInputModule.Builder("input", "Maximum Number (or -1 to exit): ")
+                        TextInputModule.builder("input", "Maximum Number (or -1 to exit): ")
                                 // safe handler to check for negative input.
                                 .addSafeHandler("exit-if-negative", s -> {
                                     // If it's negative we exit.
@@ -115,14 +115,14 @@ public static void main(String[] args) {
                                 // safe handler that references the logic for generating a random integer
                                 .addSafeHandler("generated-number", Main::getRandomInt),
                         // Text Modules that display the generated number
-                        new LineBuilder("generated-number-display")
+                        LineBuilder.builder("generated-number-display")
                                 .addText("Generated Number: ")
                                 .addText(moduleOutput.getCopy()
                                         .setName("display-generated-number")
                                         .setText("generated-number"))
                                 .newLine(),
                         // prompt the user to generate another number or exit
-                        new NumberedModuleSelector("selector", app)
+                        NumberedModuleSelector.builder("selector", app)
                                 .addScene("Generate another number", "random-number-generator")
                                 .addScene("Exit", terminate("terminate-app", app)));
 

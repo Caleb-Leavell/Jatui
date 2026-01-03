@@ -26,12 +26,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class TextInputModuleTest {
     @Test
     void testRun() {
-        ApplicationModule app = new ApplicationModule.Builder("app")
+        ApplicationModule app = ApplicationModule.builder("app")
                 .build();
 
         String output;
         try(IOCapture io = new IOCapture("test")) {
-            TextInputModule.Builder input = new TextInputModule.Builder("test-input", "input: ")
+            TextInputModule.Builder input = TextInputModule.builder("test-input", "input: ")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
@@ -55,7 +55,7 @@ class TextInputModuleTest {
         TextInputModule input;
 
         try(IOCapture io = new IOCapture("test")) {
-            input = new TextInputModule.Builder("test-input", "input: ")
+            input = TextInputModule.builder("test-input", "input: ")
                     .setScanner(io.getScanner())
                     .setPrintStream(io.getPrintStream())
                     .enableAnsi(false)
@@ -70,19 +70,19 @@ class TextInputModuleTest {
 
     @Test
     void testStructuralEquals() {
-        TextInputModule input1 = new TextInputModule.Builder("input", "input: ")
+        TextInputModule input1 = TextInputModule.builder("input", "input: ")
                 .build();
 
-        TextInputModule input2 = new TextInputModule.Builder("input", "input: ")
+        TextInputModule input2 = TextInputModule.builder("input", "input: ")
                 .build();
 
-        TextInputModule input3 = new TextInputModule.Builder("input", "input: ")
+        TextInputModule input3 = TextInputModule.builder("input", "input: ")
                 .build();
 
-        TextInputModule input4 = new TextInputModule.Builder("other", "input: ")
+        TextInputModule input4 = TextInputModule.builder("other", "input: ")
                 .build();
 
-        TextInputModule input5 = new TextInputModule.Builder("input", "other: ")
+        TextInputModule input5 = TextInputModule.builder("input", "other: ")
                 .build();
 
         assertAll(
@@ -101,7 +101,7 @@ class TextInputModuleTest {
 
         @Test
         void testCopy() {
-            TextInputModule.Builder original = new TextInputModule.Builder("input", "input: ")
+            TextInputModule.Builder original = TextInputModule.builder("input", "input: ")
                     .addHandler("logic", _ -> 5);
 
             TextInputModule.Builder copy = original.getCopy();
@@ -114,12 +114,12 @@ class TextInputModuleTest {
 
         @Test
         void testAddHandlerModule() {
-            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ApplicationModule app = ApplicationModule.builder("app").build();
 
             try(IOCapture io = new IOCapture("a")) {
-                FunctionModule.Builder logic = new FunctionModule.Builder("logic", () -> 5)
+                FunctionModule.Builder logic = FunctionModule.builder("logic", () -> 5)
                         .setApplication(app);
-                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
                         .setScanner(io.getScanner())
                         .addHandler(logic);
 
@@ -134,10 +134,10 @@ class TextInputModuleTest {
 
         @Test
         void testAddHandler() {
-            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ApplicationModule app = ApplicationModule.builder("app").build();
 
             try(IOCapture io = new IOCapture("a")) {
-                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
                         .setScanner(io.getScanner())
                         .addHandler("logic", _ -> 5);
 
@@ -151,10 +151,10 @@ class TextInputModuleTest {
 
         @Test
         void testAddSafeHandlerExceptionHandler() {
-            ApplicationModule app = new ApplicationModule.Builder("app").build();
+            ApplicationModule app = ApplicationModule.builder("app").build();
 
             try(IOCapture io = new IOCapture("a")) {
-                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
                         .setScanner(io.getScanner())
                         .addSafeHandler("logic",
                                 _ -> {throw new RuntimeException("force throw");},
@@ -170,13 +170,13 @@ class TextInputModuleTest {
 
         @Test
         void testAddSafeHandlerExceptionMessage() {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("do-nothing"))
                     .build();
 
             String output;
             try(IOCapture io = new IOCapture("a\n5")) {
-                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
                         .enableAnsi(false)
                         .addSafeHandler("logic",
                                 Integer::parseInt,
@@ -199,13 +199,13 @@ class TextInputModuleTest {
 
         @Test
         void testAddSafeHandler() {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("do-nothing"))
                     .build();
 
             String output;
             try(IOCapture io = new IOCapture("a\n5")) {
-                TextInputModule.Builder input = new TextInputModule.Builder("input", "input: ")
+                TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
                         .enableAnsi(false)
                         .addSafeHandler("logic", Integer::parseInt)
                         .setScanner(io.getScanner())
@@ -226,14 +226,14 @@ class TextInputModuleTest {
 
         @Test
         void testBuild() {
-            ApplicationModule app = new ApplicationModule.Builder("app")
+            ApplicationModule app = ApplicationModule.builder("app")
                     .setOnExit(ModuleFactory.empty("empty"))
                     .build();
 
-            FunctionModule.Builder logic = new FunctionModule.Builder("logic", () -> 5)
+            FunctionModule.Builder logic = FunctionModule.builder("logic", () -> 5)
                     .setApplication(app);
 
-            TextInputModule.Builder builder = new TextInputModule.Builder("input", "input: ")
+            TextInputModule.Builder builder = TextInputModule.builder("input", "input: ")
                     .addHandler(logic);
 
 

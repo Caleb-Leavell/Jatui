@@ -17,7 +17,6 @@
 
 package com.calebleavell.jatui.templates;
 
-import com.calebleavell.jatui.core.DirectedGraphNode;
 import com.calebleavell.jatui.modules.ModuleTemplate;
 import com.calebleavell.jatui.modules.TUIModule;
 import com.calebleavell.jatui.modules.TextModule;
@@ -29,11 +28,11 @@ import java.util.Objects;
 import static org.fusesource.jansi.Ansi.ansi;
 /**
  * LineBuilder simplifies chaining text together that is meant to live on the same line.
- * Ansi is supported with method overloads (e.g., {@link LineBuilder#addText(String, Ansi)}).
+ * Ansi is supported with method overloads (e.g., {@link TextChain#addText(String, Ansi)}).
  * <br><br>
  * <strong>Usage:</strong>
  * <pre><code>
- * LineBuilder text = new LineBuilder("name")
+ * LineBuilder text = LineBuilder.builder("name")
  *     .addText("Regular text: ")
  *     // this will display what the inputted module outputs
  *     .addModuleOutput("This string is the name of another module")
@@ -42,12 +41,12 @@ import static org.fusesource.jansi.Ansi.ansi;
  *     .newLine(); // end of line 2
  * </code></pre>
  */
-public class LineBuilder extends ModuleTemplate<LineBuilder> {
+public class TextChain extends ModuleTemplate<TextChain> {
 
     /**
      * A reference of the most recently added text is saved
      * to call {@link TextModule.Builder#printNewLine(boolean)} if
-     * {@link LineBuilder#newLine()} is called.
+     * {@link TextChain#newLine()} is called.
      */
     private TextModule.Builder current;
 
@@ -57,12 +56,22 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      */
     protected int iterator;
 
-    public LineBuilder(String name) {
-        super(LineBuilder.class, name);
+    public TextChain(String name) {
+        super(TextChain.class, name);
     }
 
-    protected LineBuilder() {
-        super(LineBuilder.class);
+    /**
+     * Constructs a new {@link TextChain} builder.
+     *
+     * @param name The name of the builder.
+     * @return The new builder.
+     */
+    public static TextChain builder(String name) {
+        return new TextChain(name);
+    }
+
+    protected TextChain() {
+        super(TextChain.class);
     }
 
     /**
@@ -71,8 +80,8 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      * @return A fresh, empty instance.
      */
     @Override
-    protected LineBuilder createInstance() {
-        return new LineBuilder();
+    protected TextChain createInstance() {
+        return new TextChain();
     }
 
     /**
@@ -82,7 +91,7 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      * @param original The builder to copy from.
      */
     @Override
-    public void shallowCopy(LineBuilder original) {
+    public void shallowCopy(TextChain original) {
         this.current = original.current.getCopy();
         this.iterator = original.iterator;
         super.shallowCopy(original);
@@ -94,7 +103,7 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      * @return self
      * @implNote Adds {@code text} as a child of {@code main} rather than directly to this module.
      */
-    public LineBuilder addText(TextModule.Builder text) {
+    public TextChain addText(TextModule.Builder text) {
         logger.trace("adding text to LineBuilder \"{}\" that displays \"{}\" (output type is \"{}\")", getName(), text.getText(), text.getOutputType());
         main.addChild(text);
         current = text;
@@ -104,14 +113,14 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
 
     /**
      * Adds a new {@link TextModule} as a child of this module.
-     * To print a new line after this text, call {@link LineBuilder#newLine()}.
+     * To print a new line after this text, call {@link TextChain#newLine()}.
      *
      * @param text The text to add.
      * @param ansi The {@link Ansi} that this text may use. Ansi is reset automatically after {@code text} is displayed.
      * @return self.
      */
-    public LineBuilder addText(String text, Ansi ansi) {
-        this.addText(new TextModule.Builder(main.getName() + "-" + iterator, text)
+    public TextChain addText(String text, Ansi ansi) {
+        this.addText(TextModule.builder(main.getName() + "-" + iterator, text)
                 .setAnsi(ansi)
                 .printNewLine(false));
         return self();
@@ -119,12 +128,12 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
 
     /**
      * Adds a new {@link TextModule} as a child of this module.
-     * To print a new line after this text, call {@link LineBuilder#newLine()}.
+     * To print a new line after this text, call {@link TextChain#newLine()}.
      *
      * @param text The text to add.
      * @return self.
      */
-    public LineBuilder addText(String text) {
+    public TextChain addText(String text) {
         return addText(text, ansi());
     }
 
@@ -138,8 +147,8 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      * @return self
      * @implNote Wraps {@link TextModule.OutputType#DISPLAY_APP_STATE}.
      */
-    public LineBuilder addModuleOutput(String moduleName, Ansi ansi) {
-        this.addText(new TextModule.Builder(main.getName() + "-" + iterator, moduleName)
+    public TextChain addModuleOutput(String moduleName, Ansi ansi) {
+        this.addText(TextModule.builder(main.getName() + "-" + iterator, moduleName)
                 .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .printNewLine(false)
                 .setAnsi(ansi));
@@ -155,7 +164,7 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      * @return self
      * @implNote Wraps {@link TextModule.OutputType#DISPLAY_APP_STATE}.
      */
-    public LineBuilder addModuleOutput(String moduleName) {
+    public TextChain addModuleOutput(String moduleName) {
         return this.addModuleOutput(moduleName, ansi());
     }
 
@@ -164,7 +173,7 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      * <br><br>
      * Example:
      * <pre><code>
-     * LineBuilder text = new LineBuilder("name")
+     * LineBuilder text = LineBuilder.builder("name")
      *     .newLine()
      *     .addText("Hello, ")
      *     .addText("World!")
@@ -180,7 +189,7 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
      * it to print a newline. {@link TextModule} uses {@link PrintStream#println()}.
      *
      */
-    public LineBuilder newLine() {
+    public TextChain newLine() {
         if (current == null) {
             this.addText("");
         }
@@ -192,7 +201,7 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
     /**
      * {@code current} is a reference of the most recently added text is saved
      * to call {@link TextModule.Builder#printNewLine(boolean)} if
-     * {@link LineBuilder#newLine()} is called.
+     * {@link TextChain#newLine()} is called.
      * @return current;
      */
     protected TextModule.Builder getCurrent() {
@@ -200,12 +209,12 @@ public class LineBuilder extends ModuleTemplate<LineBuilder> {
     }
 
     /**
-     * Checks equality for properties given by the builder. For {@link LineBuilder}, this includes
+     * Checks equality for properties given by the builder. For {@link TextChain}, this includes
      * {@code current} and {@code iterator},
      * as well as other requirements provided by {@link TUIModule.Builder#shallowStructuralEquals(TUIModule.Builder, TUIModule.Builder)}.
      */
     @Override
-    public boolean shallowStructuralEquals(LineBuilder first, LineBuilder second) {
+    public boolean shallowStructuralEquals(TextChain first, TextChain second) {
         if(first == second) return true;
         if(first == null || second == null) return false;
 

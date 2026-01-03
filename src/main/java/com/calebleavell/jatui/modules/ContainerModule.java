@@ -40,6 +40,16 @@ public class ContainerModule extends TUIModule {
         super(builder);
     }
 
+    /**
+     * Constructs a new {@link ContainerModule} builder.
+     *
+     * @param name The name of the builder.
+     * @return The new builder.
+     */
+    public static Builder builder(String name) {
+        return new Builder(name);
+    }
+
     /** Builder for {@link ContainerModule}
      * <br><br>
      *  Required Fields: {@code name}
