@@ -56,6 +56,7 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
         this.application(app);
         list = NumberedList.builder(name + "-list");
         TextInputModule.Builder collectInput = TextInputModule.builder(name + "-input", "Your choice: ")
+                .application(app)
                 .addSafeHandler(name + "-goto-module", input -> {
                     int index = Integer.parseInt(input);
                     NameOrModule nameOrModule = modules.get(index - 1);
