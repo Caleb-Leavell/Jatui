@@ -40,9 +40,9 @@ class ConfirmationPromptTest {
     @Test
     void testSetValidDeny() {
         ConfirmationPrompt deny = ConfirmationPrompt.builder("name", "Are you sure? ")
-                .setValidConfirm("1", "2", "3");
+                .setValidDeny("1", "2", "3");
 
-        assertEquals(Set.of("1", "2", "3"), deny.getValidConfirm());
+        assertEquals(Set.of("1", "2", "3"), deny.getValidDeny());
     }
 
     @Test

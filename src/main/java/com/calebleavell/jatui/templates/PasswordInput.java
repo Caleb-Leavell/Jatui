@@ -28,6 +28,35 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 // TODO - documentation
+/**
+ * Handles collecting, validating, and cleaning passwords from the user. Zeroes out the password
+ * char array after collection unless explicitly set to do otherwise via {@link PasswordInput#storeInput()}
+ * (<b>not recommended</b>).
+ * <br><br>
+ * Example usage:
+ * <pre><code>
+ * ApplicationModule app = ApplicationModule.builder("app").build();
+ *
+ * TextModule.Builder homePage = TextModule.builder("home", "Home Page");
+ *
+ * Supplier&lt;char[]&gt; supplyPassword = "password"::toCharArray; // would actually reference some database in practice
+ *
+ * PasswordInput myInput = PasswordInput.builder("pw-input", "Password: ", supplyPassword)
+ *   .addOnValidPassword(() -> app.navigateTo(homePage))
+ *   .addOnInvalidPassword(app::restart);
+ *
+ * app.setHome(myInput);
+ * app.run();
+ * </code></pre>
+ *
+ * Output:
+ * <pre>
+ * Password: incorrect
+ * Password: password
+ * Home Page
+ * Exiting...
+ * </pre>
+ */
 public class PasswordInput extends ModuleTemplate<PasswordInput> {
     String displayText;
     private Supplier<char[]> passwordSupplier;

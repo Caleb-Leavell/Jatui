@@ -17,8 +17,6 @@
 
 package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.core.DirectedGraphNode;
-import com.calebleavell.jatui.core.RunFrame;
 import com.calebleavell.jatui.templates.InputHandler;
 
 import java.util.*;
@@ -294,7 +292,7 @@ public class TextInputModule extends TUIModule {
                 if(app == null) return;
                 this.getPrintStream().println(exceptionMessage);
                 app.terminateChild(this.name);
-                app.runModuleAsChild(this);
+                app.navigateTo(this);
             }));
             handlerNum ++;
             return self();

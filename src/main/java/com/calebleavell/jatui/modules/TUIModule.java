@@ -204,7 +204,7 @@ public abstract class TUIModule {
      * <br>
      * For most use cases, only the top-level module will need to be run via this method
      * (most likely an {@link ApplicationModule}). If you need to manually run a module that is
-     * a child of another module that will be running, use {@link TUIModule#runModuleAsChild(Builder)}
+     * a child of another module that will be running, use {@link TUIModule#navigateTo(Builder)}
      * or {@link ModuleFactory#run(String, TUIModule, String)}. This ensures a unified scheduler across
      * all running modules.
      */
@@ -291,7 +291,7 @@ public abstract class TUIModule {
      * Runs the module with this module as the parent (important for checking the current running child and getting the current running branch).
      * @param module The module to run as the child of this module.
      */
-    public void runModuleAsChild(TUIModule.Builder<?> module) {
+    public void navigateTo(TUIModule.Builder<?> module) {
         if(runStack == null) return; // if this module isn't running, then it can't run another module as it's child
         if(module == null) return;
 
@@ -427,7 +427,7 @@ public abstract class TUIModule {
     /**
      * If this module displays text, this is the ansi that determines the
      * text styling of that module (e.g., coloring, bolding, etc.).
-     * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+     * Ansi is provided by <a href="https://github.com/fusesource/jansi">Jansi</a>.
      *
      * @return The ansi stored in the module.
      */
@@ -525,7 +525,7 @@ public abstract class TUIModule {
      * <p>Checks equality for properties given by the builder.</p>
      *
      * <p>For TUIModule, this includes: </p>
-     * <strong><ul>
+     * <ul>
      *     <li>name</li>
      *     <li>application (Note: checks structural equality, not reference equality) </li>
      *     <li>children</li>
@@ -533,7 +533,7 @@ public abstract class TUIModule {
      *     <li>scanner</li>
      *     <li>printStream</li>
      *     <li>enableAnsi</li>
-     * </ul></strong>
+     * </ul>
      * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered.</p>
      * @param other The TUIModule to compare
      * @return true if this module equals {@code other} according to builder-provided properties
@@ -1051,7 +1051,7 @@ public abstract class TUIModule {
         /**
          * If this module displays text, this is the ansi that determines the
          * text styling of that module (e.g., coloring, bolding, etc.).
-         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi">Jansi</a>.
          *
          * @return The ansi stored in the module.
          */
@@ -1133,7 +1133,7 @@ public abstract class TUIModule {
          * <br><br>
          * For modules that display text,the ansi determines the
          * text styling of that module (e.g., coloring, bolding, etc.).
-         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi">Jansi</a>.
          * <br><br>
          * <strong>Note</strong>: Setting the ansi automatically locks it from further updating,
          * either directly or via updating a parent. If this is not desired,
@@ -1163,7 +1163,7 @@ public abstract class TUIModule {
          * <br><br>
          * For modules that display text,the ansi determines the
          * text styling of that module (e.g., coloring, bolding, etc.).
-         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi">Jansi</a>.
          * <br><br>
          * <strong>Note</strong>: To prevent a module's ansi from being merged into
          * when you set the property of a parent, use {@link TUIModule.Builder#lockProperty(Property)}.
@@ -1193,7 +1193,7 @@ public abstract class TUIModule {
          * <br><br>
          * For modules that display text,the ansi determines the
          * text styling of that module (e.g., coloring, bolding, etc.).
-         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi">Jansi</a>.
          * <br><br>
          * <strong>Note</strong>: To prevent a module's ansi from being merged into
          * when you set the property of a parent, use {@link TUIModule.Builder#lockProperty(Property)}.
@@ -1280,7 +1280,7 @@ public abstract class TUIModule {
          * <br><br>
          * For modules that display text,the ansi determines the
          * text styling of that module (e.g., coloring, bolding, etc.).
-         * Ansi is provided by <a href="https://github.com/fusesource/jansi" rel="external">Jansi</a>.
+         * Ansi is provided by <a href="https://github.com/fusesource/jansi">Jansi</a>.
          * <br><br>
          * <strong>Note</strong>: Changing whether ansi is enabled automatically locks it from further updating,
          * either directly or via updating a parent. If this is not desired,
@@ -1320,14 +1320,14 @@ public abstract class TUIModule {
          * <p>Checks equality for properties given by the builder.</p>
          *
          * <p>For TUIModule, this includes: </p>
-         * <strong><ul>
+         * <ul>
          *     <li>name</li>
          *     <li>application</li>
          *     <li>ansi</li>
          *     <li>scanner</li>
          *     <li>printStream</li>
          *     <li>enableAnsi</li>
-         * </ul></strong>
+         * </ul>
          * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
          *  but are considered in equals().
          * @param first The first TUIModule to compare

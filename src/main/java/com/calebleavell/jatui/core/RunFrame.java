@@ -44,7 +44,7 @@ public class RunFrame {
     /**
      * This field signals that the running module is replacing the {@code currentRunningChild} of a {@link TUIModule}
      * (provided by {@link TUIModule#getCurrentRunningChild()}) in order to be able to set it back.
-     * This replacement happens when {@link TUIModule#runModuleAsChild(TUIModule.Builder)} is called.
+     * This replacement happens when {@link TUIModule#navigateTo(TUIModule.Builder)} is called.
      */
     public final TUIModule displacedChild;
 

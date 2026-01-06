@@ -68,7 +68,7 @@ public class ModuleFactory {
      * @param parent The module that the <strong>module to run</strong> is the child of (directly or indirectly)
      * @param moduleToRun  The name of the module to run (it will run when this module is run)
      * @return The {@link FunctionModule} that calls another module's run method
-     * @implNote Runs {@code moduleToRun} via {@link TUIModule#runModuleAsChild(TUIModule.Builder)} to
+     * @implNote Runs {@code moduleToRun} via {@link TUIModule#navigateTo(TUIModule.Builder)} to
      * ensure there is only one scheduler.
      */
     public static FunctionModule.Builder run(String name, TUIModule parent, String moduleToRun) {
@@ -76,7 +76,7 @@ public class ModuleFactory {
             if (parent == null || moduleToRun == null) return;
             TUIModule.Builder<?> toRun = parent.getChild(moduleToRun);
             if(toRun == null) return;
-            parent.runModuleAsChild(toRun);
+            parent.navigateTo(toRun);
         });
     }
 

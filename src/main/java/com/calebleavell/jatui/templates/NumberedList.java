@@ -55,7 +55,7 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
     /** The incrementer that defines the number for every list item. (e.g., "[5] item") **/
     private int i = 0;
 
-    public NumberedList(String name) {
+    protected NumberedList(String name) {
         super(NumberedList.class, name);
     }
 

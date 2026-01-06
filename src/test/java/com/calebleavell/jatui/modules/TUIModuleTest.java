@@ -74,7 +74,7 @@ class TUIModuleTest {
     }
 
     @Test
-    void testRunModuleAsChild() {
+    void testNavigateTo() {
         ApplicationModule testApp = ApplicationModule.builder("test-app").build();
 
         FunctionModule.Builder checkRunning = checkRunning("check-running-2", testApp);
@@ -86,7 +86,7 @@ class TUIModuleTest {
         ContainerModule.Builder home = ContainerModule.builder("home")
                 .addChildren(
                         checkRunning("check-running-1", testApp),
-                        FunctionModule.builder("run-other", () -> testApp.runModuleAsChild(checkRunning)),
+                        FunctionModule.builder("run-other", () -> testApp.navigateTo(checkRunning)),
                         checkRunning("check-running-3", testApp)
                 );
 

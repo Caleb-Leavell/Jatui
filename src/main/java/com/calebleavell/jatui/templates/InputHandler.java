@@ -102,7 +102,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
         SAFE_HANDLER
     }
 
-    public InputHandler(String name, String inputName) {
+    protected InputHandler(String name, String inputName) {
         super(InputHandler.class, name);
         this.inputName = inputName;
     }

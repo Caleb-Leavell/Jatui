@@ -56,7 +56,7 @@ public class TextChain extends ModuleTemplate<TextChain> {
      */
     protected int iterator;
 
-    public TextChain(String name) {
+    protected TextChain(String name) {
         super(TextChain.class, name);
     }
 

@@ -22,14 +22,36 @@ import com.calebleavell.jatui.modules.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-// TODO - documentation
+/**
+ * Handles navigating to a module based on a user's decision.
+ * <br><br>
+ * Example usage:
+ * <pre><code>
+ * ApplicationModule app = ApplicationModule.builder("app").build();
+ *
+ * NumberedModuleSelector selector = NumberedModuleSelector.builder("selector", app)
+ *  .addModule("Display Hello", TextModule.builder("display-hello", "Hello"))
+ *  .addModule("Display World", TextModule.builder("display-world", "World"));
+ *
+ * app.setHome(selector);
+ * app.run();
+ * </code></pre>
+ *
+ * Output:
+ * <pre>
+ * [1] Display Hello
+ * [2] Display World
+ * Your choice: 1
+ * Hello
+ * Exiting...
+ * </pre>
+ */
 public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelector> {
     private final List<NameOrModule> modules = new ArrayList<>();
     private NumberedList list;
 
-    public NumberedModuleSelector(String name, ApplicationModule app) {
+    protected NumberedModuleSelector(String name, ApplicationModule app) {
         super(NumberedModuleSelector.class, name);
         this.setApplication(app);
         list = NumberedList.builder(name + "-list");
@@ -39,7 +61,7 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
                     NameOrModule nameOrModule = modules.get(index - 1);
                     TUIModule.Builder<?> toRun = nameOrModule.getModule(app);
                     if(toRun == null) logger.error("nameOrModule returned null module for NumberedModuleSelector \"{}\"", getName());
-                    else app.runModuleAsChild(toRun);
+                    else app.navigateTo(toRun);
                     return "Successfully ran selected module";
                 });
         main.addChild(list);

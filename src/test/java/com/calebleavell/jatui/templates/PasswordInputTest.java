@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 class PasswordInputTest {
     @Test
     void testCleanMemory() {

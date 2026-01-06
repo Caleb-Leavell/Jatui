@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="JavadocGenerationManager">
-    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/out/artifacts/Jatui_javadoc" />
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/javadoc" />
+    <option name="OTHER_OPTIONS" value="-tag &quot;apiNote:a:API Note:&quot; -tag &quot;implSpec:a:Implementation Requirements:&quot; -tag &quot;implNote:a:Implementation Note:&quot;" />
   </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
