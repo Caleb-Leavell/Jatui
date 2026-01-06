@@ -18,7 +18,6 @@
 package com.calebleavell.jatui.modules;
 
 import com.calebleavell.jatui.core.DirectedGraphNode;
-import com.calebleavell.jatui.core.RunFrame;
 
 import java.util.function.Supplier;
 
@@ -38,10 +37,10 @@ public class FunctionModule extends TUIModule {
     /**
      *  Runs the stored function, attempts to update the application input
      *  based on what the function returned, then runs children as
-     *  provided by {@link TUIModule#run()}
+     *  provided by {@link TUIModule#start()}
      */
     @Override
-    public void shallowRun() {
+    public void doRunLogic() {
         logger.info("Running FunctionModule \"{}\"", getName());
         Object output = function.get();
         if(getApplication() != null)
@@ -127,7 +126,7 @@ public class FunctionModule extends TUIModule {
          */
         protected Builder(String name, Runnable function) {
             super(Builder.class, name);
-            this.setFunction(function);
+            this.function(function);
         }
 
         /**
@@ -143,7 +142,7 @@ public class FunctionModule extends TUIModule {
          * @param function The Supplier to be run when this module is run
          * @return self
          */
-        public Builder setFunction(Supplier<?> function) {
+        public Builder function(Supplier<?> function) {
             logger.debug("setting function for FunctionModule builder \"{}\"", getName());
             this.function = function;
             return self();
@@ -155,7 +154,7 @@ public class FunctionModule extends TUIModule {
          *                 in a Supplier that returns null.)
          * @return self
          */
-        public Builder setFunction(Runnable function) {
+        public Builder function(Runnable function) {
             logger.debug("setting function for FunctionModule builder \"{}\" based on a Runnable", getName());
             if(function == null) this.function = null;
             else {

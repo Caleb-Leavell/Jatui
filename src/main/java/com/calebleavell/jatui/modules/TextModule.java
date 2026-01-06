@@ -26,7 +26,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 /**
  * Handles the displaying of text. Usually this means displaying to console ({@link System#out}), but
- * {@link TUIModule.Builder#setPrintStream(PrintStream)} can be used to output to other places as well.
+ * {@link TUIModule.Builder#printStream(PrintStream)} can be used to output to other places as well.
  */
 public class TextModule extends TUIModule {
 
@@ -44,9 +44,9 @@ public class TextModule extends TUIModule {
      * it displays raw text or fetches application state.
      */
     public enum OutputType {
-        /** Displays the text provided by {@link TextModule.Builder#setText(String)} **/
+        /** Displays the text provided by {@link TextModule.Builder#text(String)} **/
         DISPLAY_TEXT,
-        /** Displays the application state, where the input identifier is provided by {@link TextModule.Builder#setText(String)} **/
+        /** Displays the application state, where the input identifier is provided by {@link TextModule.Builder#text(String)} **/
         DISPLAY_APP_STATE
     }
 
@@ -56,14 +56,14 @@ public class TextModule extends TUIModule {
      * {@link OutputType#DISPLAY_APP_STATE}, nothing is outputted and a warning
      * is logged.
      * <br>
-     * Also displays the ansi provided by {@link TUIModule.Builder#setAnsi(Ansi)} unless
+     * Also displays the ansi provided by {@link TUIModule.Builder#style(Ansi)} unless
      * disabled via {@link TUIModule.Builder#enableAnsi(boolean)}.
      * The ansi gets reset at the end of the run.
      * <br>
      * Prints a new line unless disabled via {@link TextModule.Builder#printNewLine(boolean)}.
      */
     @Override
-    public void shallowRun() {
+    public void doRunLogic() {
         logger.info("Running TextModule {}", getName());
         if(getAnsiEnabled()) {
             logger.debug("printing ansi for {}", getName());
@@ -153,7 +153,7 @@ public class TextModule extends TUIModule {
      *
      * @param name The name of the builder.
      * @param text The text to either display directly,
-     *             or the input identifier fetch the input from for the {@link ApplicationModule} if {@link Builder#setOutputType(OutputType)}
+     *             or the input identifier fetch the input from for the {@link ApplicationModule} if {@link Builder#outputType(OutputType)}
      *             is set to {@link TextModule.OutputType#DISPLAY_APP_STATE}.
      * @return The new builder.
      */
@@ -234,7 +234,7 @@ public class TextModule extends TUIModule {
          * @param type the output type of this module.
          * @return self
          */
-        public Builder setOutputType(OutputType type) {
+        public Builder outputType(OutputType type) {
             this.outputType = type;
             return self();
         }
@@ -252,7 +252,7 @@ public class TextModule extends TUIModule {
          * @param text What to output.
          * @return self.
          */
-        public Builder setText(String text) {
+        public Builder text(String text) {
             this.text = text;
             return self();
         }

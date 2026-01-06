@@ -37,7 +37,7 @@ class InputHandlerTest {
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
 
         InputHandler original = InputHandler.builder("handler", module.getName())
-                .setHandler("logic", logic, exceptionHandler);
+                .handler("logic", logic, exceptionHandler);
 
         InputHandler copy = original.getCopy();
         assertAll(
@@ -53,14 +53,14 @@ class InputHandlerTest {
         ApplicationModule app = ApplicationModule.builder("app").build();
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
         FunctionModule.Builder logic = FunctionModule.builder("logic", () -> 5)
-                .setApplication(app);
+                .application(app);
 
         InputHandler handler = InputHandler.builder("handler", module.getName())
-                .setHandler(logic);
+                .handler(logic);
 
         app.setHome(handler);
 
-        app.run();
+        app.start();
 
         assertEquals(5, app.getInput("logic", Integer.class));
     }
@@ -71,11 +71,11 @@ class InputHandlerTest {
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
 
         InputHandler handler = InputHandler.builder("handler", module.getName())
-                .setHandler("logic", _ -> 5);
+                .handler("logic", _ -> 5);
 
         app.setHome(handler);
 
-        app.run();
+        app.start();
 
         assertEquals(5, app.getInput("logic", Integer.class));
     }
@@ -86,14 +86,14 @@ class InputHandlerTest {
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
 
         InputHandler handler = InputHandler.builder("handler", module.getName())
-                .setHandler("logic",
+                .handler("logic",
                         _ -> {throw new RuntimeException("forced exception");},
                         _ -> app.updateInput("logic", "Success!")
                 );
 
 
         app.setHome(handler);
-        app.run();
+        app.start();
 
         assertEquals("Success!", app.getInput("logic", String.class));
     }
@@ -105,25 +105,25 @@ class InputHandlerTest {
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
 
         InputHandler handler1 = InputHandler.builder("handler", module.getName())
-                .setHandler("logic", logic, exceptionHandler);
+                .handler("logic", logic, exceptionHandler);
 
         InputHandler handler2 = InputHandler.builder("handler", module.getName())
-                .setHandler("logic", logic, exceptionHandler);
+                .handler("logic", logic, exceptionHandler);
 
         InputHandler handler3 = InputHandler.builder("handler", module.getName())
-                .setHandler("logic", logic, exceptionHandler);
+                .handler("logic", logic, exceptionHandler);
 
         InputHandler handler4 = InputHandler.builder("handler", TextInputModule.builder("a", "b").getName())
-                .setHandler("logic", logic, exceptionHandler);
+                .handler("logic", logic, exceptionHandler);
 
         InputHandler handler5 = InputHandler.builder("handler", module.getName())
-                .setHandler("logic", logic);
+                .handler("logic", logic);
 
         InputHandler handler6 = InputHandler.builder("handler", module.getName())
-                .setHandler("other-name", logic, exceptionHandler);
+                .handler("other-name", logic, exceptionHandler);
 
         InputHandler handler7 = InputHandler.builder("other-name", module.getName())
-                .setHandler("logic", logic, exceptionHandler);
+                .handler("logic", logic, exceptionHandler);
 
         assertAll(
                 () -> assertTrue(handler1.shallowStructuralEquals(handler1, handler1)),
@@ -145,7 +145,7 @@ class InputHandlerTest {
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
 
         InputHandler builder = InputHandler.builder("handler", module.getName())
-                .setHandler(logic);
+                .handler(logic);
 
         ContainerModule first = builder.build();
         ContainerModule second = builder.build();

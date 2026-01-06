@@ -176,11 +176,11 @@ public class PasswordInput extends ModuleTemplate<PasswordInput> {
     }
 
     @Override
-    public PasswordInput setName(String name) {
-        if(this.name == null) return super.setName(name);
+    public PasswordInput name(String name) {
+        if(this.name == null) return super.name(name);
         FunctionModule.Builder input = main.getChild(this.name+"-input", FunctionModule.Builder.class);
-        input.setName(name + "-input");
-        return super.setName(name);
+        input.name(name + "-input");
+        return super.name(name);
     }
 
     public PasswordInput setDisplayText(String displayText) {
@@ -194,7 +194,7 @@ public class PasswordInput extends ModuleTemplate<PasswordInput> {
     public ContainerModule build() {
         // update the input function to reflect the most recent name, input, and application
         FunctionModule.Builder input = main.getChild(this.name+"-input", FunctionModule.Builder.class);
-        input.setFunction(createPasswordInput());
+        input.function(createPasswordInput());
         return super.build();
     }
 
@@ -236,8 +236,8 @@ public class PasswordInput extends ModuleTemplate<PasswordInput> {
 
             List<FunctionModule.Builder> functions = match ? onValidPassword : onInvalidPassword;
             for(FunctionModule.Builder func : functions) {
-                func.setApplication(this.application); // application could be null but that's ok
-                func.build().run();
+                func.application(this.application); // application could be null but that's ok
+                func.build().start();
             }
 
             if(this.application == null) {

@@ -32,10 +32,10 @@ class ModuleFactoryTest {
 
         try(IOCapture io = new IOCapture()) {
             empty = ModuleFactory.empty("empty")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .build();
 
-            empty.run();
+            empty.start();
             output = io.getOutput();
         }
 
@@ -53,8 +53,8 @@ class ModuleFactoryTest {
 
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("exit"))
-                    .setPrintStream(io.getPrintStream())
+                    .onExit(ModuleFactory.empty("exit"))
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -66,7 +66,7 @@ class ModuleFactoryTest {
                     );
 
             app.setHome(home);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -80,8 +80,8 @@ class ModuleFactoryTest {
 
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("exit"))
-                    .setPrintStream(io.getPrintStream())
+                    .onExit(ModuleFactory.empty("exit"))
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -98,7 +98,7 @@ class ModuleFactoryTest {
                     );
 
             app.setHome(home);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -112,9 +112,9 @@ class ModuleFactoryTest {
 
         try(IOCapture io = new IOCapture("a\nb\nc\nd")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("exit"))
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .onExit(ModuleFactory.empty("exit"))
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -131,7 +131,7 @@ class ModuleFactoryTest {
                     );
 
             app.setHome(home);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -145,9 +145,9 @@ class ModuleFactoryTest {
 
         try(IOCapture io = new IOCapture("a\nb\nc\nd")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("exit"))
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .onExit(ModuleFactory.empty("exit"))
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -169,7 +169,7 @@ class ModuleFactoryTest {
                     );
 
             app.setHome(home);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -184,9 +184,9 @@ class ModuleFactoryTest {
         try(IOCapture io = new IOCapture()) {
 
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(ModuleFactory.empty("exit"))
+                    .onExit(ModuleFactory.empty("exit"))
                     .build();
 
             FunctionModule.Builder runText = ModuleFactory.run("run-group", app, "group");
@@ -203,7 +203,7 @@ class ModuleFactoryTest {
                             TextModule.builder("text-4", "fourth"));
 
             app.setHome(home);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -217,16 +217,16 @@ class ModuleFactoryTest {
 
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(ModuleFactory.empty("exit"))
+                    .onExit(ModuleFactory.empty("exit"))
                     .build();
 
             ContainerModule.Builder printToTen = ContainerModule.builder("print-to-ten")
                     .addChildren(
                             ModuleFactory.counter("counter", app),
                             TextModule.builder("display", "counter")
-                                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE),
+                                    .outputType(TextModule.OutputType.DISPLAY_APP_STATE),
                             FunctionModule.builder("exit-if-greater-than-10", () -> {
                                 int n = app.getInput("counter", Integer.class);
 
@@ -239,7 +239,7 @@ class ModuleFactoryTest {
             printToTen.addChild(printToTen);
 
             app.setHome(printToTen);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -253,16 +253,16 @@ class ModuleFactoryTest {
 
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(ModuleFactory.empty("exit"))
+                    .onExit(ModuleFactory.empty("exit"))
                     .build();
 
             ContainerModule.Builder printToTen = ContainerModule.builder("print-to-ten")
                     .addChildren(
                             ModuleFactory.counter("counter", app, 5, 2),
                             TextModule.builder("display", "counter")
-                                    .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE),
+                                    .outputType(TextModule.OutputType.DISPLAY_APP_STATE),
                             FunctionModule.builder("exit-if-greater-than-10", () -> {
                                 int n = app.getInput("counter", Integer.class);
 
@@ -275,7 +275,7 @@ class ModuleFactoryTest {
             printToTen.addChild(printToTen);
 
             app.setHome(printToTen);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }

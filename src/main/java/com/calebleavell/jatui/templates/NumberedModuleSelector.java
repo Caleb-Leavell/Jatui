@@ -53,7 +53,7 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
 
     protected NumberedModuleSelector(String name, ApplicationModule app) {
         super(NumberedModuleSelector.class, name);
-        this.setApplication(app);
+        this.application(app);
         list = NumberedList.builder(name + "-list");
         TextInputModule.Builder collectInput = TextInputModule.builder(name + "-input", "Your choice: ")
                 .addSafeHandler(name + "-goto-module", input -> {

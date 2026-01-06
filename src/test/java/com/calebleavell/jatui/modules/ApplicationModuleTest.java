@@ -35,9 +35,9 @@ class ApplicationModuleTest {
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("test-app")
                     .enableAnsi(false)
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .build();
-            app.run();
+            app.start();
             assertEquals(expected, io.getOutput());
         }
     }
@@ -50,9 +50,9 @@ class ApplicationModuleTest {
             ApplicationModule app = ApplicationModule.builder("test-app")
                     .addChildren(TextModule.builder("hello-world", "Hello, World!"))
                     .enableAnsi(false)
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .build();
-            app.run();
+            app.start();
             assertEquals(expected, io.getOutput());
         }
 
@@ -72,11 +72,11 @@ class ApplicationModuleTest {
                             TextChain.builder("output")
                                     .addText("Hello, ").addModuleOutput("input").addText("!").newLine())
                     .enableAnsi(false)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .build();
 
-            app.run();
+            app.start();
             assertEquals(expected, io.getOutput());
         }
 
@@ -97,11 +97,11 @@ class ApplicationModuleTest {
                             TextChain.builder("output").addModuleOutput("5+5").newLine()
                     )
                     .enableAnsi(false)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .build();
 
-            app.run();
+            app.start();
             assertEquals(expected, io.getOutput());
         }
     }
@@ -134,11 +134,11 @@ class ApplicationModuleTest {
                     .addChildren(
                             TextInputModule.builder("input", "What is your name? "))
                     .enableAnsi(false)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .build();
 
-            app.run();
+            app.start();
             assertAll(
                     () -> assertEquals(expected, app.getInput("input")),
                     () -> assertEquals(expected, app.getInput("input", String.class)),
@@ -157,11 +157,11 @@ class ApplicationModuleTest {
             ApplicationModule app = ApplicationModule.builder("test-app")
                     .addChildren(
                             FunctionModule.builder("input", () -> expected))
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .build();
 
-            app.run();
+            app.start();
             assertAll(
                     () -> assertEquals(expected, app.getInput("input")),
                     () -> assertEquals(expected, app.getInput("input", Integer.class)),
@@ -230,16 +230,16 @@ class ApplicationModuleTest {
 
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("test-app")
-                    .setAnsi(ansi().bold()) // set to non-default value to test against home ansi
-                    .setPrintStream(io.getPrintStream())
-                    .setScanner(io.getScanner()) //also set to test against home ansi
+                    .style(ansi().bold()) // set to non-default value to test against home ansi
+                    .printStream(io.getPrintStream())
+                    .scanner(io.getScanner()) //also set to test against home ansi
                     .enableAnsi(false)
                     .build();
 
             TextModule.Builder home = TextModule.builder("home", "Hello, World!");
 
             app.setHome(home);
-            app.run();
+            app.start();
             assertAll(
                     () -> assertEquals(expected, io.getOutput()),
                     () -> assertEquals(home, app.getHome()),
@@ -268,9 +268,9 @@ class ApplicationModuleTest {
 
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("test-app")
-                    .setAnsi(ansi().bold()) // all properties set to non-default values to test against the onExit module
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .style(ansi().bold()) // all properties set to non-default values to test against the onExit module
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -281,10 +281,10 @@ class ApplicationModuleTest {
             // we add this manually after setOnExit to make sure it doesn't get added after the exit
             app.getChildren().add(
                     TextModule.builder("text", "this should come first")
-                            .setPrintStream(io.getPrintStream())
+                            .printStream(io.getPrintStream())
                             .enableAnsi(false));
 
-            app.run();
+            app.start();
 
             assertAll(
                     () -> assertEquals(expected, io.getOutput()),
@@ -312,26 +312,26 @@ class ApplicationModuleTest {
         ApplicationModule testApp = ApplicationModule.builder("test-app").build();
 
         ApplicationModule app1 = ApplicationModule.builder("app")
-                .setApplication(testApp)
-                .setOnExit(exit.getCopy())
+                .application(testApp)
+                .onExit(exit.getCopy())
                 .build();
 
         ApplicationModule app2 = ApplicationModule.builder("app")
-                .setApplication(testApp)
-                .setOnExit(exit.getCopy())
+                .application(testApp)
+                .onExit(exit.getCopy())
                 .build();
 
         ApplicationModule app3 = ApplicationModule.builder("app")
-                .setApplication(testApp)
-                .setOnExit(exit.getCopy())
+                .application(testApp)
+                .onExit(exit.getCopy())
                 .build();
 
         ApplicationModule app4 = ApplicationModule.builder("app")
-                .setOnExit(exit.getCopy())
+                .onExit(exit.getCopy())
                 .build();
 
         ApplicationModule app5 = ApplicationModule.builder("app")
-                .setApplication(testApp)
+                .application(testApp)
                 .build();
 
         assertAll(
@@ -354,8 +354,8 @@ class ApplicationModuleTest {
             var home = ContainerModule.builder("home");
             var onExit = ContainerModule.builder("onExit");
             ApplicationModule.Builder app = ApplicationModule.builder("test-app")
-                    .setHome(home)
-                    .setOnExit(onExit);
+                    .home(home)
+                    .onExit(onExit);
 
             ApplicationModule.Builder copy = app.getCopy();
 
@@ -370,7 +370,7 @@ class ApplicationModuleTest {
         void setOnExitTest() {
             var onExit = ContainerModule.builder("onExit");
             ApplicationModule.Builder app = ApplicationModule.builder("test-app")
-                    .setOnExit(onExit);
+                    .onExit(onExit);
 
             assertEquals(app.getOnExit(), onExit);
         }
@@ -379,7 +379,7 @@ class ApplicationModuleTest {
         void setHomeTest() {
             var home = ContainerModule.builder("home");
             ApplicationModule.Builder app = ApplicationModule.builder("test-app")
-                    .setHome(home);
+                    .home(home);
 
             assertEquals(app.getHome(), home);
         }
@@ -393,13 +393,13 @@ class ApplicationModuleTest {
 
             try(IOCapture io = new IOCapture()) {
                 ApplicationModule app = ApplicationModule.builder("test-app")
-                        .setApplication(setApp)
-                        .setAnsi(ansi)
-                        .setScanner(io.getScanner())
-                        .setPrintStream(io.getPrintStream())
-                        .setHome(home)
+                        .application(setApp)
+                        .style(ansi)
+                        .scanner(io.getScanner())
+                        .printStream(io.getPrintStream())
+                        .home(home)
                         .enableAnsi(false)
-                        .setOnExit(onExit)
+                        .onExit(onExit)
                         .build();
 
                 assertAll(
@@ -422,13 +422,13 @@ class ApplicationModuleTest {
 
             try(IOCapture io = new IOCapture()) {
                 ApplicationModule.Builder appBuilder = ApplicationModule.builder("test-app")
-                        .setApplication(setApp)
-                        .setAnsi(ansi)
-                        .setScanner(io.getScanner())
-                        .setPrintStream(io.getPrintStream())
-                        .setHome(home)
+                        .application(setApp)
+                        .style(ansi)
+                        .scanner(io.getScanner())
+                        .printStream(io.getPrintStream())
+                        .home(home)
                         .enableAnsi(false)
-                        .setOnExit(onExit);
+                        .onExit(onExit);
 
                 ApplicationModule app1 = appBuilder.build();
                 ApplicationModule app2 = appBuilder.build();

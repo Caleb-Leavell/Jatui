@@ -17,13 +17,9 @@
 
 package com.calebleavell.jatui.templates;
 
-import com.calebleavell.jatui.core.DirectedGraphNode;
 import com.calebleavell.jatui.modules.*;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Scanner;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -91,14 +87,14 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
     protected enum HandlerType {
         /**
          * Builds the module with the provided {@link FunctionModule} as the logic runner.
-         * Set via {@link InputHandler#setHandler(FunctionModule.Builder)}.
+         * Set via {@link InputHandler#handler(FunctionModule.Builder)}.
          **/
         MODULE,
 
-        /** Builds the module with logic provided by {@link InputHandler#setHandler(String, Function)}. **/
+        /** Builds the module with logic provided by {@link InputHandler#handler(String, Function)}. **/
         HANDLER,
 
-        /** Builds the module with logic provided by {@link InputHandler#setHandler(String, Function, Consumer)}. **/
+        /** Builds the module with logic provided by {@link InputHandler#handler(String, Function, Consumer)}. **/
         SAFE_HANDLER
     }
 
@@ -160,7 +156,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      * {@code inputName} is the name of the app state to read.
      * @return self.
      **/
-    public InputHandler setInputName(String inputName) {
+    public InputHandler inputName(String inputName) {
         this.inputName = inputName;
         return self();
     }
@@ -210,17 +206,17 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
     /**
      * Configure the logic for this {@link InputHandler}. This overload
      * does so via a {@link FunctionModule}, but logic can be directly inputted
-     * via {@link InputHandler#setHandler(String, Function)} or similar. The app input
+     * via {@link InputHandler#handler(String, Function)} or similar. The app input
      * is not injected into {@code handler} for this overload and must be handled manually.
      * <br><br>
      * Note that {@code handler} does not get added as a child until the module is built,
-     * so property updates (e.g., {@link TUIModule.Builder#setApplication(ApplicationModule)})
+     * so property updates (e.g., {@link TUIModule.Builder#application(ApplicationModule)})
      * won't propagate to it from this module.
      *
      * @param handler The module defining the logic for the handler.
      * @return self
      */
-    public InputHandler setHandler(FunctionModule.Builder handler) {
+    public InputHandler handler(FunctionModule.Builder handler) {
         this.handlerType = InputHandler.HandlerType.MODULE;
         this.module = handler;
         return self();
@@ -238,7 +234,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      *              with the identifier provided by {@code name}.
      * @return self
      */
-    public InputHandler setHandler(String name, Function<String, ?> logic) {
+    public InputHandler handler(String name, Function<String, ?> logic) {
         this.handlerType = InputHandler.HandlerType.HANDLER;
         this.moduleName = name;
         this.logic = logic;
@@ -259,7 +255,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      *                         execution of {@code logic}.
      * @return self
      */
-    public InputHandler setHandler(String name, Function<String, ?> logic, Consumer<String> exceptionHandler) {
+    public InputHandler handler(String name, Function<String, ?> logic, Consumer<String> exceptionHandler) {
         this.handlerType = InputHandler.HandlerType.SAFE_HANDLER;
         this.moduleName = name;
         this.logic = logic;
@@ -273,7 +269,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      * this must be done manually.
      * <br><br>
      * This is the lazy mutator that is called at build-time and configured via
-     * {@link InputHandler#setHandler(FunctionModule.Builder)}.
+     * {@link InputHandler#handler(FunctionModule.Builder)}.
      * <br><br>
      * Also checks for name duplicates.
      *
@@ -293,7 +289,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      * identifier given by {@code name}. Does <i>not</i> handle exceptions.
      * <br><br>
      * This is the lazy mutator that is called at build-time and configured via
-     * {@link InputHandler#setHandler(String, Function)}.
+     * {@link InputHandler#handler(String, Function)}.
      * <br><br>
      * Also checks for name duplicates.
      *
@@ -312,7 +308,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
             String input = app.getInput(inputName, String.class);
             logger.info("running logic on handler \"{}\" with input \"{}\"", name, input);
             return logic.apply(input);
-        }).setApplication(getApplication());
+        }).application(getApplication());
         main.addChild(handler);
         checkForHandlerDuplicates(name);
         return self();
@@ -326,7 +322,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
      * {@link RuntimeException} if that is thrown by {@code logic}.
      * <br><br>
      * This is the lazy mutator that is called at build-time and configured via
-     * {@link InputHandler#setHandler(String, Function)}.
+     * {@link InputHandler#handler(String, Function)}.
      * <br><br>
      * Also checks for name duplicates.
      *
@@ -357,7 +353,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
                 return app.getInput(name);
             }
             return converted;
-        }).setApplication(getApplication());
+        }).application(getApplication());
         main.addChild(handler);
         checkForHandlerDuplicates(name);
         return self();
@@ -393,7 +389,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
 
     /**
      * Builds a new {@link InputHandler} based on this configuration of this builder.
-     * Adds the handling logic based on how it was set, e.g., via {@link InputHandler#setHandler(String, Function, Consumer)}.
+     * Adds the handling logic based on how it was set, e.g., via {@link InputHandler#handler(String, Function, Consumer)}.
      *
      * @return The built {@link InputHandler}.
      *
@@ -402,7 +398,7 @@ public class InputHandler extends ModuleTemplate<InputHandler> {
     public ContainerModule build() {
         if(handlerType == InputHandler.HandlerType.HANDLER || handlerType == InputHandler.HandlerType.SAFE_HANDLER) {
             for(TUIModule.Builder<?> child : main.getChildren()) {
-                child.setName(""); //prevent duplicate name warning
+                child.name(""); //prevent duplicate name warning
             }
         }
 

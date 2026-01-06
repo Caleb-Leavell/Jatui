@@ -18,7 +18,6 @@
 package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.modules.*;
-import com.calebleavell.jatui.templates.NumberedModuleSelector;
 import com.calebleavell.jatui.util.IOCapture;
 
 import org.junit.jupiter.api.Test;
@@ -56,10 +55,10 @@ class NumberedModuleSelectorTest {
 
         try (IOCapture io = new IOCapture("1")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(ModuleFactory.empty("empty"))
+                    .onExit(ModuleFactory.empty("empty"))
                     .build();
 
             NumberedModuleSelector selector = NumberedModuleSelector.builder("list", app)
@@ -73,10 +72,10 @@ class NumberedModuleSelectorTest {
                             TextInputModule.builder("input", "input: ")
                     )
                     .enableAnsi(false)
-                    .setPrintStream(io.getPrintStream());
+                    .printStream(io.getPrintStream());
 
             app.setHome(content);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -96,21 +95,21 @@ class NumberedModuleSelectorTest {
 
         try (IOCapture io = new IOCapture("1")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(ModuleFactory.empty("empty"))
+                    .onExit(ModuleFactory.empty("empty"))
                     .build();
 
             TextModule.Builder text = TextModule.builder("text", "Hello, World!")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
             NumberedModuleSelector original = NumberedModuleSelector.builder("list", app)
                     .addModule("goto text module", text);
 
             app.setHome(original);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -130,10 +129,10 @@ class NumberedModuleSelectorTest {
 
         try (IOCapture io = new IOCapture("1")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(ModuleFactory.empty("empty"))
+                    .onExit(ModuleFactory.empty("empty"))
                     .build();
 
             NumberedModuleSelector selector = NumberedModuleSelector.builder("list", app)
@@ -147,10 +146,10 @@ class NumberedModuleSelectorTest {
                             TextInputModule.builder("input", "input: ")
                     )
                     .enableAnsi(false)
-                    .setPrintStream(io.getPrintStream());
+                    .printStream(io.getPrintStream());
 
             app.setHome(content);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -170,21 +169,21 @@ class NumberedModuleSelectorTest {
 
         try (IOCapture io = new IOCapture("1")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(ModuleFactory.empty("empty"))
+                    .onExit(ModuleFactory.empty("empty"))
                     .build();
 
             TextModule.Builder text = TextModule.builder("text", "Hello, World!")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
             NumberedModuleSelector original = NumberedModuleSelector.builder("list", app)
                     .addModule(text);
 
             app.setHome(original);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -203,14 +202,14 @@ class NumberedModuleSelectorTest {
 
         try (IOCapture io = new IOCapture("1\n2\n3")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
             TextModule.Builder text = TextModule.builder("text", "Hello, World!")
                     .addChild(ModuleFactory.run("run-home", app, "home"))
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
             ContainerModule.Builder home = ContainerModule.builder("home")
@@ -222,7 +221,7 @@ class NumberedModuleSelectorTest {
                     );
 
             app.setHome(home);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }

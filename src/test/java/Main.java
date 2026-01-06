@@ -32,19 +32,19 @@ public class Main {
         ApplicationModule app = ApplicationModule.builder("app").build();
 
         TextModule.Builder moduleOutput = TextModule.builder("module-output-template", "template")
-                .setOutputType(DISPLAY_APP_STATE)
-                .setAnsi(ansi().bold().fgRgb(220, 180, 0));
+                .outputType(DISPLAY_APP_STATE)
+                .style(ansi().bold().fgRgb(220, 180, 0));
 
         ConfirmationPrompt confirmExit = ConfirmationPrompt.builder("confirm-exit",
                 "Are you sure you want to exit (y/n)? ")
-                .setApplication(app)
+                .application(app)
                 .addOnConfirm(app::terminate)
                 .addOnDeny(app::restart);
 
         ContainerModule.Builder randomNumberGenerator = ContainerModule.builder("random-number-generator")
             .addChildren(
                 TextModule.builder("title", "=== Random Number Generator ===")
-                        .setAnsi(ansi().bold().fgRgb(200, 255, 255)),
+                        .style(ansi().bold().fgRgb(200, 255, 255)),
                 TextInputModule.builder("get-max-number", "Maximum Number (or -1 to exit): ")
                         .addSafeHandler("generated-number", s -> {
                             int max = Integer.parseInt(s);
@@ -57,15 +57,15 @@ public class Main {
                 TextChain.builder("generated-number-display")
                         .addText("Generated Number: ")
                         .addText(moduleOutput.getCopy()
-                                .setName("display-generated-number")
-                                .setText("generated-number"))
+                                .name("display-generated-number")
+                                .text("generated-number"))
                         .newLine(),
                 NumberedModuleSelector.builder("selector", app)
                         .addModule("Generate another number", ModuleFactory.restart("restart", app))
                         .addModule("Exit", confirmExit));
 
         app.setHome(randomNumberGenerator);
-        app.run();
+        app.start();
     }
 
     static Random rand = new Random();

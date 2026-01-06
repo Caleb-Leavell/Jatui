@@ -17,7 +17,6 @@
 
 package com.calebleavell.jatui.templates;
 
-import com.calebleavell.jatui.templates.NumberedList;
 import com.calebleavell.jatui.util.IOCapture;
 import org.junit.jupiter.api.Test;
 
@@ -28,8 +27,8 @@ class NumberedListTest {
     @Test
     void testCopy() {
         NumberedList original = NumberedList.builder("list")
-                .setStart(5)
-                .setStep(3)
+                .start(5)
+                .step(3)
                 .addListText("item1", "item2");
 
         NumberedList copy = original.getCopy();
@@ -44,10 +43,10 @@ class NumberedListTest {
         try(IOCapture io = new IOCapture()) {
             NumberedList list = NumberedList.builder("list")
                     .addListText("item1")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            list.build().run();
+            list.build().start();
 
             output = io.getOutput();
         }
@@ -62,10 +61,10 @@ class NumberedListTest {
         try(IOCapture io = new IOCapture()) {
             NumberedList list = NumberedList.builder("list")
                     .addListText("item1", "item2")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            list.build().run();
+            list.build().start();
 
             output = io.getOutput();
         }
@@ -79,13 +78,13 @@ class NumberedListTest {
 
         try(IOCapture io = new IOCapture()) {
             NumberedList list = NumberedList.builder("list")
-                    .setStart(5)
+                    .start(5)
                     .addListText("item1")
                     .addListText("item2")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            list.build().run();
+            list.build().start();
 
             output = io.getOutput();
         }
@@ -99,13 +98,13 @@ class NumberedListTest {
 
         try(IOCapture io = new IOCapture()) {
             NumberedList list = NumberedList.builder("list")
-                    .setStep(3)
+                    .step(3)
                     .addListText("item1")
                     .addListText("item2")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            list.build().run();
+            list.build().start();
 
             output = io.getOutput();
         }
@@ -119,14 +118,14 @@ class NumberedListTest {
 
         try(IOCapture io = new IOCapture()) {
             NumberedList list = NumberedList.builder("list")
-                    .setStart(5)
-                    .setStep(3)
+                    .start(5)
+                    .step(3)
                     .addListText("item1")
                     .addListText("item2")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            list.build().run();
+            list.build().start();
 
             output = io.getOutput();
         }
@@ -137,38 +136,38 @@ class NumberedListTest {
     @Test
     void testShallowShallowStructuralEquals() {
         NumberedList list1 = NumberedList.builder("list")
-                .setStart(5)
-                .setStep(2)
+                .start(5)
+                .step(2)
                 .addListText("text1", "text2");
 
         NumberedList list2 = NumberedList.builder("list")
-                .setStart(5)
-                .setStep(2)
+                .start(5)
+                .step(2)
                 .addListText("text1", "text2");
 
         NumberedList list3 = NumberedList.builder("list")
-                .setStart(5)
-                .setStep(2)
+                .start(5)
+                .step(2)
                 .addListText("text1", "text2");
 
         NumberedList list4 = NumberedList.builder("list")
-                .setStart(5)
-                .setStep(2)
+                .start(5)
+                .step(2)
                 .addListText("text1", "text2", "text3");
 
         NumberedList list5 = NumberedList.builder("list")
-                .setStart(6)
-                .setStep(2)
+                .start(6)
+                .step(2)
                 .addListText("text1", "text2");
 
         NumberedList list6 = NumberedList.builder("list")
-                .setStart(5)
-                .setStep(3)
+                .start(5)
+                .step(3)
                 .addListText("text1", "text2");
 
         NumberedList list7 = NumberedList.builder("rename-super-name")
-                .setStart(5)
-                .setStep(2)
+                .start(5)
+                .step(2)
                 .addListText("text1", "text2");
 
         assertAll(

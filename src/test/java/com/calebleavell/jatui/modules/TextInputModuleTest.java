@@ -32,14 +32,14 @@ class TextInputModuleTest {
         String output;
         try(IOCapture io = new IOCapture("test")) {
             TextInputModule.Builder input = TextInputModule.builder("test-input", "input: ")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setApplication(app);
+                    .application(app);
 
             app.setHome(input);
 
-            input.build().run();
+            input.build().start();
 
             output = io.getOutput();
         }
@@ -56,13 +56,13 @@ class TextInputModuleTest {
 
         try(IOCapture io = new IOCapture("test")) {
             input = TextInputModule.builder("test-input", "input: ")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
 
-            input.run();
+            input.start();
         }
 
         assertEquals("test", input.getInput());
@@ -118,14 +118,14 @@ class TextInputModuleTest {
 
             try(IOCapture io = new IOCapture("a")) {
                 FunctionModule.Builder logic = FunctionModule.builder("logic", () -> 5)
-                        .setApplication(app);
+                        .application(app);
                 TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
-                        .setScanner(io.getScanner())
+                        .scanner(io.getScanner())
                         .addHandler(logic);
 
                 app.setHome(input);
 
-                app.run();
+                app.start();
             }
 
             assertEquals(5, app.getInput("logic"));
@@ -138,12 +138,12 @@ class TextInputModuleTest {
 
             try(IOCapture io = new IOCapture("a")) {
                 TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
-                        .setScanner(io.getScanner())
+                        .scanner(io.getScanner())
                         .addHandler("logic", _ -> 5);
 
                 app.setHome(input);
 
-                app.run();
+                app.start();
             }
 
             assertEquals(5, app.getInput("logic"));
@@ -155,14 +155,14 @@ class TextInputModuleTest {
 
             try(IOCapture io = new IOCapture("a")) {
                 TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
-                        .setScanner(io.getScanner())
+                        .scanner(io.getScanner())
                         .addSafeHandler("logic",
                                 _ -> {throw new RuntimeException("force throw");},
                                 _ -> app.updateInput("logic", 5));
 
                 app.setHome(input);
 
-                app.run();
+                app.start();
             }
 
             assertEquals(5, app.getInput("logic"));
@@ -171,7 +171,7 @@ class TextInputModuleTest {
         @Test
         void testAddSafeHandlerExceptionMessage() {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("do-nothing"))
+                    .onExit(ModuleFactory.empty("do-nothing"))
                     .build();
 
             String output;
@@ -181,11 +181,11 @@ class TextInputModuleTest {
                         .addSafeHandler("logic",
                                 Integer::parseInt,
                                 "Success!")
-                        .setScanner(io.getScanner())
-                        .setPrintStream(io.getPrintStream());
+                        .scanner(io.getScanner())
+                        .printStream(io.getPrintStream());
 
                 app.setHome(input);
-                app.run();
+                app.start();
 
                 output = io.getOutput();
             }
@@ -200,7 +200,7 @@ class TextInputModuleTest {
         @Test
         void testAddSafeHandler() {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("do-nothing"))
+                    .onExit(ModuleFactory.empty("do-nothing"))
                     .build();
 
             String output;
@@ -208,12 +208,12 @@ class TextInputModuleTest {
                 TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
                         .enableAnsi(false)
                         .addSafeHandler("logic", Integer::parseInt)
-                        .setScanner(io.getScanner())
-                        .setPrintStream(io.getPrintStream());
+                        .scanner(io.getScanner())
+                        .printStream(io.getPrintStream());
 
                 app.setHome(input);
 
-                app.run();
+                app.start();
 
                 output = io.getOutput();
             }
@@ -227,11 +227,11 @@ class TextInputModuleTest {
         @Test
         void testBuild() {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("empty"))
+                    .onExit(ModuleFactory.empty("empty"))
                     .build();
 
             FunctionModule.Builder logic = FunctionModule.builder("logic", () -> 5)
-                    .setApplication(app);
+                    .application(app);
 
             TextInputModule.Builder builder = TextInputModule.builder("input", "input: ")
                     .addHandler(logic);
@@ -239,7 +239,7 @@ class TextInputModuleTest {
 
             String first = runInputModule(builder);
             int firstOutput = app.getInput("logic", Integer.class);
-            logic.setFunction(() -> 6);
+            logic.function(() -> 6);
             String second = runInputModule(builder);
             int secondOutput = app.getInput("logic", Integer.class);
 
@@ -256,10 +256,10 @@ class TextInputModuleTest {
         try(IOCapture io = new IOCapture("input\ninput\ninput")) {
             builder.unlockProperty(TUIModule.Property.SCANNER);
             builder.unlockProperty(TUIModule.Property.PRINTSTREAM);
-            builder.setScanner(io.getScanner());
-            builder.setPrintStream(io.getPrintStream());
+            builder.scanner(io.getScanner());
+            builder.printStream(io.getPrintStream());
 
-            builder.build().run();
+            builder.build().start();
 
             return io.getOutput();
         }

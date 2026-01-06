@@ -57,7 +57,7 @@ public abstract class TUIModule {
      * Fields that can be recursively updated in the Builder. <br>
      * You can change the recursion flags for these fields (see {@link DirectedGraphNode.PropertyUpdateFlag}). <br>
      * <br>
-     * To update the flag for a property on a builder, call {@link TUIModule.Builder#setPropertyUpdateFlag(Property, DirectedGraphNode.PropertyUpdateFlag)} <br>
+     * To update the flag for a property on a builder, call {@link TUIModule.Builder#updateFlag(Property, DirectedGraphNode.PropertyUpdateFlag)} <br>
      * You can also call {@link TUIModule.Builder#lockProperty(Property)} or {@link TUIModule.Builder#unlockProperty(Property)}. <br>
      *  <br>
      * Note: setting the ansi, scanner, print stream, or enabling ansi will automatically lock those property flags,
@@ -135,7 +135,7 @@ public abstract class TUIModule {
     protected static final Logger logger = LoggerFactory.getLogger(TUIModule.class);
 
     /**
-     * If there is a child currently running while {@link TUIModule#run() } is active, this will reference that child.
+     * If there is a child currently running while {@link TUIModule#start() } is active, this will reference that child.
      */
     private TUIModule currentRunningChild;
 
@@ -147,7 +147,7 @@ public abstract class TUIModule {
     protected boolean restart = false;
 
     /**
-     * The stack that maintains the schedule order for running modules. The scheduler is implemented in {@link TUIModule#run()}.
+     * The stack that maintains the schedule order for running modules. The scheduler is implemented in {@link TUIModule#start()}.
      */
     private Deque<RunFrame> runStack = null;
 
@@ -199,7 +199,7 @@ public abstract class TUIModule {
 
 
     /**
-     * Runs this module as a "source", meaning a new scheduling stack is created.
+     * Runs this module as a "root", meaning a new scheduling stack is created.
      * It will run all children from this module.
      * <br>
      * For most use cases, only the top-level module will need to be run via this method
@@ -208,22 +208,22 @@ public abstract class TUIModule {
      * or {@link ModuleFactory#run(String, TUIModule, String)}. This ensures a unified scheduler across
      * all running modules.
      */
-    public void run() {
+    public void start() {
         logger.debug("Running module \"{}\" as a source (creating new run stack)", name);
 
         this.runStack = new ArrayDeque<>();
 
         this.mainRun(new RunFrame(null, null, null));
 
-        this.run(runStack);
+        this.start(runStack);
     }
 
     /**
-     * Helper for {@link TUIModule#run()}. Iterates through the runStack.
+     * Helper for {@link TUIModule#start()}. Iterates through the runStack.
      *
      * @param runStack The stack of modules to run. It needs a local copy because the instance field will be set to null right before the final check.
      */
-    private void run(Deque<RunFrame> runStack) {
+    private void start(Deque<RunFrame> runStack) {
         while (!runStack.isEmpty()) {
             RunFrame frame = runStack.pop();
             TUIModule module = frame.module;
@@ -249,7 +249,7 @@ public abstract class TUIModule {
      * @implSpec The children of this module are automatically run after this, so there is no need to
      * implement logic that handles scheduling the behavior of children.
      */
-    public abstract void shallowRun();
+    public abstract void doRunLogic();
 
     /**
      * Linearly schedules all children to run, and then schedules itself to end its run.
@@ -261,7 +261,7 @@ public abstract class TUIModule {
         logger.trace("Running children for module \"{}\"", this.name);
         runStack.push(new RunFrame(this, frame.parent, RunFrame.State.END, frame.displacedChild));
 
-        this.shallowRun();
+        this.doRunLogic();
 
         for(TUIModule.Builder<?> child : children.reversed()) {
             TUIModule toRun = child.build();
@@ -563,7 +563,7 @@ public abstract class TUIModule {
         return TUIModule.shallowStructuralEquals(this, other);
     }
 
-
+    // TODO - document
     public static boolean shallowStructuralEquals(TUIModule first, TUIModule second) {
         if(first == second) return true;
         if(first == null || second == null) return false;
@@ -642,7 +642,7 @@ public abstract class TUIModule {
          * The ansi that may be displayed (Jansi object).
          * Note that not every module will display ansi.
          */
-        protected Ansi ansi = ansi();
+        protected Ansi ansi = Ansi.ansi();
 
 
         /**
@@ -695,7 +695,7 @@ public abstract class TUIModule {
          */
         public Builder(Class<B> type, String name) {
             this.type = type;
-            this.setName(name);
+            this.name(name);
             for(Property property : Property.values()) {
                 propertyUpdateFlags.put(property, PropertyUpdateFlag.UPDATE);
             }
@@ -851,7 +851,7 @@ public abstract class TUIModule {
          * @param flag The propagation behavior given by {@link DirectedGraphNode.PropertyUpdateFlag}
          * @return self
          */
-        public B setPropertyUpdateFlag(Property property, PropertyUpdateFlag flag) {
+        public B updateFlag(Property property, PropertyUpdateFlag flag) {
             propertyUpdateFlags.put(property, flag);
 
             return self();
@@ -904,10 +904,10 @@ public abstract class TUIModule {
          */
         public B updateProperties(TUIModule module) {
             logger.debug("updating properties for module \"{}\" based on module \"{}\"", name, module.name);
-            this.setApplication(module.getApplication());
-            this.setAnsi(module.getAnsi());
-            this.setScanner(module.getScanner());
-            this.setPrintStream(module.getPrintStream());
+            this.application(module.getApplication());
+            this.style(module.getAnsi());
+            this.scanner(module.getScanner());
+            this.printStream(module.getPrintStream());
             this.enableAnsi(module.getAnsiEnabled());
 
             return self();
@@ -1013,7 +1013,7 @@ public abstract class TUIModule {
          * @param name The unique name of this module.
          * @return self
          */
-        public B setName(String name) {
+        public B name(String name) {
             logger.debug("setting name for module \"{}\" to \"{}\"", this.name, name);
 
             usedNames.putIfAbsent(name, 0);
@@ -1102,13 +1102,13 @@ public abstract class TUIModule {
          *
          * <strong>Note</strong>: To prevent a module's application from being updated
          * when you set the property of a parent, use {@link TUIModule.Builder#lockProperty(Property)}.
-         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * You can also use {@link TUIModule.Builder#updateFlag(Property, PropertyUpdateFlag)}
          * for more fine-grained control.
          *
          * @param app The {@link ApplicationModule} that this module will be tied to.
          * @return self
          */
-        public B setApplication(ApplicationModule app) {
+        public B application(ApplicationModule app) {
             logger.debug("setting app for module \"{}\" to \"{}\"", name, (app == null) ? "null" : app.getName());
             this.updateProperty(Property.APPLICATION, n -> n.setApplicationNonRecursive(app));
 
@@ -1138,15 +1138,15 @@ public abstract class TUIModule {
          * <strong>Note</strong>: Setting the ansi automatically locks it from further updating,
          * either directly or via updating a parent. If this is not desired,
          * use {@link TUIModule.Builder#unlockProperty(Property)}.
-         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}.
+         * You can also use {@link TUIModule.Builder#updateFlag(Property, PropertyUpdateFlag)}.
          * Setting the ansi uses {@link TUIModule.Property#SET_ANSI}.
          * Note that defining behavior for SET_ANSI does <strong>not</strong>
-         * affect behavior for merging ansi (e.g., via {@link TUIModule.Builder#prependAnsi(Ansi)}).
+         * affect behavior for merging ansi (e.g., via {@link TUIModule.Builder#prependStyle(Ansi)}).
          *
          * @param ansi The {@link Ansi} that this module may use.
          * @return self
          */
-        public B setAnsi(Ansi ansi) {
+        public B style(Ansi ansi) {
             logger.debug("setting ansi for \"{}\"", name);
             this.updateProperty(Property.SET_ANSI, n -> {
                 logger.trace("setting ansi for \"{}\"", n.name);
@@ -1168,7 +1168,7 @@ public abstract class TUIModule {
          * <strong>Note</strong>: To prevent a module's ansi from being merged into
          * when you set the property of a parent, use {@link TUIModule.Builder#lockProperty(Property)}.
          * Prepending the ansi uses {@link TUIModule.Property#MERGE_ANSI}.
-         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * You can also use {@link TUIModule.Builder#updateFlag(Property, PropertyUpdateFlag)}
          * for more fine-grained control.
          * Note that defining behavior for MERGE_ANSI does <strong>not</strong>
          * affect behavior for setting ansi directly. <br>
@@ -1176,11 +1176,11 @@ public abstract class TUIModule {
          * @param ansi The {@link Ansi} that this module may use.
          * @return self
          */
-        public B prependAnsi(Ansi ansi) {
+        public B prependStyle(Ansi ansi) {
             logger.debug("prepending ansi to module \"{}\"", name);
             this.updateProperty(Property.MERGE_ANSI, n -> {
                 logger.trace("prepending ansi to module \"{}\"", n.name);
-                n.ansi = ansi().a(ansi).a(n.ansi);
+                n.ansi = Ansi.ansi().a(ansi).a(n.ansi);
             });
 
             return self();
@@ -1198,7 +1198,7 @@ public abstract class TUIModule {
          * <strong>Note</strong>: To prevent a module's ansi from being merged into
          * when you set the property of a parent, use {@link TUIModule.Builder#lockProperty(Property)}.
          * Appending the ansi uses {@link TUIModule.Property#MERGE_ANSI}.
-         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * You can also use {@link TUIModule.Builder#updateFlag(Property, PropertyUpdateFlag)}
          * for more fine-grained control.
          * Note that defining behavior for MERGE_ANSI does <strong>not</strong>
          * affect behavior for setting ansi directly. <br>
@@ -1206,11 +1206,11 @@ public abstract class TUIModule {
          * @param ansi The {@link Ansi} that this module may use.
          * @return self
          */
-        public B appendAnsi(Ansi ansi) {
+        public B appendStyle(Ansi ansi) {
             logger.debug("appending ansi to module \"{}\"", name);
             this.updateProperty(Property.MERGE_ANSI, n -> {
                 logger.trace("appending ansi to module \"{}\"", n.name);
-                n.ansi = ansi().a(n.ansi).a(ansi);
+                n.ansi = Ansi.ansi().a(n.ansi).a(ansi);
             });
 
             return self();
@@ -1226,13 +1226,13 @@ public abstract class TUIModule {
          * <strong>Note</strong>: Setting the scanner automatically locks it from further updating,
          * either directly or via updating a parent. If this is not desired,
          * use {@link TUIModule.Builder#unlockProperty(Property)}.
-         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * You can also use {@link TUIModule.Builder#updateFlag(Property, PropertyUpdateFlag)}
          * for more fine-grained control.
          *
          * @param scanner The {@link Scanner} that this module may use.
          * @return self
          */
-        public B setScanner(Scanner scanner) {
+        public B scanner(Scanner scanner) {
             logger.debug("setting scanner for module \"{}\"", name);
             this.updateProperty(TUIModule.Property.SCANNER, n -> {
                 logger.trace("setting scanner for module \"{}\"", n.name);
@@ -1253,13 +1253,13 @@ public abstract class TUIModule {
          * <strong>Note</strong>: Setting the PrintStream automatically locks it from further updating,
          * either directly or via updating a parent. If this is not desired,
          * use {@link TUIModule.Builder#unlockProperty(Property)}.
-         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}
+         * You can also use {@link TUIModule.Builder#updateFlag(Property, PropertyUpdateFlag)}
          * for more fine-grained control.
          *
          * @param printStream The {@link PrintStream} that this module may use.
          * @return self
          */
-        public B setPrintStream(PrintStream printStream) {
+        public B printStream(PrintStream printStream) {
             logger.debug("setting print stream for module \"{}\"", name);
             this.updateProperty(TUIModule.Property.PRINTSTREAM, n -> {
                 logger.trace("setting print stream for module \"{}\"", n.name);
@@ -1285,10 +1285,10 @@ public abstract class TUIModule {
          * <strong>Note</strong>: Changing whether ansi is enabled automatically locks it from further updating,
          * either directly or via updating a parent. If this is not desired,
          * use {@link TUIModule.Builder#unlockProperty(Property)}.
-         * You can also use {@link TUIModule.Builder#setPropertyUpdateFlag(Property, PropertyUpdateFlag)}.
+         * You can also use {@link TUIModule.Builder#updateFlag(Property, PropertyUpdateFlag)}.
          * Changing whether ansi is enabled uses {@link TUIModule.Property#ENABLE_ANSI}.
          * Note that defining behavior for ENABLE_ANSI does <strong>not</strong>
-         * affect behavior for setting or merging ansi (e.g., via {@link TUIModule.Builder#prependAnsi(Ansi)}).
+         * affect behavior for setting or merging ansi (e.g., via {@link TUIModule.Builder#prependStyle(Ansi)}).
          *
          * @param enable Whether ansi is enabled.
          * @return self

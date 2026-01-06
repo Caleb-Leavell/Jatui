@@ -98,7 +98,7 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
 
     /**
      * Adds a single list item. Adheres to the start and step set by
-     * {@link NumberedList#setStart(int)} and {@link NumberedList#setStep(int)}.
+     * {@link NumberedList#start(int)} and {@link NumberedList#step(int)}.
      *
      * @param listText The item to display (e.g., "[5] {@code listText}").
      * @return self
@@ -117,7 +117,7 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
 
     /**
      * Adds zero or more list items. Adheres to the start and step set by
-     * {@link NumberedList#setStart(int)} and {@link NumberedList#setStep(int)}.
+     * {@link NumberedList#start(int)} and {@link NumberedList#step(int)}.
      * <br>
      * Example:
      * <pre><code>
@@ -147,7 +147,7 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
      * @param start The starting number for the list.
      * @return self
      **/
-    public NumberedList setStart(int start) {
+    public NumberedList start(int start) {
         logger.trace("adding start of {} to {}", getName(), start);
         this.start = start;
         return this;
@@ -158,7 +158,7 @@ public class NumberedList extends ModuleTemplate<NumberedList> {
      * @param step The amount to increment every list number.
      * @return self
      **/
-    public NumberedList setStep(int step) {
+    public NumberedList step(int step) {
         logger.trace("adding step of {} to {}", getName(), step);
         this.step = step;
         return this;

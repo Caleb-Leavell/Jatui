@@ -17,8 +17,6 @@
 
 package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.modules.ApplicationModule;
-import com.calebleavell.jatui.modules.FunctionModule;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +37,7 @@ class FunctionModuleTest {
 
         app.setHome(test);
 
-        test.build().run();
+        test.build().start();
 
         assertEquals("Test Output", app.getInput("test"));
     }
@@ -58,7 +56,7 @@ class FunctionModuleTest {
             Supplier<Integer> func = () -> 5;
             FunctionModule.Builder test = FunctionModule.builder("test", () -> {});
 
-            test.setFunction(func);
+            test.function(func);
 
             assertEquals(func, test.getFunction());
         }
@@ -73,13 +71,13 @@ class FunctionModuleTest {
 
             List<Integer> testList = new ArrayList<>();
 
-            test.setFunction(() -> {
+            test.function(() -> {
                 testList.add(5);
             });
 
             app.setHome(test);
 
-            test.build().run();
+            test.build().start();
 
             assertAll(
                     () -> assertNull(app.getInput("test")),

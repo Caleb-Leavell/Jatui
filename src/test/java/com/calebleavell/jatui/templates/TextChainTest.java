@@ -44,10 +44,10 @@ class TextChainTest {
         try(IOCapture io = new IOCapture()) {
             TextChain original = TextChain.builder("lines")
                     .addText(TextModule.builder("text", "Hello, World!"))
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            original.build().run();
+            original.build().start();
 
             output = io.getOutput();
         }
@@ -62,9 +62,9 @@ class TextChainTest {
         try(IOCapture io = new IOCapture()) {
             TextChain original = TextChain.builder("lines")
                     .addText("Hello, World!", ansi().bold())
-                    .setPrintStream(io.getPrintStream());
+                    .printStream(io.getPrintStream());
 
-            original.build().run();
+            original.build().start();
 
             output = io.getOutput();
         }
@@ -79,10 +79,10 @@ class TextChainTest {
         try(IOCapture io = new IOCapture()) {
             TextChain original = TextChain.builder("lines")
                     .addText("Hello, World!")
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            original.build().run();
+            original.build().start();
 
             output = io.getOutput();
         }
@@ -96,8 +96,8 @@ class TextChainTest {
 
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("empty"))
-                    .setPrintStream(io.getPrintStream())
+                    .onExit(ModuleFactory.empty("empty"))
+                    .printStream(io.getPrintStream())
                     .build();
 
             ContainerModule.Builder home = ContainerModule.builder("home")
@@ -110,7 +110,7 @@ class TextChainTest {
                     );
 
             app.setHome(home);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -124,8 +124,8 @@ class TextChainTest {
 
         try(IOCapture io = new IOCapture()) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setOnExit(ModuleFactory.empty("empty"))
-                    .setPrintStream(io.getPrintStream())
+                    .onExit(ModuleFactory.empty("empty"))
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -139,7 +139,7 @@ class TextChainTest {
                     );
 
             app.setHome(home);
-            app.run();
+            app.start();
 
             output = io.getOutput();
         }
@@ -157,10 +157,10 @@ class TextChainTest {
                     .newLine()
                     .addText("World!")
                     .newLine()
-                    .setPrintStream(io.getPrintStream())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
-            original.build().run();
+            original.build().start();
 
             output = io.getOutput();
         }

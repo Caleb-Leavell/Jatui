@@ -33,7 +33,7 @@ public class ApplicationModule extends TUIModule {
 
     /** The module that runs by default when the application finishes running **/
     public static final TUIModule.Builder<?> DEFAULT_EXIT = TextModule.builder("exit", "Exiting...")
-            .setAnsi(ansi().fgRgb(125, 100, 100));
+            .style(ansi().fgRgb(125, 100, 100));
 
     /**
      * Where input collected during the application's lifecycle is stored. <br>
@@ -58,23 +58,23 @@ public class ApplicationModule extends TUIModule {
     private final Map<String, Integer> nameFrequencyMap = new HashMap<>();
 
     /**
-     * Overrides {@link TUIModule#run()}. <br>
+     * Overrides {@link TUIModule#start()}. <br>
      * Checks and logs name duplicates, runs children (where "home" is the first child),
      * and then runs {@link ApplicationModule#onExit} if not disabled.
      * @implNote overrides run instead of shallowRun to ensure onExit runs exactly once per run, regardless of
      * restarting or termination.
      */
     @Override
-    public void run() {
+    public void start() {
         logger.info("Running ApplicationModule \"{}\"", getName());
 
         checkForNameDuplicates();
-        super.run();
-        onExit.build().run();
+        super.start();
+        onExit.build().start();
     }
 
     @Override
-    public void shallowRun() {/* no additional behavior needed in shallowRun */}
+    public void doRunLogic() {/* no additional behavior needed in shallowRun */}
 
     /**
      * Checks every child attached to this application and logs an error
@@ -231,9 +231,9 @@ public class ApplicationModule extends TUIModule {
 
 
         for(TUIModule.Builder<?> child : getChildren()) {
-            child.setApplication(this);
-            child.setPrintStream(this.getPrintStream());
-            child.setScanner(this.getScanner());
+            child.application(this);
+            child.printStream(this.getPrintStream());
+            child.scanner(this.getScanner());
             child.enableAnsi(this.getAnsiEnabled());
         }
     }
@@ -257,9 +257,9 @@ public class ApplicationModule extends TUIModule {
     public void setOnExit(TUIModule.Builder<?> onExit) {
         logger.debug("setting onExit for application \"{}\" to module \"{}\"", getName(), onExit.getName());
         this.onExit = onExit;
-        onExit.setApplication(this);
-        onExit.setPrintStream(this.getPrintStream());
-        onExit.setScanner(this.getScanner());
+        onExit.application(this);
+        onExit.printStream(this.getPrintStream());
+        onExit.scanner(this.getScanner());
         onExit.enableAnsi(this.getAnsiEnabled());
     }
 
@@ -294,9 +294,9 @@ public class ApplicationModule extends TUIModule {
         this.onExit = builder.onExit;
 
         for(TUIModule.Builder<?> child : getChildren()) {
-            child.setApplication(this);
-            child.setPrintStream(this.getPrintStream());
-            child.setScanner(this.getScanner());
+            child.application(this);
+            child.printStream(this.getPrintStream());
+            child.scanner(this.getScanner());
             child.enableAnsi(this.getAnsiEnabled());
         }
 
@@ -375,7 +375,7 @@ public class ApplicationModule extends TUIModule {
          * have been locked.
          * @param home The first module to run when this application is run.
          */
-        public Builder setHome(TUIModule.Builder<?> home) {
+        public Builder home(TUIModule.Builder<?> home) {
             logger.debug("setting home for application builder \"{}\" to module \"{}\"", getName(), (home == null) ? "null" : home.getName());
 
             if (getChildren().isEmpty()) {
@@ -403,7 +403,7 @@ public class ApplicationModule extends TUIModule {
          * it is a distinct module that runs after all children have finished running.
          * @param onExit The module that runs at the end of this application module's run.
          */
-        public Builder setOnExit(TUIModule.Builder<?> onExit) {
+        public Builder onExit(TUIModule.Builder<?> onExit) {
             logger.debug("setting onExit for application builder \"{}\" to \"{}\"", getName(), (onExit == null) ? "null" : onExit.getName());
             this.children.remove(this.onExit);
             this.onExit = onExit;

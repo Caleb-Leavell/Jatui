@@ -23,7 +23,7 @@ import com.calebleavell.jatui.modules.TUIModule;
  *  Holds information required for a single scheduling unit of the application.
  *  In principle, the application runs module-by-module, so the primary data stored is
  *  {@link RunFrame#module}. Everything else (e.g., {@link RunFrame#parent}) is auxiliary
- *  information to help manage the run stack (created in {@link TUIModule#run()}).
+ *  information to help manage the run stack (created in {@link TUIModule#start()}).
  */
 public class RunFrame {
     /**
@@ -49,7 +49,7 @@ public class RunFrame {
     public final TUIModule displacedChild;
 
     /**
-     * Signals to the scheduler how to manage this frame. See {@link TUIModule#run()}
+     * Signals to the scheduler how to manage this frame. See {@link TUIModule#start()}
      * for implementation details on frame management.
      */
     public enum State {

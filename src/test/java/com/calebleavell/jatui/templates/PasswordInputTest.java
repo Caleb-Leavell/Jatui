@@ -19,7 +19,6 @@ package com.calebleavell.jatui.templates;
 
 import com.calebleavell.jatui.modules.ApplicationModule;
 import com.calebleavell.jatui.modules.ModuleFactory;
-import com.calebleavell.jatui.templates.PasswordInput;
 import com.calebleavell.jatui.util.IOCapture;
 import org.junit.jupiter.api.Test;
 
@@ -37,8 +36,8 @@ class PasswordInputTest {
 
         try(IOCapture io = new IOCapture("my-password")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -46,7 +45,7 @@ class PasswordInputTest {
                     .storeInputAndMatch();
 
             app.setHome(myInput);
-            app.run();
+            app.start();
 
             char[] expectedInput = "my-password".toCharArray();
             char[] input = Arrays.copyOf(app.getInput("pw-input-input", char[].class), expectedInput.length);
@@ -75,8 +74,8 @@ class PasswordInputTest {
 
         try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -84,15 +83,15 @@ class PasswordInputTest {
                     .storeInput();
 
             app.setHome(myInput);
-            app.run();
+            app.start();
 
             boolean isValid1 = myInput.validatePassword(correct);
 
-            app.run();
+            app.start();
             boolean isValid2 = myInput.validatePassword(correct);
 
             myInput.cleanImmediately();
-            app.run();
+            app.start();
             boolean isValid3 = myInput.validatePassword(correct);
 
             assertAll(
@@ -110,8 +109,8 @@ class PasswordInputTest {
 
         try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password\nwrong-password")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -119,16 +118,16 @@ class PasswordInputTest {
                     .addOnValidPassword("on-valid", () -> 5);
 
             app.setHome(myInput);
-            app.run();
+            app.start();
             Integer input1 = app.getInput("on-valid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input2 = app.getInput("on-valid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input3 = app.getInput("on-valid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input4 = app.getInput("on-valid", Integer.class);
 
             assertAll(
@@ -147,8 +146,8 @@ class PasswordInputTest {
 
         try(IOCapture io = new IOCapture("wrong-password\ncorrect-password\ncorrect-password\nwrong-password")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -158,16 +157,16 @@ class PasswordInputTest {
                     .addOnValidPassword(addOne);
 
             app.setHome(myInput);
-            app.run();
+            app.start();
             Integer input1 = app.getInput("on-valid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input2 = app.getInput("on-valid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input3 = app.getInput("on-valid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input4 = app.getInput("on-valid", Integer.class);
 
             assertAll(
@@ -186,8 +185,8 @@ class PasswordInputTest {
 
         try(IOCapture io = new IOCapture("correct-password\nwrong-password\nwrong-password\ncorrect-password")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -195,16 +194,16 @@ class PasswordInputTest {
                     .addOnInvalidPassword("on-invalid", () -> 5);
 
             app.setHome(myInput);
-            app.run();
+            app.start();
             Integer input1 = app.getInput("on-invalid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input2 = app.getInput("on-invalid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input3 = app.getInput("on-invalid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input4 = app.getInput("on-invalid", Integer.class);
 
             assertAll(
@@ -223,8 +222,8 @@ class PasswordInputTest {
 
         try(IOCapture io = new IOCapture("correct-password\nwrong-password\nwrong-password\ncorrect-password")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -234,16 +233,16 @@ class PasswordInputTest {
                     .addOnInvalidPassword(addOne);
 
             app.setHome(myInput);
-            app.run();
+            app.start();
             Integer input1 = app.getInput("on-invalid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input2 = app.getInput("on-invalid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input3 = app.getInput("on-invalid", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input4 = app.getInput("on-invalid", Integer.class);
 
             assertAll(
@@ -262,8 +261,8 @@ class PasswordInputTest {
 
         try(IOCapture io = new IOCapture("correct-password\ncorrect-password\nwrong-password\nwrong-password\ncorrect-password")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -278,19 +277,19 @@ class PasswordInputTest {
                     .addOnValidPassword(addOne);
 
             app.setHome(myInput);
-            app.run();
+            app.start();
             Integer input1 = app.getInput("output", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input2 = app.getInput("output", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input3 = app.getInput("output", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input4 = app.getInput("output", Integer.class);
             app.resetMemory();
-            app.run();
+            app.start();
             Integer input5 = app.getInput("output", Integer.class);
 
             assertAll(
@@ -306,7 +305,7 @@ class PasswordInputTest {
     @Test
     void testSetName() {
         PasswordInput input = PasswordInput.builder("name-1", "text", null);
-        input.setName("name-2");
+        input.name("name-2");
 
         assertAll(
                 () -> assertEquals("name-2", input.getName()),
@@ -322,20 +321,20 @@ class PasswordInputTest {
 
         try(IOCapture io = new IOCapture("input1\ninput2")) {
             ApplicationModule app = ApplicationModule.builder("app")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setOnExit(ModuleFactory.empty("on-exit"))
+                    .onExit(ModuleFactory.empty("on-exit"))
                     .build();
 
             PasswordInput myInput = PasswordInput.builder("pw-input", "text-1", supplyCorrect)
                     .storeInputAndMatch();
 
             app.setHome(myInput);
-            app.run();
+            app.start();
             String output1 = io.getOutput();
             myInput.setDisplayText("text-2");
-            app.run();
+            app.start();
             String output2 = io.getOutput();
 
             assertAll(

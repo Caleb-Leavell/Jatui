@@ -17,8 +17,6 @@
 
 package com.calebleavell.jatui.modules;
 
-import com.calebleavell.jatui.core.RunFrame;
-
 /**
  * Not only does this class improve modularity by housing other modules,
  * but it also provides a template for extending TUIGenericModule.
@@ -26,10 +24,10 @@ import com.calebleavell.jatui.core.RunFrame;
 public class ContainerModule extends TUIModule {
 
     /**
-     * Simply logs the run and calls the super-method provided by {@link TUIModule#run()}.
+     * Simply logs the run and calls the super-method provided by {@link TUIModule#start()}.
      */
     @Override
-    public void shallowRun() {
+    public void doRunLogic() {
         logger.info("Running ContainerModule \"{}\"", getName());
     }
     /**

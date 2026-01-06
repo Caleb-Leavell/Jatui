@@ -121,7 +121,7 @@ public class TextChain extends ModuleTemplate<TextChain> {
      */
     public TextChain addText(String text, Ansi ansi) {
         this.addText(TextModule.builder(main.getName() + "-" + iterator, text)
-                .setAnsi(ansi)
+                .style(ansi)
                 .printNewLine(false));
         return self();
     }
@@ -149,9 +149,9 @@ public class TextChain extends ModuleTemplate<TextChain> {
      */
     public TextChain addModuleOutput(String moduleName, Ansi ansi) {
         this.addText(TextModule.builder(main.getName() + "-" + iterator, moduleName)
-                .setOutputType(TextModule.OutputType.DISPLAY_APP_STATE)
+                .outputType(TextModule.OutputType.DISPLAY_APP_STATE)
                 .printNewLine(false)
-                .setAnsi(ansi));
+                .style(ansi));
         return self();
     }
 

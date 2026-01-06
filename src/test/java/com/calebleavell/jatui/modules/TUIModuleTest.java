@@ -43,13 +43,13 @@ class TUIModuleTest {
 
     public static FunctionModule.Builder checkRunning(String name, TUIModule parent) {
         FunctionModule.Builder checkRunning = FunctionModule.builder(name, () -> {});
-        checkRunning.setFunction(() -> parent.getCurrentRunningBranch().getLast().structuralEquals(checkRunning.build()));
+        checkRunning.function(() -> parent.getCurrentRunningBranch().getLast().structuralEquals(checkRunning.build()));
         return checkRunning;
     }
 
     public static FunctionModule.Builder checkShallowRunning (String name, TUIModule parent) {
         FunctionModule.Builder checkRunning = FunctionModule.builder(name, () -> {});
-        checkRunning.setFunction(() -> parent.getCurrentRunningChild().structuralEquals(checkRunning.build()));
+        checkRunning.function(() -> parent.getCurrentRunningChild().structuralEquals(checkRunning.build()));
         return checkRunning;
     }
 
@@ -64,7 +64,7 @@ class TUIModuleTest {
                 );
 
         testApp.setHome(home);
-        testApp.run();
+        testApp.start();
 
         assertAll(
                 () -> assertTrue(testApp.getInput("check-running-1", Boolean.class)),
@@ -80,7 +80,7 @@ class TUIModuleTest {
         FunctionModule.Builder checkRunning = checkRunning("check-running-2", testApp);
 
         ApplicationModule otherApp = ApplicationModule.builder("other-app")
-                .setHome(checkRunning)
+                .home(checkRunning)
                 .build();
 
         ContainerModule.Builder home = ContainerModule.builder("home")
@@ -91,7 +91,7 @@ class TUIModuleTest {
                 );
 
         testApp.setHome(home);
-        testApp.run();
+        testApp.start();
 
         assertAll(
                 () -> assertTrue(testApp.getInput("check-running-1", Boolean.class)),
@@ -198,7 +198,7 @@ class TUIModuleTest {
                 );
 
         testApp.setHome(home);
-        testApp.run();
+        testApp.start();
 
         assertAll(
                 () -> assertTrue(testApp.getInput("is-run-1", Boolean.class)),
@@ -224,7 +224,7 @@ class TUIModuleTest {
 
 
         testApp.setHome(home);
-        testApp.run();
+        testApp.start();
 
         assertAll(
                 () -> assertTrue(testApp.getInput("is-run-1", Boolean.class)),
@@ -251,7 +251,7 @@ class TUIModuleTest {
 
 
         testApp.setHome(home);
-        testApp.run();
+        testApp.start();
 
         assertAll(
                 () -> assertTrue(testApp.getInput("is-run-1", Boolean.class)),
@@ -277,7 +277,7 @@ class TUIModuleTest {
                 );
 
         app.setHome(home);
-        app.run();
+        app.start();
 
         assertAll(
                 () -> assertEquals(2, count[0]),
@@ -306,7 +306,7 @@ class TUIModuleTest {
                 );
 
         app.setHome(home);
-        app.run();
+        app.start();
 
         assertAll(
                 () -> assertEquals(2, count[0]),
@@ -337,7 +337,7 @@ class TUIModuleTest {
                 );
 
         app.setHome(home);
-        app.run();
+        app.start();
 
         assertAll(
                 () -> assertEquals(5, count[0]),
@@ -368,7 +368,7 @@ class TUIModuleTest {
                 );
 
         app.setHome(home);
-        app.run();
+        app.start();
 
         assertAll(
                 () -> assertEquals(1, count[0]),
@@ -384,10 +384,10 @@ class TUIModuleTest {
         testApp.getChildren().clear();
         testApp.getChildren().addAll(
                 List.of(
-                        checkShallowRunning("check-running-1", testApp).setApplication(testApp),
-                        checkShallowRunning("check-running-2", testApp).setApplication(testApp)));
+                        checkShallowRunning("check-running-1", testApp).application(testApp),
+                        checkShallowRunning("check-running-2", testApp).application(testApp)));
 
-        testApp.run();
+        testApp.start();
 
         assertAll(
                 () -> assertTrue(testApp.getInput("check-running-1", Boolean.class)),
@@ -404,7 +404,7 @@ class TUIModuleTest {
         ContainerModule.Builder nest_0 = ContainerModule.builder("nest-0");
         ContainerModule.Builder nest_1 = ContainerModule.builder("nest-1");
         FunctionModule.Builder nest_2 = FunctionModule.builder("nest-2", () -> {});
-        nest_2.setFunction(() -> {
+        nest_2.function(() -> {
             List<TUIModule> runningBranch = testApp.getCurrentRunningBranch();
             List<TUIModule> expectedList = List.of(testApp, home.build(), nest_0.build(), nest_1.build(), nest_2.build());
 
@@ -419,7 +419,7 @@ class TUIModuleTest {
                 );
 
         testApp.setHome(home);
-        testApp.run();
+        testApp.start();
 
         assertTrue(testApp.getInput("nest-2", Boolean.class));
     }
@@ -427,28 +427,28 @@ class TUIModuleTest {
     @Test
     void testGetApplication() {
         ApplicationModule testApp = ApplicationModule.builder("test-app").build();
-        ContainerModule test = ContainerModule.builder("test").setApplication(testApp).build();
+        ContainerModule test = ContainerModule.builder("test").application(testApp).build();
         assertEquals(testApp, test.getApplication());
     }
 
     @Test
     void testGetAnsi() {
         Ansi ansi = ansi().bold().fgRgb(50, 50, 50);
-        ContainerModule test = ContainerModule.builder("test").setAnsi(ansi).build();
+        ContainerModule test = ContainerModule.builder("test").style(ansi).build();
         assertEquals(ansi, test.getAnsi());
     }
 
     @Test
     void testGetScanner() {
         Scanner scnr = new Scanner(new ByteArrayInputStream("test".getBytes()));
-        ContainerModule test = ContainerModule.builder("test").setScanner(scnr).build();
+        ContainerModule test = ContainerModule.builder("test").scanner(scnr).build();
         assertEquals(scnr, test.getScanner());
     }
 
     @Test
     void getPrintStream() {
         PrintStream strm = new PrintStream(new ByteArrayOutputStream());
-        ContainerModule test = ContainerModule.builder("test").setPrintStream(strm).build();
+        ContainerModule test = ContainerModule.builder("test").printStream(strm).build();
         assertEquals(strm, test.getPrintStream());
     }
 
@@ -469,7 +469,7 @@ class TUIModuleTest {
     void testLogger() {
 
         ContainerModule module = ContainerModule.builder("module").build();
-        module.run();
+        module.start();
     }
 
     @Test
@@ -480,86 +480,86 @@ class TUIModuleTest {
 
         // Base module
         ContainerModule module1 = ContainerModule.builder("")
-                .setName("module-name")
-                .setAnsi(ansi().bold())
+                .name("module-name")
+                .style(ansi().bold())
                 .enableAnsi(false)
-                .setPrintStream(ioShared.getPrintStream())
-                .setScanner(ioShared.getScanner())
-                .setApplication(app1)
+                .printStream(ioShared.getPrintStream())
+                .scanner(ioShared.getScanner())
+                .application(app1)
                 .build();
 
         // Exact copy: all properties same
         ContainerModule module2 = ContainerModule.builder("")
-                .setName("module-name")
-                .setAnsi(ansi().bold())
+                .name("module-name")
+                .style(ansi().bold())
                 .enableAnsi(false)
-                .setPrintStream(ioShared.getPrintStream())
-                .setScanner(ioShared.getScanner())
-                .setApplication(app1)
+                .printStream(ioShared.getPrintStream())
+                .scanner(ioShared.getScanner())
+                .application(app1)
                 .build();
 
         // Differences:
 
         // Different name
         ContainerModule moduleNameDiff = ContainerModule.builder("")
-                .setName("different-name")
-                .setAnsi(ansi().bold())
+                .name("different-name")
+                .style(ansi().bold())
                 .enableAnsi(false)
-                .setPrintStream(ioShared.getPrintStream())
-                .setScanner(ioShared.getScanner())
-                .setApplication(app1)
+                .printStream(ioShared.getPrintStream())
+                .scanner(ioShared.getScanner())
+                .application(app1)
                 .build();
 
         // Different application
         ApplicationModule app2 = ApplicationModule.builder("app2").build();
         ContainerModule moduleAppDiff = ContainerModule.builder("")
-                .setName("module-name")
-                .setAnsi(ansi().bold())
+                .name("module-name")
+                .style(ansi().bold())
                 .enableAnsi(false)
-                .setPrintStream(ioShared.getPrintStream())
-                .setScanner(ioShared.getScanner())
-                .setApplication(app2)
+                .printStream(ioShared.getPrintStream())
+                .scanner(ioShared.getScanner())
+                .application(app2)
                 .build();
 
         // Different ANSI
         ContainerModule moduleAnsiDiff = ContainerModule.builder("")
-                .setName("module-name")
-                .setAnsi(ansi().bgRgb(10, 10, 10))
+                .name("module-name")
+                .style(ansi().bgRgb(10, 10, 10))
                 .enableAnsi(false)
-                .setPrintStream(ioShared.getPrintStream())
-                .setScanner(ioShared.getScanner())
-                .setApplication(app1)
+                .printStream(ioShared.getPrintStream())
+                .scanner(ioShared.getScanner())
+                .application(app1)
                 .build();
 
         // Different ANSI enabled flag
         ContainerModule moduleAnsiEnabledDiff = ContainerModule.builder("")
-                .setName("module-name")
-                .setAnsi(ansi().bold())
+                .name("module-name")
+                .style(ansi().bold())
                 .enableAnsi(true)
-                .setPrintStream(ioShared.getPrintStream())
-                .setScanner(ioShared.getScanner())
-                .setApplication(app1)
+                .printStream(ioShared.getPrintStream())
+                .scanner(ioShared.getScanner())
+                .application(app1)
                 .build();
 
         // Different print stream (new IOCapture)
         IOCapture ioOther = new IOCapture();
         ContainerModule modulePrintStreamDiff = ContainerModule.builder("")
-                .setName("module-name")
-                .setAnsi(ansi().bold())
+                .name("module-name")
+                .style(ansi().bold())
                 .enableAnsi(false)
-                .setPrintStream(ioOther.getPrintStream())
-                .setScanner(ioShared.getScanner())
-                .setApplication(app1)
+                .printStream(ioOther.getPrintStream())
+                .scanner(ioShared.getScanner())
+                .application(app1)
                 .build();
 
         // Different scanner (new IOCapture)
         ContainerModule moduleScannerDiff = ContainerModule.builder("")
-                .setName("module-name")
-                .setAnsi(ansi().bold())
+                .name("module-name")
+                .style(ansi().bold())
                 .enableAnsi(false)
-                .setPrintStream(ioShared.getPrintStream())
-                .setScanner(ioOther.getScanner())
-                .setApplication(app1)
+                .printStream(ioShared.getPrintStream())
+                .scanner(ioOther.getScanner())
+                .application(app1)
                 .build();
 
         ioShared.close();
@@ -620,7 +620,7 @@ class TUIModuleTest {
         void testSetNameAndGetName() {
             ContainerModule.Builder test = ContainerModule.builder("old-name");
             String oldName = test.getName();
-            test.setName("new-name");
+            test.name("new-name");
             String newName = test.getName();
 
             assertAll(
@@ -644,7 +644,7 @@ class TUIModuleTest {
             test.addChild(child);
 
             ApplicationModule oldApp = test.getApplication();
-            test.setApplication(app);
+            test.application(app);
             ApplicationModule newApp = test.getApplication();
             ApplicationModule childApp = child.getApplication();
 
@@ -662,7 +662,7 @@ class TUIModuleTest {
             test.addChild(child);
 
             Ansi oldAnsi  = test.getAnsi();
-            test.setAnsi(ansi().bold());
+            test.style(ansi().bold());
             Ansi newAnsi = test.getAnsi();
             Ansi childAnsi = child.getAnsi();
 
@@ -677,11 +677,11 @@ class TUIModuleTest {
         void testPrependAnsi() {
             ContainerModule.Builder test = ContainerModule.builder("test");
             ContainerModule.Builder child = ContainerModule.builder("child")
-                    .setAnsi(ansi().bold().reset());
+                    .style(ansi().bold().reset());
             test.addChild(child);
 
             Ansi oldAnsi = child.getAnsi();
-            test.prependAnsi(ansi().fgRgb(3, 1, 4));
+            test.prependStyle(ansi().fgRgb(3, 1, 4));
             Ansi newAnsi = test.getAnsi();
             Ansi childAnsi = child.getAnsi();
 
@@ -696,11 +696,11 @@ class TUIModuleTest {
         void testAppendAnsi() {
             ContainerModule.Builder test = ContainerModule.builder("test");
             ContainerModule.Builder child = ContainerModule.builder("child")
-                    .setAnsi(ansi().bold().reset());
+                    .style(ansi().bold().reset());
             test.addChild(child);
 
             Ansi oldAnsi = child.getAnsi();
-            test.appendAnsi(ansi().fgRgb(3, 1, 4));
+            test.appendStyle(ansi().fgRgb(3, 1, 4));
             Ansi newAnsi = test.getAnsi();
             Ansi childAnsi = child.getAnsi();
 
@@ -719,7 +719,7 @@ class TUIModuleTest {
             test.addChild(child);
 
             Scanner oldScanner = test.getScanner();
-            test.setScanner(scanner);
+            test.scanner(scanner);
             Scanner newScanner = test.getScanner();
             Scanner childScanner = child.getScanner();
 
@@ -738,7 +738,7 @@ class TUIModuleTest {
             test.addChild(child);
 
             PrintStream oldPs = test.getPrintStream();
-            test.setPrintStream(ps);
+            test.printStream(ps);
             PrintStream newPs = test.getPrintStream();
             PrintStream childPs = child.getPrintStream();
 
@@ -865,9 +865,9 @@ class TUIModuleTest {
             test.addChild(child1);
             child1.addChild(child2);
 
-            child1.setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.SKIP);
+            child1.updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.SKIP);
 
-            test.setApplication(app);
+            test.application(app);
 
             assertAll(
                     () -> assertEquals(app, test.getApplication()),
@@ -889,7 +889,7 @@ class TUIModuleTest {
 
             child1.lockProperty(TUIModule.Property.APPLICATION);
 
-            test.setApplication(app);
+            test.application(app);
 
             assertAll(
                     () -> assertEquals(app, test.getApplication()),
@@ -912,7 +912,7 @@ class TUIModuleTest {
             child1.lockProperty(TUIModule.Property.APPLICATION);
             child1.unlockProperty(TUIModule.Property.APPLICATION);
 
-            test.setApplication(app);
+            test.application(app);
 
             assertAll(
                     () -> assertEquals(app, test.getApplication()),
@@ -927,11 +927,11 @@ class TUIModuleTest {
             ApplicationModule app = ApplicationModule.builder("app").build();
             IOCapture io = new IOCapture();
             ContainerModule.Builder populated = ContainerModule.builder("populated")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold());
+                    .style(ansi().bold());
 
             ContainerModule.Builder empty = ContainerModule.builder("empty");
 
@@ -955,7 +955,7 @@ class TUIModuleTest {
             ContainerModule.Builder test = ContainerModule.builder("test");
 
             DirectedGraphNode.PropertyUpdateFlag oldFlag = test.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION);
-            test.setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.SKIP);
+            test.updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.SKIP);
             DirectedGraphNode.PropertyUpdateFlag newFlag = test.getPropertyUpdateFlags().get(TUIModule.Property.APPLICATION);
 
             assertAll(
@@ -984,12 +984,12 @@ class TUIModuleTest {
             ApplicationModule app = ApplicationModule.builder("app").build();
             IOCapture io = new IOCapture();
             ContainerModule.Builder original = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder copied  = original.getCopy();
 
@@ -1011,20 +1011,20 @@ class TUIModuleTest {
             ApplicationModule app = ApplicationModule.builder("app").build();
             IOCapture io = new IOCapture();
             ContainerModule.Builder original = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
                     .addChildren(
                             ContainerModule.builder("child1"),
                             ContainerModule.builder("child2")
-                                    .setApplication(app),
+                                    .application(app),
                             ContainerModule.builder("child3")
                                     .addChild(ContainerModule.builder("child4")),
                             ContainerModule.builder("child5")
-                                    .setAnsi(ansi().a("testAnsi"))
+                                    .style(ansi().a("testAnsi"))
                     );
 
             original.getChild("child4").addChild(original);
@@ -1042,70 +1042,70 @@ class TUIModuleTest {
             ApplicationModule app = ApplicationModule.builder("app").build();
             IOCapture io = new IOCapture();
             ContainerModule.Builder first = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder second = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder third = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder fourth = ContainerModule.builder("original")
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder fifth = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder sixth = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
+                    .application(app)
+                    .scanner(io.getScanner())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder seventh = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder eighth = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT);
 
             ContainerModule.Builder ninth = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold());
+                    .style(ansi().bold());
 
             io.close();
 
@@ -1129,30 +1129,30 @@ class TUIModuleTest {
             IOCapture io = new IOCapture();
 
             ContainerModule.Builder first = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
                     .addChild(ContainerModule.builder("child"));
 
             ContainerModule.Builder second = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
                     .addChild(ContainerModule.builder("child"));
 
             ContainerModule.Builder third = ContainerModule.builder("original")
-                    .setApplication(app)
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .application(app)
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
-                    .setAnsi(ansi().bold())
-                    .setPropertyUpdateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
+                    .style(ansi().bold())
+                    .updateFlag(TUIModule.Property.APPLICATION, DirectedGraphNode.PropertyUpdateFlag.UPDATE_THEN_HALT)
                     .addChild(ContainerModule.builder("child").enableAnsi(false));
 
             io.close();
@@ -1177,11 +1177,11 @@ class TUIModuleTest {
             ContainerModule.Builder child = ContainerModule.builder("child");
 
             TUIModule test = ContainerModule.builder("test")
-                    .setApplication(app)
+                    .application(app)
                     .addChild(child)
-                    .setAnsi(ansi().bold())
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .style(ansi().bold())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false)
                     .build();
 
@@ -1204,11 +1204,11 @@ class TUIModuleTest {
             ContainerModule.Builder child = ContainerModule.builder("child");
 
             ContainerModule.Builder builder = ContainerModule.builder("test")
-                    .setApplication(app)
+                    .application(app)
                     .addChild(child)
-                    .setAnsi(ansi().bold())
-                    .setScanner(io.getScanner())
-                    .setPrintStream(io.getPrintStream())
+                    .style(ansi().bold())
+                    .scanner(io.getScanner())
+                    .printStream(io.getPrintStream())
                     .enableAnsi(false);
 
             TUIModule first = builder.build();

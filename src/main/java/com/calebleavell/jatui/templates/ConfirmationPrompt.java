@@ -17,8 +17,6 @@
 
 package com.calebleavell.jatui.templates;
 
-import com.calebleavell.jatui.core.DirectedGraphNode;
-import com.calebleavell.jatui.modules.ContainerModule;
 import com.calebleavell.jatui.modules.ModuleTemplate;
 import com.calebleavell.jatui.modules.TUIModule;
 import com.calebleavell.jatui.modules.TextInputModule;
@@ -92,7 +90,7 @@ public class ConfirmationPrompt extends ModuleTemplate<ConfirmationPrompt> {
      * @param confirmStrings The strings that count as confirmation
      * @return self
      */
-    public ConfirmationPrompt setValidConfirm(String... confirmStrings) {
+    public ConfirmationPrompt validConfirm(String... confirmStrings) {
         confirm.clear();
         for(String str : confirmStrings) {
             confirm.add(str.toLowerCase().strip().replace("\n", ""));
@@ -115,7 +113,7 @@ public class ConfirmationPrompt extends ModuleTemplate<ConfirmationPrompt> {
      * @param denyStrings The strings that count as denial
      * @return self
      */
-    public ConfirmationPrompt setValidDeny(String... denyStrings) {
+    public ConfirmationPrompt validDeny(String... denyStrings) {
         deny.clear();
         for(String str : denyStrings) {
             deny.add(str.toLowerCase().strip().replace("\n", ""));
@@ -205,16 +203,16 @@ public class ConfirmationPrompt extends ModuleTemplate<ConfirmationPrompt> {
 
 
     /**
-     * Sets the name as provided by {@link TUIModule.Builder#setName(String)}. Also updates the name of the input module to
+     * Sets the name as provided by {@link TUIModule.Builder#name(String)}. Also updates the name of the input module to
      * ensure correct input handling.
      *
      * @param name The unique name of this module.
      * @return self
      */
     @Override
-    public ConfirmationPrompt setName(String name) {
-        if(this.name != null) this.getChild(this.name + "-input").setName(name + "-input");
-        super.setName(name);
+    public ConfirmationPrompt name(String name) {
+        if(this.name != null) this.getChild(this.name + "-input").name(name + "-input");
+        super.name(name);
         return self();
     }
 

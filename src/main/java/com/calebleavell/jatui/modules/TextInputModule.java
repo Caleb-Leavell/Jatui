@@ -25,7 +25,7 @@ import java.util.function.Function;
 
 /**
  * Handles collection of text for the application. Generally this means collecting user input from the console,
- * but {@link TUIModule.Builder#setScanner(Scanner)} can be used to collect input from other places as well.
+ * but {@link TUIModule.Builder#scanner(Scanner)} can be used to collect input from other places as well.
  * <br>
  * A TextInputModule can't do much unless it belongs to an {@link ApplicationModule}.
  * If it is tied to one, whatever input is collected is updated in the app's inputMap and can
@@ -44,16 +44,16 @@ public class TextInputModule extends TUIModule {
 
     /**
      * Displays the displayText given in the constructor for {@link TextInputModule.Builder}, collects input
-     * from the scanner given in {@link TUIModule.Builder#setScanner(Scanner)} then updates the application
+     * from the scanner given in {@link TUIModule.Builder#scanner(Scanner)} then updates the application
      * it's tied to store the input (This can be accessed via {@link ApplicationModule#getInput(String)}).
      * <br>
      * If InputHandlers are provided via {@link TextInputModule.Builder#addHandler(FunctionModule.Builder)} or a corresponding method,
      * those are run immediately after this.
      */
     @Override
-    public void shallowRun() {
+    public void doRunLogic() {
         logger.info("Running TextInputModule {}", getName());
-        displayText.build().run();
+        displayText.build().start();
         logger.info("collecting input...");
         input = getScanner().nextLine();
         logger.info("input collected: \"{}\"", input);
@@ -63,7 +63,7 @@ public class TextInputModule extends TUIModule {
     }
 
     /**
-     * Retrieve the input collected on {@link TextInputModule#shallowRun()}.
+     * Retrieve the input collected on {@link TextInputModule#doRunLogic()}.
      * Alternatively, this can be collected via {@link ApplicationModule#getInput(String)},
      * or {@link ApplicationModule#getInput(String, Class)} with the class set to {@code String.class}.
      *
@@ -199,12 +199,12 @@ public class TextInputModule extends TUIModule {
          * @return self
          */
         @Override
-        public Builder setName(String name) {
-            super.setName(name);
+        public Builder name(String name) {
+            super.name(name);
             if(this.handlers == null) return self();
             this.handlers.getChildren().forEach(child -> {
                 if (child instanceof InputHandler handler) {
-                    handler.setInputName(name);
+                    handler.inputName(name);
                 }
             });
             return self();
@@ -230,7 +230,7 @@ public class TextInputModule extends TUIModule {
          */
         public Builder addHandler(FunctionModule.Builder handler) {
             logger.trace("adding handler via FunctionModule \"{}\"", handler.getName());
-            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).setHandler(handler));
+            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).handler(handler));
             handlerNum ++;
             return self();
         }
@@ -246,7 +246,7 @@ public class TextInputModule extends TUIModule {
          */
         public Builder addHandler(String name, Function<String, ?> logic) {
             logger.trace("adding handler \"{}\" via inputted logic", name);
-            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).setHandler(name, logic));
+            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).handler(name, logic));
             handlerNum ++;
             return self();
         }
@@ -267,7 +267,7 @@ public class TextInputModule extends TUIModule {
          */
         public <T> Builder addSafeHandler(String name, Function<String, T> logic, Consumer<String> exceptionHandler) {
             logger.trace("adding safe handler \"{}\" via inputted logic and exception handler", name);
-            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).setHandler(name, logic, exceptionHandler));
+            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).handler(name, logic, exceptionHandler));
             handlerNum++;
             return self();
         }
@@ -287,7 +287,7 @@ public class TextInputModule extends TUIModule {
          */
         public Builder addSafeHandler(String name, Function<String, ?> logic, String exceptionMessage) {
             logger.trace("adding safe handler \"{}\" via inputted logic and exception message", name);
-            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).setHandler(name, logic, _ -> {
+            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).handler(name, logic, _ -> {
                 ApplicationModule app = this.getApplication();
                 if(app == null) return;
                 this.getPrintStream().println(exceptionMessage);
@@ -337,7 +337,7 @@ public class TextInputModule extends TUIModule {
             // we add them before to allow for property propagation
             this.children.remove(handlers);
             this.children.add(handlers);
-            this.setApplication(application);
+            this.application(application);
             TextInputModule output = new TextInputModule(self());
             // re-add the child after constructing the module so that it can be edited if needed
             this.children.addFirst(displayText);
