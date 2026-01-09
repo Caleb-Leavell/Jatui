@@ -48,9 +48,22 @@ import java.util.List;
  * </pre>
  */
 public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelector> {
+    /**
+     * The {@link NameOrModule} objects that keep a reference to the modules that can be selected.
+     */
     private final List<NameOrModule> modules = new ArrayList<>();
+
+    /**
+     * The {@link NumberedList} that displays all the selection options.
+     */
     private NumberedList list;
 
+    /**
+     * Constructor for {@link NumberedModuleSelector}.
+     *
+     * @param name The name of the module.
+     * @param app The application to work with. Calls {@link TUIModule.Builder#application(ApplicationModule)}.
+     */
     protected NumberedModuleSelector(String name, ApplicationModule app) {
         super(NumberedModuleSelector.class, name);
         this.application(app);
@@ -94,7 +107,11 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
         return new NumberedModuleSelector();
     }
 
-
+    /**
+     * Copies the {@link NameOrModule} objects and the {@link NumberedList} object,
+     * and delegates to {@link TUIModule.Builder#shallowCopy(TUIModule.Builder)}.
+     * @param original The builder to copy from.
+     */
     @Override
     public void shallowCopy(NumberedModuleSelector original) {
         for(NameOrModule m : original.modules) {
@@ -104,6 +121,13 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
         super.shallowCopy(original);
     }
 
+    /**
+     * Adds a module option to the selector. Adds {@code displayText} via {@link NumberedList#addListText(String)}.
+     *
+     * @param displayText The text to display (e.g., if displayText="myText" "<b>[1]</b> myText).
+     * @param module The {@link NameOrModule} with a reference to the module the user may navigate to.
+     * @return self
+     */
     private NumberedModuleSelector addModule(String displayText, NameOrModule module){
         logger.trace("adding module with displayText \"{}\" to NumberedModuleSelector \"{}\"", displayText, getName());
         this.modules.add(module);
@@ -111,47 +135,63 @@ public class NumberedModuleSelector extends ModuleTemplate<NumberedModuleSelecto
         return self();
     }
 
+    /**
+     * Adds a module option to the selector. Adds {@code displayText} via {@link NumberedList#addListText(String)}.
+     *
+     * @param displayText The text to display (e.g., if displayText="myText" "<b>[1]</b> myText).
+     * @param moduleName The name of the module the user may navigate to
+     *                   that is connected the {@link ApplicationModule} tied to this module
+     *                   (via either {@link ApplicationModule#setHome(TUIModule.Builder)} or
+     *                   {@link TUIModule.Builder#addChild(TUIModule.Builder)}). The module doesn't have
+     *                   to be a direct child.
+     * @return self
+     */
     public NumberedModuleSelector addModule(String displayText, String moduleName) {
         return addModule(displayText, new NameOrModule(moduleName));
     }
 
+    /**
+     * Adds a module option to the selector. Adds {@code displayText} via {@link NumberedList#addListText(String)}.
+     *
+     * @param displayText The text to display (e.g., if displayText="myText" "<b>[1]</b> myText).
+     * @param module The {@link TUIModule.Builder} the user may navigate to.
+     * @return self
+     */
     public NumberedModuleSelector addModule(String displayText, TUIModule.Builder<?> module) {
         return addModule(displayText, new NameOrModule(module));
     }
 
+    /**
+     * Adds a module option to the selector. Uses the name of the module as the displayed list option.
+     * e.g., if the name of the module is "myModule", the option could be "<b>[1]</b> myModule."
+     *
+     * @param moduleName The name of the module the user may navigate to
+     *                   that is connected the {@link ApplicationModule} tied to this module
+     *                   (via either {@link ApplicationModule#setHome(TUIModule.Builder)} or
+     *                   {@link TUIModule.Builder#addChild(TUIModule.Builder)}). The module doesn't have
+     *                   to be a direct child.
+     * @return self
+     */
     public NumberedModuleSelector addModule(String moduleName) {
         return addModule(moduleName, moduleName);
     }
 
+
+    /**
+     * Adds a module option to the selector. Uses the name of the module as the displayed list option.
+     * e.g., if the name of the module is "myModule", the option could be "<b>[1]</b> myModule."
+     *
+     * @param module The {@link TUIModule.Builder} the user may navigate to.
+     * @return self
+     */
     public NumberedModuleSelector addModule(TUIModule.Builder<?> module) {
         return addModule(module.getName(), module);
     }
 
     /**
-     * <p>Checks equality for properties given by the builder.</p>
-     *
-     * <p>For InputHandlers, this includes: </p>
-     * <ul>
-     *     <li><strong>modules</strong> (the actual list of modules that are selected from) </li>
-     *     <li><strong>list</strong> (the NumberedList that displays the options and collects input) </li>
-     *     <li><strong>app</strong> (the app that the list of modules goes to, which may or may not be the same as the app for this module)</li>
-     *     <li>name</li>
-     *     <li>application</li>
-     *     <li>children</li>
-     *     <li>ansi</li>
-     *     <li>scanner</li>
-     *     <li>printStream</li>
-     *     <li>enableAnsi</li>
-     * </ul>
-     *
-     * <p>Note: Runtime properties (e.g., currentRunningChild, terminated), are not considered. Children are also not considered here,
-     *  but are considered in equals()
-     * @param first The first NumberedList to compare
-     * @param second The second NumberedList to compare
-     * @return {@code true} if {@code first} and {@code second} are equal according to builder-provided properties
-     *
-     * @implNote
-     *This is the {@code Function<TUIModule<?>, TUIModule.Builder<?>, Boolean>} that is passed into {@link DirectedGraphNode#structuralEquals(DirectedGraphNode)}
+     * Checks equality for properties given by the builder. For {@link NumberedModuleSelector}, this includes
+     * {@code modules},
+     * as well as other requirements provided by {@link TUIModule.Builder#shallowStructuralEquals(TUIModule.Builder, TUIModule.Builder)}.
      */
     @Override
     public boolean shallowStructuralEquals(NumberedModuleSelector first, NumberedModuleSelector second) {
