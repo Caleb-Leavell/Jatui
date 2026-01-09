@@ -597,6 +597,10 @@ public abstract class TUIModule {
      * which means Builders which extend this can use the fluent method
      * chains provided by this builder while retaining their type.
      * <br><br>
+     * <strong>Note:</strong> Module builders are lazily realized by the scheduler at runtime. Calling
+     * build() is generally not required (with the rare exception of cases like
+     * building an {@link ApplicationModule} first).
+     * <br><br>
      * Required fields: {@code type}, {@code name} <br>
      * Optional fields: {@code children}, {@code propertyUpdateFlags}, {@code application},
      *  {@code ansi}, {@code scanner}, {@code printStream}, {@code enableAnsi} <br>
