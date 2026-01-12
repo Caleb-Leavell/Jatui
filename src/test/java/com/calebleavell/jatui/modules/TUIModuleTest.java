@@ -935,7 +935,7 @@ class TUIModuleTest {
 
             ContainerModule.Builder empty = ContainerModule.builder("empty");
 
-            empty.updateProperties(populated.build());
+            empty.updateProperties(populated);
 
             io.close();
 
