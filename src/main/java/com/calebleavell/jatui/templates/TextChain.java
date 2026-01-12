@@ -134,7 +134,9 @@ public class TextChain extends ModuleTemplate<TextChain> {
      * @return self.
      */
     public TextChain addText(String text) {
-        return addText(text, ansi());
+        this.addText(TextModule.builder(main.getName() + "-" + iterator, text)
+                .printNewLine(false));
+        return self();
     }
 
     /**
@@ -165,7 +167,10 @@ public class TextChain extends ModuleTemplate<TextChain> {
      * @implNote Wraps {@link TextModule.OutputType#DISPLAY_APP_STATE}.
      */
     public TextChain addModuleOutput(String moduleName) {
-        return this.addModuleOutput(moduleName, ansi());
+        this.addText(TextModule.builder(main.getName() + "-" + iterator, moduleName)
+                .outputType(TextModule.OutputType.DISPLAY_APP_STATE)
+                .printNewLine(false));
+        return self();
     }
 
     /**
