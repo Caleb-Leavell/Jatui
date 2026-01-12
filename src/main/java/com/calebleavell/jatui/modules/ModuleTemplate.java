@@ -95,6 +95,7 @@ public abstract class ModuleTemplate<B extends ModuleTemplate<B>> extends TUIMod
      */
     @Override
     public ContainerModule build() {
+        main.updateProperties(this);
         return new ContainerModule(self());
     }
 }

@@ -906,7 +906,7 @@ public abstract class TUIModule {
          * @param module The module to copy properties from.
          * @return self
          */
-        public B updateProperties(TUIModule module) {
+        public B updateProperties(TUIModule.Builder<?> module) {
             logger.debug("updating properties for module \"{}\" based on module \"{}\"", name, module.name);
             this.application(module.getApplication());
             this.style(module.getAnsi());
