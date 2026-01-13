@@ -11,6 +11,7 @@ Jatui is a Java library that provides a framework for building TUIs that are mea
 
 
 ## Get Started
+**Prerequisites**: Java **21** or higher.
 
 This library is on Maven Central! Add the following dependencies to your pom.xml:
 
