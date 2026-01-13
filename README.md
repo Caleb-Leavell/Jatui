@@ -36,7 +36,7 @@ You may replace logback-classic with any logback library compatible with slf4j.
 Here's a simple "Hello, World!" app to get started:
 
 ```Java
-// declare a ApplicationModule to house our app
+// declare an ApplicationModule to house our app
 ApplicationModule app = ApplicationModule.builder("app").build();
 
 // define the actual application structure
