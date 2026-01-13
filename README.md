@@ -36,6 +36,9 @@ This also adds [slf4j](https://github.com/qos-ch/slf4j) and [Jansi](https://gith
 Here's a simple "Hello, World!" app to get started:
 
 ```Java
+import com.calebleavell.jatui.modules.*'
+```
+```Java
 // declare an ApplicationModule to house our app
 ApplicationModule app = ApplicationModule.builder("app").build();
 
