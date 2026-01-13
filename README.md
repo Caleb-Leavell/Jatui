@@ -46,4 +46,4 @@ app.setHome(helloWorld);
 app.run();
 ```
 
-Other demo apps can be viewed [here](https://github.com/Caleb-Leavell/Jatui/tree/main/src/test/java).
+Other demo apps can be viewed [here](https://github.com/Caleb-Leavell/Jatui/tree/main/src/test/java). Additionally, the javadoc can be viewed [here](https://caleb-leavell.github.io/Jatui/).
