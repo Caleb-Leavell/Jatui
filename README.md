@@ -45,4 +45,4 @@ app.setHome(helloWorld);
 app.run();
 ```
 
-Other demo apps can be viewed [here]([url](https://github.com/Caleb-Leavell/Jatui/tree/main/src/test/java)).
+Other demo apps can be viewed [here](https://github.com/Caleb-Leavell/Jatui/tree/main/src/test/java).
