@@ -292,7 +292,7 @@ public class TextInputModule extends TUIModule {
          */
         public Builder addSafeHandler(String name, Function<String, ?> logic, String exceptionMessage) {
             logger.trace("adding safe handler \"{}\" via inputted logic and exception message", name);
-            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).handler(name, logic, _ -> {
+            handlers.addChild(InputHandler.builder(this.name + "-" + handlerNum, this.name).handler(name, logic, ignored -> {
                 ApplicationModule app = this.getApplication();
                 if(app == null) return;
                 this.getPrintStream().println(exceptionMessage);

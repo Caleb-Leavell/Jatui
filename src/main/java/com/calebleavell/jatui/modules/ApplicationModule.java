@@ -90,7 +90,7 @@ public class ApplicationModule extends TUIModule {
 
         for(TUIModule.Builder<?> child : getChildren()) {
             child.forEach(c -> {
-                nameFrequencyMap.computeIfAbsent(c.getName(), _ -> 0);
+                nameFrequencyMap.computeIfAbsent(c.getName(), ignored -> 0);
                 nameFrequencyMap.put(c.getName(), nameFrequencyMap.get(c.getName()) + 1);
             });
         }

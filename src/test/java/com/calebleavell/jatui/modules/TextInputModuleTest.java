@@ -107,7 +107,7 @@ class TextInputModuleTest {
         @Test
         void testCopy() {
             TextInputModule.Builder original = TextInputModule.builder("input", "input: ")
-                    .addHandler("logic", _ -> 5);
+                    .addHandler("logic", ignored -> 5);
 
             TextInputModule.Builder copy = original.getCopy();
 
@@ -144,7 +144,7 @@ class TextInputModuleTest {
             try(IOCapture io = new IOCapture("a")) {
                 TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
                         .scanner(io.getScanner())
-                        .addHandler("logic", _ -> 5);
+                        .addHandler("logic", ignored -> 5);
 
                 app.setHome(input);
 
@@ -162,8 +162,8 @@ class TextInputModuleTest {
                 TextInputModule.Builder input = TextInputModule.builder("input", "input: ")
                         .scanner(io.getScanner())
                         .addSafeHandler("logic",
-                                _ -> {throw new RuntimeException("force throw");},
-                                _ -> app.updateInput("logic", 5));
+                                ignored -> {throw new RuntimeException("force throw");},
+                                ignored -> app.updateInput("logic", 5));
 
                 app.setHome(input);
 

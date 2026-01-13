@@ -38,7 +38,7 @@ class InputHandlerTest {
     @Test
     void testCopy() {
         Function<String, String> logic = s -> s;
-        Consumer<String> exceptionHandler = _ -> System.out.print("");
+        Consumer<String> exceptionHandler = ignored -> System.out.print("");
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
 
         InputHandler original = InputHandler.builder("handler", module.getName())
@@ -76,7 +76,7 @@ class InputHandlerTest {
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
 
         InputHandler handler = InputHandler.builder("handler", module.getName())
-                .handler("logic", _ -> 5);
+                .handler("logic", ignored -> 5);
 
         app.setHome(handler);
 
@@ -92,8 +92,8 @@ class InputHandlerTest {
 
         InputHandler handler = InputHandler.builder("handler", module.getName())
                 .handler("logic",
-                        _ -> {throw new RuntimeException("forced exception");},
-                        _ -> app.updateInput("logic", "Success!")
+                        ignored -> {throw new RuntimeException("forced exception");},
+                        ignored -> app.updateInput("logic", "Success!")
                 );
 
 
@@ -106,7 +106,7 @@ class InputHandlerTest {
     @Test
     void testShallowShallowStructuralEquals() {
         Function<String, String> logic = s -> s;
-        Consumer<String> exceptionHandler = _ -> System.out.print("");
+        Consumer<String> exceptionHandler = ignored -> System.out.print("");
         TextInputModule.Builder module = TextInputModule.builder("input", "Your input: ");
 
         InputHandler handler1 = InputHandler.builder("handler", module.getName())
