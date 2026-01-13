@@ -16,19 +16,19 @@ Jatui is a Java library that provides a framework for building TUIs that are mea
 This library is on Maven Central! Add the following dependencies to your pom.xml:
 
 ```xml
-    <dependencies>
-        <dependency>
-            <groupId>io.github.calebleavell</groupId>
-            <artifactId>jatui</artifactId>
-            <version>1.0.2</version>
-        </dependency>
+<dependencies>
+    <dependency>
+        <groupId>io.github.calebleavell</groupId>
+        <artifactId>jatui</artifactId>
+        <version>1.0.2</version>
+    </dependency>
 
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.20</version>
-        </dependency>
-    <dependencies>
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.5.20</version>
+    </dependency>
+<dependencies>
 ```
 
 You may replace logback-classic with any logback library compatible with slf4j.
@@ -48,3 +48,26 @@ app.start();
 ```
 
 Other demo apps can be viewed [here](https://github.com/Caleb-Leavell/Jatui/tree/main/src/test/java). Additionally, the javadoc can be viewed [here](https://caleb-leavell.github.io/Jatui/).
+
+## Logging
+
+The library uses [slf4j](https://github.com/qos-ch/slf4j) to log various information and errors. This means you will need an slf4j-compatible logback library (see above). If using [logback-classic](https://mvnrepository.com/artifact/ch.qos.logback/logback-classic), you will need a `logback.xml` file in the `resources` directory. Here's an example `logback.xml`:
+
+```xml
+<configuration>
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>test.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="warn">
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>
+```
+
+The logger will trace various actions performed by the library, as well as give warnings/errors for things like duplicate/nonexistent names.
+
