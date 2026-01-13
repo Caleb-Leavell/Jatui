@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Jatui</name>
-    <description>A Java TUI (terminal UI) library</description>
+    <description>A declarative Text User Interface Library for Java.</description>
     <url>https://github.com/caleb-leavell/jatui</url>
 
     <groupId>io.github.calebleavell</groupId>
