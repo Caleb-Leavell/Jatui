@@ -115,7 +115,7 @@ public static void main(String[] args) {
                                     return null;
                                 }, "Error: input integer (your input might be too large)")
                                 // safe handler that references the logic for generating a random integer
-                                .addSafeHandler("generated-number", Main::getRandomInt),
+                                .addSafeHandler("generated-number", RandomNumber::getRandomInt),
                         // Text Modules that display the generated number
                         LineBuilder.builder("generated-number-display")
                                 .addText("Generated Number: ")
@@ -147,6 +147,6 @@ Here's the output of the application:
 
 <img width="445" height="289" alt="image" src="https://github.com/user-attachments/assets/ea4afdfa-db5a-43fa-a1b2-67a6af5fcf5d" />
 
-For a fully commented version of this application that explains how everything works, visit the [Demo App](https://github.com/Caleb-Leavell/Jatui/blob/main/src/main/java/com/calebleavell/jatui/Main.java)
+For a fully commented version of this application that explains how everything works, visit the [Demo App](https://github.com/Caleb-Leavell/Jatui/blob/main/src/main/java/com/calebleavell/jatui/RandomNumber.java)
 
 This library is an evolution of my previous [Java Text Interface Library](https://github.com/Caleb-Leavell/TextInterface). It's been rewritten from the ground up to be less verbose and more powerful.
