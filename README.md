@@ -28,6 +28,7 @@ This library is on Maven Central! Add the following dependencies to your pom.xml
             <artifactId>logback-classic</artifactId>
             <version>1.5.20</version>
         </dependency>
+    <dependencies>
 ```
 
 You may replace logback-classic with any logback library compatible with slf4j.
