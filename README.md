@@ -37,14 +37,14 @@ Here's a simple "Hello, World!" app to get started:
 
 ```Java
 // declare a ApplicationModule to house our app
-ApplicationModule app = new ApplicationModule("app").build();
+ApplicationModule app = ApplicationModule.builder("app").build();
 
 // define the actual application structure
 TextModule.Builder helloWorld = TextModule.builder("hello-world", "Hello, World!");
 
 // set the app home and run
 app.setHome(helloWorld);
-app.run();
+app.start();
 ```
 
 Other demo apps can be viewed [here](https://github.com/Caleb-Leavell/Jatui/tree/main/src/test/java). Additionally, the javadoc can be viewed [here](https://caleb-leavell.github.io/Jatui/).
