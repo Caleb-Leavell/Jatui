@@ -28,10 +28,10 @@ This library is on Maven Central! Add the following dependencies to your pom.xml
         <artifactId>logback-classic</artifactId>
         <version>1.5.20</version>
     </dependency>
-<dependencies>
+</dependencies>
 ```
 
-You may replace logback-classic with any logback library compatible with slf4j.
+This also adds [slf4j](https://github.com/qos-ch/slf4j) and [Jansi](https://github.com/fusesource/jansi). You may replace logback-classic with any logback library compatible with slf4j.
 
 Here's a simple "Hello, World!" app to get started:
 
