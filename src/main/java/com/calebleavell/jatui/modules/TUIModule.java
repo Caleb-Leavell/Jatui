@@ -568,7 +568,17 @@ public abstract class TUIModule {
         return TUIModule.shallowStructuralEquals(this, other);
     }
 
-    // TODO - document
+    /**
+     * Performs a structural equality check on two modules. Does not check the equality
+     * of children. <br>
+     * Checks equality of {@code name}, {@code application}, {@code ansi},
+     * {@code scanner}, {@code printStream}, and {@code enableAnsi}.
+     * Structural equality, not reference equality, is checked for {@code application}.
+     *
+     * @param first The first {@link TUIModule} to check equality of.
+     * @param second The second {@link TUIModule} to check equality of.
+     * @return Whether both modules are equal.
+     */
     public static boolean shallowStructuralEquals(TUIModule first, TUIModule second) {
         if(first == second) return true;
         if(first == null || second == null) return false;

@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.calebleavell.jatui.core"},{"l":"com.calebleavell.jatui.modules"},{"l":"com.calebleavell.jatui.templates"},{"l":"com.calebleavell.jatui.util"}];updateSearchResults();

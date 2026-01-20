@@ -32,7 +32,7 @@ import java.util.Objects;
 
 import static org.fusesource.jansi.Ansi.ansi;
 /**
- * LineBuilder simplifies chaining text together that is meant to live on the same line.
+ * Simplifies chaining text together that is meant to live on the same line.
  * Ansi is supported with method overloads (e.g., {@link TextChain#addText(String, Ansi)}).
  * <br><br>
  * <strong>Usage:</strong>
