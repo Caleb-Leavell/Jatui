@@ -46,8 +46,12 @@ public class RectToy {
         // separate line so we can reference rectBuilder within the children
         rectBuilder.addChildren(
                     // collect the relevant fields
-                    TextInputModule.builder("width-input", "Width: "),
-                    TextInputModule.builder("height-input", "Height: "),
+                    TextInputModule.builder("width-input", "Width: ")
+                            .addSafeHandler("width-input-int", Integer::parseInt,
+                                    "Error: Invalid width input"),
+                    TextInputModule.builder("height-input", "Height: ")
+                            .addSafeHandler("height-input-int", Integer::parseInt,
+                                    "Error: Invalid height input"),
                     TextInputModule.builder("cell-input", "Cell character (e.g., \"#\"): ")
                             // It's easier to handle the inputs in a safe handler for the last
                             // input so we get the built-in exception handling.
@@ -55,8 +59,8 @@ public class RectToy {
                                 // we don't bother handling null-case or invalid input since the
                                 // safe handler automatically reruns on a runtime error
 
-                                int width = Integer.parseInt(app.getInput("width-input", String.class));
-                                int height = Integer.parseInt(app.getInput("height-input", String.class));
+                                int width = app.getInput("width-input-int", Integer.class);
+                                int height = app.getInput("height-input-int", Integer.class);
 
                                 rectToDisplay.cell(cell);
                                 rectToDisplay.width(width);
