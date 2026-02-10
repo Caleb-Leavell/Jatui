@@ -32,7 +32,6 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.fusesource.jansi.Ansi.ansi;
 /**
  * The abstract class for all TUIModules.
  * <br><br>
@@ -42,9 +41,9 @@ import static org.fusesource.jansi.Ansi.ansi;
  * <br>
  * Use {@link TUIModule.Builder} to construct a TUIModule (note: all concrete subclasses will have their own builder).
  * <br><br>
- * Use {@link ContainerModule} as the minimal implementation for this class. <br>
- * <br>
- * <Strong>TUIModule (and Jatui in general) is <i>not</i> thread-safe and is intended to be managed on a single thread.</Strong>
+ * Use {@link ContainerModule} as the minimal implementation for this class.
+ * <br><br>
+ * <strong>TUIModule (and Jatui in general) is <i>not</i> thread-safe and is intended to be managed on a single thread.</strong>
  */
 public abstract class TUIModule {
 
