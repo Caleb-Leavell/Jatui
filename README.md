@@ -60,13 +60,13 @@ The library uses [slf4j](https://github.com/qos-ch/slf4j) to log various informa
 <configuration>
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>test.log</file>
-        <append>true</append>
+        <append>false</append>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="warn">
+    <root level="info">
         <appender-ref ref="FILE" />
     </root>
 </configuration>
