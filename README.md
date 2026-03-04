@@ -9,6 +9,11 @@ Existing TUI libraries generally target *raw* terminals (handle user input every
 
 Jatui is a Java library that provides a framework for building TUIs that are meant to run in a cooked-terminal environment by implementing a modularized, declarative system that allows for reusable, customizable, and analyzable application units.
 
+Here's a simple example of the sort of control flow you can achieve with a cooked terminal:
+
+<img width="323" height="379" alt="image" src="https://github.com/user-attachments/assets/6fef49e7-88ed-4273-aff5-3fbddc4089b9" />
+
+See the implementation [here](https://github.com/Caleb-Leavell/Jatui/blob/main/src/test/java/RandomNumber.java).
 
 ## Get Started
 **Prerequisites**: Java **21** or higher.
@@ -36,7 +41,7 @@ This also adds [slf4j](https://github.com/qos-ch/slf4j) and [Jansi](https://gith
 Here's a simple "Hello, World!" app to get started:
 
 ```Java
-import com.calebleavell.jatui.modules.*'
+import com.calebleavell.jatui.modules.*
 ```
 ```Java
 // declare an ApplicationModule to house our app
