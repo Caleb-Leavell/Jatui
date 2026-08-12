@@ -1,6 +1,11 @@
 # Jatui - A Java Text User Interface Library
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.calebleavell/jatui)](https://central.sonatype.com/artifact/io.github.calebleavell/jatui)
-[![GitHub license](https://img.shields.io/github/license/Caleb-Leavell/Jatui)](https://github.com/Caleb-Leavell/Jatui/blob/main/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.calebleavell/jatui?color=007ec6)](https://central.sonatype.com/artifact/io.github.calebleavell/jatui)
+[![Javadoc](https://img.shields.io/badge/javadoc-reference-007ec6?logo=openjdk&logoColor=white)](https://caleb-leavell.github.io/Jatui/)
+[![Java Version](https://img.shields.io/badge/Java-21%2B-007ec6?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Changelog](https://img.shields.io/badge/changelog-Release%20Notes-007ec6)](https://github.com/Caleb-Leavell/Jatui/releases)
+[![GitHub License](https://img.shields.io/github/license/Caleb-Leavell/Jatui?color=007ec6)](https://github.com/Caleb-Leavell/Jatui/blob/main/LICENSE)
+
+<br>
 
 Existing TUI libraries generally target *raw* terminals (handle user input every time a key is pressed). However, there are many applications that are simple enough to live in the default *cooked* terminal (handle user input when the user presses enter). Examples of these applications are:
 - **CLI Wizards** (installation, configuration, setup flows)
