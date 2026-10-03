@@ -9,7 +9,7 @@
 
 Jatui is a library for making Text User Interface applications that **don't require per-keystroke input handling.** Since it targets a cooked (canonical) terminal, it allows for a much simpler overall system. If you *do* need functionality like per-keystroke input, then a library like [Ratatui](https://github.com/ratatui/ratatui) (or for java, [TamboUI](https://github.com/tamboui/tamboui)), might be a better fit.
 
-Jatui is specifically aimed at easing several pain-points that you might find when building TUIs in native Java; primarily the fact that as the scope of the application grows, the amount of boilerplate increases dramatically (you can find a concrete comparison [here](https://github.com/Caleb-Leavell/Jatui/wiki#motivation)). Jatui provides a system that lets you define specific pieces of your TUI as reusable *modules* and put them together in a parameterizable structure. It's great for things like:
+Jatui is specifically aimed at easing several pain-points that you might find when building TUIs in native Java; primarily the fact that as the scope of the application grows, the amount of boilerplate increases dramatically (you can find a concrete comparison [here](https://github.com/Caleb-Leavell/Jatui/wiki#motivation)). Jatui provides a system that lets you define specific pieces of your TUI as reusable **modules** and put them together in a parameterizable structure. It's great for things like:
 - **CLI Wizards** (e.g., config tools)
 - **REPLs** (e.g., programming language interpreters)
 - **Logic Prototyping** (e.g., testing a highly parameterizable algorithm)
