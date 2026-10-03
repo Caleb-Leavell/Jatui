@@ -7,22 +7,22 @@
 
 <br>
 
-Existing TUI libraries generally target *raw* terminals (handle user input every time a key is pressed). However, there are many applications that are simple enough to live in the default *cooked* terminal (handle user input when the user presses enter). Examples of these applications are:
-- **CLI Wizards** (installation, configuration, setup flows)
-- **Menu-Driven Tools** (interactive scripts, database helpers, git interfaces)
-- **Logic Prototyping** (quickly testing algorithms or workflows)
-- **Simple REPLs** (read–eval–print loops that don’t need per-keystroke input)
-- **Text Adventures & Games** (turn-based input works well in cooked mode)
+Jatui is a library for making Text User Interface applications that **don't require per-keystroke input handling.** Since it targets a cooked (canonical) terminal, it allows for a much simpler overall system. If you *do* need functionality like per-keystroke input, then a library like [Ratatui](https://github.com/ratatui/ratatui) (or for java, [TamboUI](https://github.com/tamboui/tamboui)), might be a better fit.
 
-Jatui is a Java library that provides a framework for building TUIs that are meant to run in a cooked-terminal environment by implementing a modularized, declarative system that allows for reusable, customizable, and analyzable application units.
+Jatui is specifically aimed at easing several pain-points that you might find when building TUIs in native Java; primarily the fact that as the scope of the application grows, the amount of boilerplate increases dramatically (you can find a concrete comparison [here](https://github.com/Caleb-Leavell/Jatui/wiki#motivation)). Jatui provides a system that lets you define specific pieces of your TUI as reusable *modules* and put them together in a parameterizable structure. It's great for things like:
+- **CLI Wizards** (e.g., config tools)
+- **REPLs** (e.g., programming language interpreters)
+- **Logic Prototyping** (e.g., testing a highly parameterizable algorithm)
+- **Choice-based Games** (e.g., text adventures)
+- And more!
 
-Here's a simple example of the sort of control flow you can achieve with a cooked terminal:
+Here's a simple example of the sort of control flow you can achieve with Jatui:
 
 <img width="323" height="379" alt="image" src="https://github.com/user-attachments/assets/6fef49e7-88ed-4273-aff5-3fbddc4089b9" />
 
 See the implementation [here](https://github.com/Caleb-Leavell/Jatui/blob/main/src/test/java/RandomNumber.java).
 
-## Get Started
+## Installation and Getting Started
 **Prerequisites**: Java **21** or higher.
 
 This library is on Maven Central! Add the following dependencies to your pom.xml:
@@ -43,23 +43,25 @@ This library is on Maven Central! Add the following dependencies to your pom.xml
 </dependencies>
 ```
 
-This also adds [slf4j](https://github.com/qos-ch/slf4j) and [Jansi](https://github.com/fusesource/jansi). You may replace logback-classic with any logback library compatible with slf4j.
+Jatui brings in [slf4j](https://github.com/qos-ch/slf4j) and [Jansi](https://github.com/fusesource/jansi). You'll also need an slf4j-compatible logging implementation (the above brings in logbback-classic; feel free to change it!).
 
 Here's a simple "Hello, World!" app to get started:
 
 ```Java
-import com.calebleavell.jatui.modules.*
-```
-```Java
-// declare an ApplicationModule to house our app
-ApplicationModule app = ApplicationModule.builder("app").build();
+import com.calebleavell.jatui.modules.ApplicationModule;
+import com.calebleavell.jatui.modules.TextModule;
 
-// define the actual application structure
-TextModule.Builder helloWorld = TextModule.builder("hello-world", "Hello, World!");
+public class HelloWorld {
+    public static void main(String[] args) {
+        ApplicationModule app = ApplicationModule.builder("app").build();
 
-// set the app home and run
-app.setHome(helloWorld);
-app.start();
+        TextModule.Builder helloWorld =
+                TextModule.builder("hello-world", "Hello, World!");
+
+        app.setHome(helloWorld);
+        app.start();
+    }
+}
 ```
 
 Other demo apps can be viewed [here](https://github.com/Caleb-Leavell/Jatui/tree/main/src/test/java). Additionally, the javadoc can be viewed [here](https://caleb-leavell.github.io/Jatui/).
